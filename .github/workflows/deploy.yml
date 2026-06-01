@@ -2,24 +2,49 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
+
 permissions:
   contents: read
   pages: write
   id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm ci
-      - run: npm run build
+          cache: 'npm'
+
+      - name: Debug: show files and pwd
+        run: |
+          pwd
+          ls -la
+          if [ -d "./client" ]; then
+            echo "=== client ==="
+            ls -la ./client
+          fi
+          if [ -d "./server" ]; then
+            echo "=== server ==="
+            ls -la ./server
+          fi
+
+      - name: Install client dependencies
+        working-directory: ./client
+        run: npm ci --no-progress --silent
+
+      - name: Build client
+        working-directory: ./client
+        run: npm run build --if-present
+
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist # Vite -> dist ; if CRA, change to ./build
+          path: ./client/dist
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
