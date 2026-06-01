@@ -22,6 +22,7 @@ jobs:
         with:
           node-version: '20.x'
           cache: 'npm'
+          cache-dependency-path: ./client/package-lock.json
 
       - name: "Debug: show files and pwd"
         run: |
