@@ -90,7 +90,7 @@ const TypeChartPage = () => {
   ];
 
   const versions = [
-    { id: 'type_table_v3', label: 'XY - Champions (현재)', size: 18, matrix: matrixV3 },
+    { id: 'type_table_v3', label: 'XY - Champions (최신)', size: 18, matrix: matrixV3 },
     { id: 'type_table_v2', label: 'GS - BW2', size: 17, matrix: matrixV2 },
     { id: 'type_table_v1', label: 'RGBY', size: 15, matrix: matrixV1 },
   ];
