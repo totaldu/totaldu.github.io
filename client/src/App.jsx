@@ -93,7 +93,7 @@ const MainHome = ({ articles, searchQuery, setSearchQuery }) => (
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-cyan-300 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="relative max-w-4xl mx-auto text-center">
+      <div className="relative max-w-4xl mx-auto text-center w-full">
         <h2 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-md">무엇을 도와드릴까요?</h2>
         <p className="text-white/80 text-lg mb-12 font-medium">데이터 기반의 프라이빗 위키 시스템</p>
 
