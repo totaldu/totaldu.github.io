@@ -33,7 +33,7 @@ const STAT_KO = {
 
 const FORM_LABEL_KO = {
 
-  //피카츄
+  // 피카츄
   'rock-star':   '하드록',
   'belle':       '마담',
   'pop-star':    '아이돌',
@@ -50,7 +50,7 @@ const FORM_LABEL_KO = {
   'starter':     '파트너',
   'world-cap':   '월드캡',
 
-  //마임맨
+  // 마임맨
   'mime':        '마임맨',
   'mime-galar':  '가라',
   
@@ -60,7 +60,7 @@ const FORM_LABEL_KO = {
   'defense':   '디펜스',
   'speed':     '스피드',
 
-  //케르디오
+  // 케르디오
   'ordinary':  '통상',
   'resolute':  '각오',
   
@@ -89,7 +89,7 @@ const FORM_LABEL_KO = {
   'pau':       '훌라훌라',
   'sensu':     '하늘하늘',
 
-  //루가루암
+  // 루가루암
   'midnight':  '한밤',
   'dusk':      '황혼',
   'dawn':      '여명',
