@@ -29,7 +29,51 @@ const STAT_KO = {
   "speed": "스피드",
 };
 
-// ✅ 위에 떠있던 data.stats.map() 블록 완전 삭제
+const FORM_LABEL_KO = {
+  'normal':    '(노말)',
+  'attack':    '(어택)',
+  'defense':   '(디펜스)',
+  'speed':     '(스피드)',       // ✅ 오타 수정 (괄호 2개 제거)
+  'ordinary':  '(통상)',          // ✅ 괄호 통일
+  'resolute':  '(각오)',
+  'origin':    '(오리진)',
+  'altered':   '(어나더)',
+  'land':      '(랜드)',
+  'sky':       '(스카이)',
+  'heat':      '(히트)',
+  'wash':      '(워시)',
+  'frost':     '(프로스트)',
+  'fan':       '(스핀)',
+  'mow':       '(커트)',          // ✅ 닫는 따옴표 추가
+  'aria':      '(보이스)',
+  'pirouette': '(스텝)',
+  'baile':     '(이글이글)',
+  'pom-pom':   '(파칙파칙)',
+  'pau':       '(훌라훌라)',
+  'sensu':     '(하늘하늘)',
+  'midnight':  '(한밤)',
+  'dusk':      '(황혼)',
+  'dawn':      '(여명)',          // ✅ 괄호 통일
+};
+
+// ✅ 여기에 추가 — getKoreanName 먼저, getFormLabel 나중
+const getKoreanName = (name) => {
+  // "deoxys-attack" 같은 경우 기본 이름("deoxys")으로 fallback
+  if (koreanNames[name]) return koreanNames[name];
+  const baseName = name.split('-')[0];
+  return koreanNames[baseName] ?? name;
+};
+
+const getFormLabel = (formName) => {
+  const parts = formName.split('-');
+  // 접미사 없으면 한국어 이름 그대로
+  if (parts.length === 1) return getKoreanName(formName);
+  // "deoxys-attack" → suffix = "attack" → "(어택)"
+  const suffix = parts.slice(1).join('-');
+  return FORM_LABEL_KO[suffix] ?? suffix;
+};
+
+// ──────────────────────────────────────────────────────────────
 
 const StatBar = ({ label, value }) => {
   const MAX_STAT = 255;
@@ -60,15 +104,16 @@ const StatBar = ({ label, value }) => {
   );
 };
 
+// ──────────────────────────────────────────────────────────────
+
 const PokemonDetailPage = () => {
   const { id } = useParams();
   const [pokemon, setPokemon] = useState(null);
-  const [forms, setForms] = useState([]);        // ✅ 폼 목록
-  const [activeForm, setActiveForm] = useState(null); // ✅ 현재 선택된 폼
+  const [forms, setForms] = useState([]);
+  const [activeForm, setActiveForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ✅ 기본 포켓몬 + species(폼 목록) 동시 fetch
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -80,23 +125,19 @@ const PokemonDetailPage = () => {
       })
       .then(async (data) => {
         setPokemon(data);
-        setActiveForm(data); // 기본 폼을 초기값으로
+        setActiveForm(data);
 
-        // species에서 폼 목록 가져오기
         const speciesRes = await fetch(data.species.url);
         const speciesData = await speciesRes.json();
-
-        // varieties = 해당 포켓몬의 모든 폼 목록
         const varieties = speciesData.varieties;
 
         if (varieties.length > 1) {
-          // 폼이 여러 개일 때만 목록 저장
           const formDetails = await Promise.all(
             varieties.map(v => fetch(v.pokemon.url).then(r => r.json()))
           );
           setForms(formDetails);
         } else {
-          setForms([data]); // 폼이 하나뿐이면 기본값만
+          setForms([data]);
         }
 
         setLoading(false);
@@ -107,7 +148,6 @@ const PokemonDetailPage = () => {
       });
   }, [id]);
 
-  // ✅ activeForm 기준으로 렌더링 (pokemon 대신 activeForm 사용)
   if (loading) return (
     <div className="flex items-center justify-center h-64 text-gray-400 font-bold animate-pulse">
       불러오는 중...
@@ -139,7 +179,7 @@ const PokemonDetailPage = () => {
         ← 도감으로 돌아가기
       </Link>
 
-      {/* ✅ 폼 전환 탭 — 폼이 2개 이상일 때만 표시 */}
+      {/* 폼 전환 탭 — 2개 이상일 때만 표시 */}
       {forms.length > 1 && (
         <div className="flex gap-2 flex-wrap">
           {forms.map(form => (
@@ -158,9 +198,9 @@ const PokemonDetailPage = () => {
         </div>
       )}
 
-      {/* 기존 메인 카드 — pokemon → activeForm 으로 교체 */}
+      {/* 메인 카드 — activeForm 기준 */}
       <div className="flex flex-col md:flex-row gap-6 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        {/* ... 나머지 기존 코드 그대로, pokemon. → activeForm. 으로만 변경 ... */}
+        {/* 기존 카드 내용 그대로 유지 */}
       </div>
 
     </div>
