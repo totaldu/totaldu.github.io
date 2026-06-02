@@ -52,7 +52,12 @@ const FORM_LABEL_KO = {
 
   // 마임맨
   'mime':        '마임맨',
-  'mime-galar':  '가라',
+  'mime-galar':  '가라르',
+
+  // 켄타로스
+  'paldea-combat-breed': '팔데아-컴뱃종',
+  'paldea-blaze-breed':  '팔데아-블레이즈종',
+  'paldea-aqua-breed':   '팔데아-워터종',
   
   // 테오키스
   'normal':    '노말',
