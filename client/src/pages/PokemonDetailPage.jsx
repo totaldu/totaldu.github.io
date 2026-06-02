@@ -132,16 +132,32 @@ const FORM_LABEL_KO = {
   'baile':     '이글이글스타일',
   'pom-pom':   '파칙파칙스타일',
   'pau':       '훌라훌라스타일',
-  'sensu':     '하늘하늘스타',
+  'sensu':     '하늘하늘스타일',
 
   // 루가루암
   'midday':    '한낮의 모습'
   'midnight':  '한밤중의 모습',
   'dusk':      '황혼의 모습',
 
-  // 약러리
+  // 약어리
   'solo':      '단독의 모습',
   'school':    '군집의 모습',
+
+  // 메테노
+  'red-meteor':    '유성의 모습',
+  'orange-meteor': '유성의 모습',
+  'yellow-meteor': '유성의 모습',
+  'green-meteor    '유성의 모습',
+  'blue-meteor':   '유성의 모습',
+  'indigo-meteor': '유성의 모습',
+  'violet-meteor': '유성의 모습',
+  'red':           '빨간색 코어',
+  'orange':        '주황색 코어',
+  'yellow':        '노란색 코어',
+  'green':         '초록색 코어',
+  'blue':          '파랑색 코어',
+  'indigo':        '옥색 코어',
+  'violet':        '보라색 코어',
 
   'dawn':      '여명',
 
