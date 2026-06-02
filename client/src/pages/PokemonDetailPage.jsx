@@ -200,7 +200,56 @@ const PokemonDetailPage = () => {
 
       {/* 메인 카드 — activeForm 기준 */}
       <div className="flex flex-col md:flex-row gap-6 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
-        {/* 기존 카드 내용 그대로 유지 */}
+        {/* 메인 카드 — activeForm 기준 */}
+<div className="flex flex-col md:flex-row gap-6 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+
+  {/* 왼쪽: 이미지 + 타입 */}
+  <div
+    className="flex flex-col items-center justify-center p-8 md:w-64 shrink-0"
+    style={{ backgroundColor: mainColor + '22' }}
+  >
+    <img
+      src={officialArt}
+      alt={koreanName}
+      className="w-48 h-48 object-contain drop-shadow-md"
+    />
+    <h1 className="mt-4 text-2xl font-extrabold text-gray-800">{koreanName}</h1>
+    <p className="text-gray-400 text-sm font-bold">
+      #{String(activeForm.id).padStart(3, '0')}
+    </p>
+    <div className="flex gap-2 mt-3">
+      <span
+        className="px-3 py-1 rounded-full text-white text-xs font-bold"
+        style={{ backgroundColor: TYPE_COLORS[mainType] }}
+      >
+        {TYPE_KO[mainType]}
+      </span>
+      {subType && (
+        <span
+          className="px-3 py-1 rounded-full text-white text-xs font-bold"
+          style={{ backgroundColor: TYPE_COLORS[subType] }}
+        >
+          {TYPE_KO[subType]}
+        </span>
+      )}
+    </div>
+  </div>
+
+  {/* 오른쪽: 종족값 */}
+  <div className="flex flex-col justify-center p-8 flex-1">
+    <h2 className="text-lg font-extrabold text-gray-700 mb-4">종족값</h2>
+    {activeForm.stats.map(stat => (
+      <StatBar
+        key={stat.stat.name}
+        label={STAT_KO[stat.stat.name] ?? stat.stat.name}
+        value={stat.base_stat}
+      />
+    ))}
+    <div className="mt-4 text-right text-sm font-bold text-gray-500">
+      합계: <span className="text-gray-800 text-base">{totalStats}</span>
+    </div>
+  </div>
+</div>
       </div>
 
     </div>
