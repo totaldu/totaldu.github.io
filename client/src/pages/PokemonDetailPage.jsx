@@ -96,6 +96,17 @@ const FORM_LABEL_KO = {
   'aria':      '보이스',
   'pirouette': '스텝',
 
+  // 큐레무
+  'black':     '블랙큐레무',
+  'white':     '화이트큐레무',
+
+  // 개굴닌자
+  'battle-bond': '일러스트2',
+  'ash':         '지우개굴닌자',
+
+  // 화염레오
+  'male':        '화염레오',
+
   // 춤추새
   'baile':     '이글이글',
   'pom-pom':   '파칙파칙',
