@@ -90,7 +90,7 @@ const FORM_LABEL_KO = {
   'dawn':      '여명',
 
   // 무한다이노
-  'eternamax': '무한다이맥스'
+  'eternamax': '무한다이맥스',
   
   // 리전폼
   'alola':      '알로라',
