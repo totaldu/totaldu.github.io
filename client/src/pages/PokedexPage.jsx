@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import koreanNames from '../data/pokemonKoreanNames.json'; // ✅ 추가
+import koreanNames from '../data/pokemonKoreanNames.json';
+import { disassembleHangul, chosungIncludes } from 'es-hangul';
 
 const TYPE_COLORS = {
   normal: '#A8A77A', fire: '#EE8130', water: '#6390F0',
@@ -122,12 +123,22 @@ const PokedexPage = () => {
   }, []);
 
   // ✅ 필터링: 한글명 또는 영문명으로 검색
-  const filteredPokemon = allPokemon.filter(p => {
-    const query = searchQuery.toLowerCase();
-    const matchEn = p.name.toLowerCase().includes(query);
-    const matchKo = (koreanNames[p.name] || '').includes(searchQuery);
-    return matchEn || matchKo;
-  });
+  const filteredPokemon = pokemonList.filter((p) => {
+  const koreanName = koreanNames[p.name] || '';
+  const englishName = p.name.toLowerCase();
+  const query = searchQuery.toLowerCase();
+
+  // 1. 영어 이름 검색
+  const matchEn = englishName.includes(query);
+
+  // 2. 한글 완성형 검색 (예: "이상해")
+  const matchKo = koreanName.includes(query);
+
+  // 3. 초성 검색 (예: "ㅇㅅㅎ" → 이상해씨)
+  const matchChosung = koreanName ? chosungIncludes(koreanName, query) : false;
+
+  return matchEn || matchKo || matchChosung;
+});
 
   const totalPages = Math.ceil(filteredPokemon.length / ITEMS_PER_PAGE);
   const currentSlice = filteredPokemon.slice(
