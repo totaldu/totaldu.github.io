@@ -21,13 +21,21 @@ const TYPE_KO = {
 };
 
 const STAT_KO = {
-  hp: 'HP',
-  attack: '공격',
-  defense: '방어',
-  'special-attack': '특공',
-  'special-defense': '특방',
-  speed: '스피드',
+  "hp": "HP",
+  "attack": "공격",
+  "defense": "방어",
+  "special-attack": "특수공격",
+  "special-defense": "특수방어",
+  "speed": "스피드",
 };
+
+{data.stats.map((stat) => (
+  <StatBar
+    key={stat.stat.name}
+    label={STAT_KO[stat.stat.name] ?? stat.stat.name}
+    value={stat.base_stat}
+  />
+))}
 
 // 능력치 최대값 기준 (바 길이 계산용)
 const STAT_MAX = {
