@@ -76,8 +76,8 @@ const FORM_LABEL_KO = {
   // 불비달마
   'standard':       '노말모드',
   'zen':            '달마모드',
-  'galar-standard': '가라르의 모습/노말모드',
-  'galar-zen':      '가라르의 모습/달마모드',
+  'galar-standard': '가라르의 모습-노말모드',
+  'galar-zen':      '가라르의 모습-달마모드',
 
   // 토네로스, 볼트로스, 랜드로스
   'incarnate':      '화신폼',
@@ -144,20 +144,26 @@ const FORM_LABEL_KO = {
   'school':    '군집의 모습',
 
   // 메테노
-  'red-meteor':    '유성의 모습',
-  'orange-meteor': '유성의 모습',
-  'yellow-meteor': '유성의 모습',
-  'green-meteor    '유성의 모습',
-  'blue-meteor':   '유성의 모습',
-  'indigo-meteor': '유성의 모습',
-  'violet-meteor': '유성의 모습',
-  'red':           '빨간색 코어',
-  'orange':        '주황색 코어',
-  'yellow':        '노란색 코어',
-  'green':         '초록색 코어',
-  'blue':          '파랑색 코어',
-  'indigo':        '옥색 코어',
-  'violet':        '보라색 코어',
+  'red-meteor':      '유성의 모습',
+  'orange-meteor':   '유성의 모습',
+  'yellow-meteor':   '유성의 모습',
+  'green-meteor      '유성의 모습',
+  'blue-meteor':     '유성의 모습',
+  'indigo-meteor':   '유성의 모습',
+  'violet-meteor':   '유성의 모습',
+  'red':             '빨간색 코어',
+  'orange':          '주황색 코어',
+  'yellow':          '노란색 코어',
+  'green':           '초록색 코어',
+  'blue':            '파랑색 코어',
+  'indigo':          '옥색 코어',
+  'violet':          '보라색 코어',
+
+  // 따라큐
+  'disguised':       '둔갑한 모습',
+  'busted':          '들킨 모습',
+  'totem-disguised': '주인 포켓몬-둔갑한 모습',
+  'totem-busted':    '주인 포켓몬-들킨 모습',
 
   'dawn':      '여명',
 
