@@ -158,9 +158,7 @@ const PokedexPage = () => {
       {/* 헤더 */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <Link to="/" className="text-[#005596] text-sm font-bold mb-1 inline-block hover:underline">
-            ← 메인으로 돌아가기
-          </Link>
+          {/* ✅ 삭제: <Link to="/">← 메인으로 돌아가기</Link> */}
           <h1 className="text-2xl font-black text-gray-900">포켓몬 도감</h1>
           <p className="text-sm text-gray-400 mt-0.5">
             총 <span className="font-bold text-[#005596]">{filteredPokemon.length}</span>마리
