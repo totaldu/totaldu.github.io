@@ -100,7 +100,7 @@ const TypeChartPage = () => {
     if (val === 2)   return <span className="text-red-600 font-extrabold">2</span>;
     if (val === 0.5) return <span className="text-blue-500 font-extrabold">½</span>;
     if (val === 0)   return <span className="text-gray-300 font-extrabold">0</span>;
-    return <span className="text-gray-200 font-extrabold select-none">·</span>; // 1은 점으로 표시 (노이즈 감소)
+    return <span className="text-gray-200 font-extrabold select-none"> </span>; // 1은 점으로 표시 (노이즈 감소)
   };
 
   return (
