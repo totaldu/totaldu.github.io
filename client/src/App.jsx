@@ -184,8 +184,8 @@ const App = () => {
         <header className="bg-white/80 backdrop-blur-md border-b border-gray-100 h-20 flex items-center sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 w-full flex justify-between items-center">
             <Link to="/" className="text-2xl font-black text-[#005596] flex items-center gap-2">
-              <span className="bg-[#005596] text-white px-3 py-1 rounded-xl text-sm tracking-widest uppercase">Private</span>
-              <span>WIKI</span>
+              <span className="bg-[#005596] text-white px-3 py-1 rounded-xl text-sm tracking-widest uppercase">Total</span>
+              <span>DU</span>
             </Link>
 
             <nav className="hidden lg:flex items-center space-x-10 font-bold text-gray-600">
