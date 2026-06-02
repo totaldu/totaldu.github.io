@@ -36,7 +36,7 @@ const STAT_MAX = {
 };
 
 const StatBar = ({ label, value }) => {
-  const MAX_STAT = 200;
+  const MAX_STAT = 255;
   const percentage = Math.min((value / MAX_STAT) * 100, 100); // 최대 100%로 클램핑
 
   const getColor = (v) => {
