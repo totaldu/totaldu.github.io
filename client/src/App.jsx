@@ -7,6 +7,11 @@ import PokedexLayout from './pages/PokedexLayout';
 import PokedexPage from './pages/PokedexPage';
 import PokemonDetailPage from './pages/PokemonDetailPage';
 
+// ✅ API Base URL: 로컬 개발 시 localhost:4000, 배포 시 Vercel 백엔드 자동 선택
+const API_BASE = import.meta.env.DEV
+  ? "http://localhost:4000"
+  : "https://down-up17-github-io.vercel.app";
+
 // --- 1. 상세 페이지 컴포넌트들 ---
 
 const PartyPage = () => (
@@ -174,7 +179,8 @@ const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetch('/api/articles')
+    // ✅ API_BASE를 사용하여 환경에 따라 로컬/프로덕션 자동 분기
+    fetch(`${API_BASE}/api/articles`)
       .then(res => res.json())
       .then(data => setArticles(data))
       .catch(err => console.error("API 연결 실패:", err));
