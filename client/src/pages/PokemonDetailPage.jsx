@@ -137,7 +137,6 @@ const FORM_LABEL_KO = {
   // 루가루암
   'midday':    '한낮의 모습',
   'midnight':  '한밤중의 모습',
-  'dusk':      '황혼', // 네크로즈마와 공유
 
   // 약어리
   'solo':      '단독의 모습',
@@ -169,8 +168,85 @@ const FORM_LABEL_KO = {
   'dawn':            '새벽',
   'ultra':           '울트라네크로즈마',
 
+  // 마기아나
+  'original':        '500년 전의 색',
+  'original-mega':   '500년 전의 색-메가진화',
+
+  // 윽우지
+  'gulping':        '그대로 삼킨 모습',
+  'gorging':        '통째로 삼킨 모습',
+
+  // 스트린더
+  'amped':          '하이한 모습',
+  'low-key':        '로우한 모습',
+  'amped-gmax':     '하이한 모습-거다이맥스',
+  'low-key-gmax':   '로우한 모습-거다이맥스',
+
+  // 빙큐보
+  'noice':          '나이스페이스',
+
+  // 모르페코
+  'full-belly':     '배부른 모양',
+  'hangry':         '배고픈 모양',
+
+  // 자시안, 자마젠타
+  'crowned':        '검왕/방패왕',
+
+  // 우라오스
+  'single-strike':      '일격의 모습',
+  'rapid-strike':       '연격의 모습',
+  'single-strike-gmax': '일격의 모습-거다이맥스',
+  'rapid-strike-gmax':  '연격의 모습-거다이맥스',
+
   // 무한다이노
   'eternamax': '무한다이맥스',
+
+   // 자루도
+  'dada':               '아빠',
+
+  // 버드렉스
+  'shadow':             '흑마 탄 모습',
+
+  // 다투곰
+  'bloodmoon':          '붉은 달',
+
+  // 파밀리쥐
+  'family-of-four':     '네 식구',
+  'family-of-three':    '세 식구',
+
+  // 시비꼬
+  'green-plumage':      '그린 페더',
+  'blue-plumage':       '블루 페더',
+  'yellow-plumage':     '옐로 페더',
+  'white-plumage':      '화이트 페더',
+
+  // 돌핀맨
+  'zero':               '나이브폼',
+  'hero':               '마이티폼',
+
+  // 싸리용
+  'curvy':              '젖힌 모습',
+  'droopy':             '늘어진 모습',
+  'stretchy':           '뻗은 모습',
+  'curvy-mega':         '젖힌 모습-메가진화',
+  'droopy-mega':        '늘어진 모습-메가진화',
+  'stretchy-mega':      '뻗은 모습-메가진화',
+
+  // 노고고치
+  'two-segment':        '두 마디폼',
+  'three-segment':      '세 마디폼',
+
+  // 모으령
+  'roaming':            '도보폼',
+
+  // 오거폰
+  'wellspring-mask':    '우물의 가면',
+  'heartflame-mask':    '화덕의 가면',
+  'cornerstone-mask':   '주춧돌의 가면',
+
+  // 테라파고스
+  'terastal':           '테라스탈폼',
+  'stellar':            '스텔라폼',
 
   // 성별
   'male':        '수컷의 모습',
