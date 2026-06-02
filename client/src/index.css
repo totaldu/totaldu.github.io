@@ -57,11 +57,11 @@ body {
 }
 
 #root {
-  width: 1126px;
+  width: 100%;           /* ← 1126px → 100%로 변경 */
   max-width: 100%;
-  margin: 0 auto;
+  margin: 0;             /* ← auto → 0으로 변경 */
   text-align: center;
-  border-inline: 1px solid var(--border);
+  /* border-inline 제거 또는 주석 처리 */
   min-height: 100svh;
   display: flex;
   flex-direction: column;
