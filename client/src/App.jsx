@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { Search, Menu, User, LogIn, ChevronRight, Info, BookOpen, Globe, FileText, Sparkles, Zap, Timer } from 'lucide-react';
 import TypeChartPage from './pages/TypeChartPage';
 import BattleLayout from './pages/BattleLayout';
+import PokedexLayout from './pages/PokedexLayout';
 import PokedexPage from './pages/PokedexPage';
 
 // --- 1. 상세 페이지 컴포넌트들 ---
@@ -207,7 +208,10 @@ const App = () => {
         {/* 경로에 따른 페이지 렌더링 설정 */}
         <Routes>
           <Route path="/" element={<MainHome articles={articles} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
-          <Route path="/pokedex" element={<PokedexPage />} />
+          Route path="/pokedex" element={<PokedexLayout />}>
+            <Route index element={<PokedexPage />} />
+            {/* 추후 추가: <Route path="stats" element={<StatsRankPage />} /> */}
+          </Route>
           <Route path="/party" element={<PartyPage />} />
 
           {/* BattleLayout을 부모로 하고 하위 라우트를 중첩합니다 */}
@@ -221,7 +225,7 @@ const App = () => {
         </Routes>
 
         <footer className="mt-auto py-12 bg-white text-center border-t border-gray-100">
-          <p className="text-gray-400 text-sm font-medium">© 2024 TotalDU Private Wiki System. All Rights Reserved.</p>
+          <p className="text-gray-400 text-sm font-medium"> 2026 TotalDU </p>
         </footer>
       </div>
     </BrowserRouter>
