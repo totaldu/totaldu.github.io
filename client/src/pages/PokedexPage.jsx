@@ -3,7 +3,6 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
-// 타입별 색상
 const TYPE_COLORS = {
   normal: '#A8A77A', fire: '#EE8130', water: '#6390F0',
   grass: '#7AC74C', electric: '#F7D02C', ice: '#96D9D6',
@@ -21,34 +20,31 @@ const TYPE_KO = {
   steel: '강철', fairy: '페어리',
 };
 
-const ITEMS_PER_PAGE = 48;
+// ✅ 30마리 (6열 × 5줄)
+const ITEMS_PER_PAGE = 30;
 
-// 포켓몬 카드 컴포넌트
 const PokemonCard = ({ pokemon }) => {
   const mainType = pokemon.types[0]?.type?.name || 'normal';
   const subType = pokemon.types[1]?.type?.name;
   const mainColor = TYPE_COLORS[mainType] || '#A8A77A';
 
   return (
-    <div
-      className="group relative flex flex-col items-center rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden cursor-pointer bg-white"
-    >
-      {/* 배경 그라디언트 */}
+    <div className="group relative flex flex-col items-center rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden cursor-pointer bg-white">
       <div
         className="w-full h-24 flex items-center justify-center"
         style={{ background: `linear-gradient(135deg, ${mainColor}33, ${mainColor}11)` }}
       >
         <img
-          src={pokemon.sprites?.other?.['official-artwork']?.front_default
+          src={
+            pokemon.sprites?.other?.['official-artwork']?.front_default
             || pokemon.sprites?.front_default
-            || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`}
+            || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`
+          }
           alt={pokemon.name}
           className="h-20 w-20 object-contain drop-shadow-md group-hover:scale-110 transition-transform"
           loading="lazy"
         />
       </div>
-
-      {/* 정보 영역 */}
       <div className="w-full px-3 py-2 text-center">
         <p className="text-[11px] text-gray-400 font-mono font-bold">
           #{String(pokemon.id).padStart(4, '0')}
@@ -56,7 +52,6 @@ const PokemonCard = ({ pokemon }) => {
         <p className="text-sm font-black text-gray-800 capitalize truncate">
           {pokemon.name}
         </p>
-        {/* 타입 뱃지 */}
         <div className="flex justify-center gap-1 mt-1.5 mb-1">
           <span
             className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
@@ -78,7 +73,6 @@ const PokemonCard = ({ pokemon }) => {
   );
 };
 
-// 스켈레톤 로딩 카드
 const SkeletonCard = () => (
   <div className="rounded-2xl border border-gray-100 overflow-hidden animate-pulse bg-white">
     <div className="h-24 bg-gray-100" />
@@ -91,16 +85,15 @@ const SkeletonCard = () => (
 );
 
 const PokedexPage = () => {
-  const [allPokemon, setAllPokemon] = useState([]);      // 전체 목록 (이름+url만)
-  const [pageData, setPageData] = useState([]);           // 현재 페이지 상세 데이터
+  const [allPokemon, setAllPokemon] = useState([]);
+  const [pageData, setPageData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [detailLoading, setDetailLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedType, setSelectedType] = useState('all');
 
-  // 1. 최초 마운트: 전체 1025마리 목록만 가져오기
+  // 1. 최초 마운트: 전체 목록 fetch
   useEffect(() => {
     setLoading(true);
     fetch('https://pokeapi.co/api/v2/pokemon?limit=1025&offset=0')
@@ -115,29 +108,21 @@ const PokedexPage = () => {
       });
   }, []);
 
-  // 필터링된 목록 계산
+  // 필터링 + 페이지 슬라이스
   const filteredPokemon = allPokemon.filter(p =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
   const totalPages = Math.ceil(filteredPokemon.length / ITEMS_PER_PAGE);
-
-  // 현재 페이지 슬라이스
   const currentSlice = filteredPokemon.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE
   );
 
-  // 2. 페이지/필터 바뀔 때: 현재 페이지 상세 데이터 병렬 fetch
+  // 2. 페이지/검색/전체목록 로드 시 상세 fetch
   useEffect(() => {
     if (currentSlice.length === 0) { setPageData([]); return; }
     setDetailLoading(true);
-
-    Promise.all(
-      currentSlice.map(p =>
-        fetch(p.url).then(res => res.json())
-      )
-    )
+    Promise.all(currentSlice.map(p => fetch(p.url).then(res => res.json())))
       .then(results => {
         setPageData(results);
         setDetailLoading(false);
@@ -146,21 +131,18 @@ const PokedexPage = () => {
         setError('상세 데이터를 불러오지 못했습니다.');
         setDetailLoading(false);
       });
-  }, [currentPage, searchQuery, allPokemon.length]);
+  }, [currentPage, searchQuery, allPokemon.length]); // ✅ 첫 진입 버그 픽스 포함
 
-  // 검색 시 첫 페이지로 리셋
   const handleSearch = useCallback((e) => {
     setSearchQuery(e.target.value);
     setCurrentPage(1);
   }, []);
 
-  // 페이지 이동
   const goToPage = (page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 페이지 번호 배열 생성 (최대 5개 표시)
   const getPageNumbers = () => {
     const delta = 2;
     const range = [];
@@ -173,7 +155,7 @@ const PokedexPage = () => {
   return (
     <div className="w-full flex flex-col gap-6">
 
-      {/* 상단 헤더 */}
+      {/* 헤더 */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <Link to="/" className="text-[#005596] text-sm font-bold mb-1 inline-block hover:underline">
@@ -185,8 +167,6 @@ const PokedexPage = () => {
             {searchQuery && ` — "${searchQuery}" 검색 결과`}
           </p>
         </div>
-
-        {/* 검색창 */}
         <div className="relative w-full md:w-72">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
@@ -206,9 +186,9 @@ const PokedexPage = () => {
         </div>
       )}
 
-      {/* 포켓몬 그리드 */}
+      {/* ✅ 그리드: 항상 6열 고정 */}
       {loading ? (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+        <div className="grid grid-cols-6 gap-3">
           {Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => <SkeletonCard key={i} />)}
         </div>
       ) : filteredPokemon.length === 0 ? (
@@ -217,7 +197,7 @@ const PokedexPage = () => {
           <p className="text-sm mt-2">"{searchQuery}"에 해당하는 포켓몬을 찾을 수 없어요.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+        <div className="grid grid-cols-6 gap-3">
           {detailLoading
             ? Array.from({ length: currentSlice.length }).map((_, i) => <SkeletonCard key={i} />)
             : pageData.map(pokemon => <PokemonCard key={pokemon.id} pokemon={pokemon} />)
@@ -232,16 +212,12 @@ const PokedexPage = () => {
             onClick={() => goToPage(1)}
             disabled={currentPage === 1}
             className="px-3 py-2 rounded-lg text-sm font-bold bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition-colors"
-          >
-            «
-          </button>
+          >«</button>
           <button
             onClick={() => goToPage(currentPage - 1)}
             disabled={currentPage === 1}
             className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition-colors"
-          >
-            <ChevronLeft size={16} />
-          </button>
+          ><ChevronLeft size={16} /></button>
 
           {getPageNumbers().map(num => (
             <button
@@ -252,25 +228,19 @@ const PokedexPage = () => {
                   ? 'bg-[#005596] text-white shadow-sm'
                   : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
                 }`}
-            >
-              {num}
-            </button>
+            >{num}</button>
           ))}
 
           <button
             onClick={() => goToPage(currentPage + 1)}
             disabled={currentPage === totalPages}
             className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition-colors"
-          >
-            <ChevronRight size={16} />
-          </button>
+          ><ChevronRight size={16} /></button>
           <button
             onClick={() => goToPage(totalPages)}
             disabled={currentPage === totalPages}
             className="px-3 py-2 rounded-lg text-sm font-bold bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition-colors"
-          >
-            »
-          </button>
+          >»</button>
         </div>
       )}
     </div>
