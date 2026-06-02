@@ -31,30 +31,106 @@ const STAT_KO = {
 };
 
 const FORM_LABEL_KO = {
+
+  //피카츄
+  'rock-star': '하드록',
+  'belle':     '마담',
+  'pop-star':  '아이돌',
+  'phd':       '닥',
+  'libre':     '마스크',
+  'cosplay':   '명탐정/ client/src/pages/PokemonDetailPage.jsx
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import koreanNames from '../data/pokemonKoreanNames.json';
+import { getKoreanName } from '../utils/pokemonUtils';
+
+const TYPE_COLORS = {
+  normal: '#A8A77A', fire: '#EE8130', water: '#6390F0',
+  grass: '#7AC74C', electric: '#F7D02C', ice: '#96D9D6',
+  fighting: '#C22E28', poison: '#A33EA1', ground: '#E2BF65',
+  flying: '#A98FF3', psychic: '#F95587', bug: '#A6B91A',
+  rock: '#B6A136', ghost: '#735797', dragon: '#6F35FC',
+  dark: '#705746', steel: '#B7B7CE', fairy: '#D685AD',
+};
+
+const TYPE_KO = {
+  normal: '노말', fire: '불꽃', water: '물', grass: '풀',
+  electric: '전기', ice: '얼음', fighting: '격투', poison: '독',
+  ground: '땅', flying: '비행', psychic: '에스퍼', bug: '벌레',
+  rock: '바위', ghost: '고스트', dragon: '드래곤', dark: '악',
+  steel: '강철', fairy: '페어리',
+};
+
+const STAT_KO = {
+  "hp": "HP",
+  "attack": "공격",
+  "defense": "방어",
+  "special-attack": "특수공격",
+  "special-defense": "특수방어",
+  "speed": "스피드",
+};
+
+const FORM_LABEL_KO = {
+
+  //피카츄
+  'rock-star':   '하드록',
+  'belle':       '마담',
+  'pop-star':    '아이돌',
+  'phd':         '닥',
+  'libre':       '마스크',
+  'cosplay':     '명탐정',
+  'original-cap':     '오리지널캡',
+  'hoenn-cap':   '호연캡',
+  'sinnoh-cap':  '신오캡',
+  'unova-cap':   '하나캡',
+  'kalos-cap':   '칼로스캡',
+  'alola-cap':   '알로라캡',
+  'partner-cap': '너로정했다캡',
+  'starter':     '파트',
+  'world-cap':   '월드캡',
+  
+  // 테오키스
   'normal':    '노말',
   'attack':    '어택',
   'defense':   '디펜스',
   'speed':     '스피드',
+
+  //케르디오
   'ordinary':  '통상',
   'resolute':  '각오',
+  
+  // 디아루가, 펄기아, 기라티나
   'origin':    '오리진',
   'altered':   '어나더',
+  
+  // 쉐이미
   'land':      '랜드',
   'sky':       '스카이',
+
+  //쉐이미
   'heat':      '히트',
   'wash':      '워시',
   'frost':     '프로스트',
   'fan':       '스핀',
   'mow':       '커트',
+
+  // 메로엣타
   'aria':      '보이스',
   'pirouette': '스텝',
+
+  // 춤추새
   'baile':     '이글이글',
   'pom-pom':   '파칙파칙',
   'pau':       '훌라훌라',
   'sensu':     '하늘하늘',
+
+  //루가루암
   'midnight':  '한밤',
   'dusk':      '황혼',
   'dawn':      '여명',
+
+  // 무한다이노
+  'eternamax': '무한다이맥스'
   
   // 리전폼
   'alola':      '알로라',
@@ -67,9 +143,6 @@ const FORM_LABEL_KO = {
   'mega-x': '메가-X',
   'mega-y': '메가-Y',
   'gmax': '거다이맥스',
-
-  // 특수
-  'eternamax': '무한다이맥스',
 };
 
 const getFormLabel = (formName) => {
