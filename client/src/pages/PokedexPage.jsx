@@ -123,7 +123,7 @@ const PokedexPage = () => {
   }, []);
 
   // ✅ 필터링: 한글명 또는 영문명으로 검색
-  const filteredPokemon = pokemonList.filter((p) => {
+  const filteredPokemon = allPokemon.filter((p) => {
   const koreanName = koreanNames[p.name] || '';
   const englishName = p.name.toLowerCase();
   const query = searchQuery.toLowerCase();
