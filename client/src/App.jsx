@@ -87,7 +87,7 @@ const CommunityPage = () => (
 // --- 2. 메인 홈 화면 ---
 const MainHome = ({ articles, searchQuery, setSearchQuery }) => (
   <>
-    <section className="relative bg-gradient-to-br from-[#0a8d87] via-[#15b291] to-[#005596] min-h-[calc(100vh-80px)] px-4 overflow-hidden flex items-center">
+    <section className="relative w-full bg-gradient-to-br from-[#0a8d87] via-[#15b291] to-[#005596] min-h-[calc(100vh-80px)] px-4 overflow-hidden flex items-center">
       <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-cyan-300 rounded-full blur-3xl"></div>
