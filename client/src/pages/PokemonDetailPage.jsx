@@ -104,6 +104,17 @@ const FORM_LABEL_KO = {
   'battle-bond': '일러스트2',
   'ash':         '지우개굴닌자',
 
+  // 킬가르도
+  'shield':      '실드폼',
+  'blade':       '블레이드폼',
+
+  // 지가르데
+  '50':                 '50%폼',
+  '10-power-construct': '10%폼',
+  '50-power-construct': '50%폼',
+  'complete':           '퍼펙트폼',
+  '10':                 '10%폼',
+
   // 춤추새
   'baile':     '이글이글',
   'pom-pom':   '파칙파칙',
