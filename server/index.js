@@ -4,7 +4,16 @@ const cors = require('cors');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-app.use(cors()); // 모든 도메인 허용 (개발용)
+app.use(cors({
+  origin: 'http://localhost:5173',
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
+
+// Private Network Access 허용 헤더 추가
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Private-Network', 'true');
+  next();
+});
 app.use(express.json());
 
 // --- 설정값 (실제 배포 시에는 .env 파일로 관리하세요) ---
