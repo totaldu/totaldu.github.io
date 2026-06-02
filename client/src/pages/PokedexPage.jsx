@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import koreanNames from '../data/pokemonKoreanNames.json'; // ✅ 추가
 
 const TYPE_COLORS = {
   normal: '#A8A77A', fire: '#EE8130', water: '#6390F0',
@@ -20,13 +21,14 @@ const TYPE_KO = {
   steel: '강철', fairy: '페어리',
 };
 
-// ✅ 30마리 (6열 × 5줄)
 const ITEMS_PER_PAGE = 30;
 
+// ✅ PokemonCard: 한글명 메인 + 영문명 서브
 const PokemonCard = ({ pokemon }) => {
   const mainType = pokemon.types[0]?.type?.name || 'normal';
   const subType = pokemon.types[1]?.type?.name;
   const mainColor = TYPE_COLORS[mainType] || '#A8A77A';
+  const koreanName = koreanNames[pokemon.name]; // ✅ 한글명 조회
 
   return (
     <div className="group relative flex flex-col items-center rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden cursor-pointer bg-white">
@@ -40,7 +42,7 @@ const PokemonCard = ({ pokemon }) => {
             || pokemon.sprites?.front_default
             || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`
           }
-          alt={pokemon.name}
+          alt={koreanName || pokemon.name}
           className="h-20 w-20 object-contain drop-shadow-md group-hover:scale-110 transition-transform"
           loading="lazy"
         />
@@ -49,9 +51,19 @@ const PokemonCard = ({ pokemon }) => {
         <p className="text-[11px] text-gray-400 font-mono font-bold">
           #{String(pokemon.id).padStart(4, '0')}
         </p>
-        <p className="text-sm font-black text-gray-800 capitalize truncate">
-          {pokemon.name}
+
+        {/* ✅ 한글명 메인 */}
+        <p className="text-sm font-black text-gray-800 truncate">
+          {koreanName || pokemon.name}
         </p>
+
+        {/* ✅ 영문명 서브 (한글명 없으면 숨김) */}
+        {koreanName && (
+          <p className="text-[10px] text-gray-400 capitalize truncate -mt-0.5">
+            {pokemon.name}
+          </p>
+        )}
+
         <div className="flex justify-center gap-1 mt-1.5 mb-1">
           <span
             className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
@@ -79,6 +91,7 @@ const SkeletonCard = () => (
     <div className="p-3 flex flex-col items-center gap-2">
       <div className="h-3 w-10 bg-gray-200 rounded" />
       <div className="h-4 w-20 bg-gray-200 rounded" />
+      <div className="h-3 w-16 bg-gray-200 rounded" />
       <div className="h-4 w-14 bg-gray-200 rounded-full" />
     </div>
   </div>
@@ -108,10 +121,14 @@ const PokedexPage = () => {
       });
   }, []);
 
-  // 필터링 + 페이지 슬라이스
-  const filteredPokemon = allPokemon.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // ✅ 필터링: 한글명 또는 영문명으로 검색
+  const filteredPokemon = allPokemon.filter(p => {
+    const query = searchQuery.toLowerCase();
+    const matchEn = p.name.toLowerCase().includes(query);
+    const matchKo = (koreanNames[p.name] || '').includes(searchQuery);
+    return matchEn || matchKo;
+  });
+
   const totalPages = Math.ceil(filteredPokemon.length / ITEMS_PER_PAGE);
   const currentSlice = filteredPokemon.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
@@ -131,7 +148,7 @@ const PokedexPage = () => {
         setError('상세 데이터를 불러오지 못했습니다.');
         setDetailLoading(false);
       });
-  }, [currentPage, searchQuery, allPokemon.length]); // ✅ 첫 진입 버그 픽스 포함
+  }, [currentPage, searchQuery, allPokemon.length]);
 
   const handleSearch = useCallback((e) => {
     setSearchQuery(e.target.value);
@@ -158,7 +175,6 @@ const PokedexPage = () => {
       {/* 헤더 */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          {/* ✅ 삭제: <Link to="/">← 메인으로 돌아가기</Link> */}
           <h1 className="text-2xl font-black text-gray-900">포켓몬 도감</h1>
           <p className="text-sm text-gray-400 mt-0.5">
             총 <span className="font-bold text-[#005596]">{filteredPokemon.length}</span>마리
@@ -169,7 +185,7 @@ const PokedexPage = () => {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="포켓몬 이름 검색 (영문)..."
+            placeholder="이름으로 검색 (한글/영문)..." // ✅ 수정
             value={searchQuery}
             onChange={handleSearch}
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0a8d87]/40 shadow-sm"
@@ -184,7 +200,7 @@ const PokedexPage = () => {
         </div>
       )}
 
-      {/* ✅ 그리드: 항상 6열 고정 */}
+      {/* 그리드 */}
       {loading ? (
         <div className="grid grid-cols-6 gap-3">
           {Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => <SkeletonCard key={i} />)}
