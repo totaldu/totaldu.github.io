@@ -61,7 +61,7 @@ const FORM_LABEL_KO = {
 
   // 캐스퐁
   'sunny':       '태양',
-  'rainy':       '빗방',
+  'rainy':       '빗방울',
   'snowy':       '설운',
 
   // 가이오가, 그란돈
