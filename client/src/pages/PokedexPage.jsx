@@ -2,7 +2,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import koreanNames from '../data/pokemonKoreanNames.json'; // ✅ 추가
+import koreanNames from '../data/pokemonKoreanNames.json';
+import { disassembleHangul, chosungIncludes } from 'es-hangul';
 
 const TYPE_COLORS = {
   normal: '#A8A77A', fire: '#EE8130', water: '#6390F0',
