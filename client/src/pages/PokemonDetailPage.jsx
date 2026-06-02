@@ -33,46 +33,6 @@ const STAT_KO = {
 const FORM_LABEL_KO = {
 
   //피카츄
-  'rock-star': '하드록',
-  'belle':     '마담',
-  'pop-star':  '아이돌',
-  'phd':       '닥',
-  'libre':     '마스크',
-  'cosplay':   '명탐정/ client/src/pages/PokemonDetailPage.jsx
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import koreanNames from '../data/pokemonKoreanNames.json';
-import { getKoreanName } from '../utils/pokemonUtils';
-
-const TYPE_COLORS = {
-  normal: '#A8A77A', fire: '#EE8130', water: '#6390F0',
-  grass: '#7AC74C', electric: '#F7D02C', ice: '#96D9D6',
-  fighting: '#C22E28', poison: '#A33EA1', ground: '#E2BF65',
-  flying: '#A98FF3', psychic: '#F95587', bug: '#A6B91A',
-  rock: '#B6A136', ghost: '#735797', dragon: '#6F35FC',
-  dark: '#705746', steel: '#B7B7CE', fairy: '#D685AD',
-};
-
-const TYPE_KO = {
-  normal: '노말', fire: '불꽃', water: '물', grass: '풀',
-  electric: '전기', ice: '얼음', fighting: '격투', poison: '독',
-  ground: '땅', flying: '비행', psychic: '에스퍼', bug: '벌레',
-  rock: '바위', ghost: '고스트', dragon: '드래곤', dark: '악',
-  steel: '강철', fairy: '페어리',
-};
-
-const STAT_KO = {
-  "hp": "HP",
-  "attack": "공격",
-  "defense": "방어",
-  "special-attack": "특수공격",
-  "special-defense": "특수방어",
-  "speed": "스피드",
-};
-
-const FORM_LABEL_KO = {
-
-  //피카츄
   'rock-star':   '하드록',
   'belle':       '마담',
   'pop-star':    '아이돌',
