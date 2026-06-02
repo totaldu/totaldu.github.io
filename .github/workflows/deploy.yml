@@ -58,4 +58,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Deploy to Pages
-        uses: actions/deploy-pages@v4.0.5      # ✅ v4 → v4.0.5
+        uses: actions/deploy-pages@v5
