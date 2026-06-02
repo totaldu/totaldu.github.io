@@ -63,6 +63,9 @@ const FORM_LABEL_KO = {
   'sunny':       '태양',
   'rainy':       '빗방',
   'snowy':       '설운',
+
+  // 가이오가, 그란돈
+  'primal':      '원시회귀',
   
   // 테오키스
   'normal':    '노말',
