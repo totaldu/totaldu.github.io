@@ -104,9 +104,6 @@ const FORM_LABEL_KO = {
   'battle-bond': '일러스트2',
   'ash':         '지우개굴닌자',
 
-  // 화염레오
-  'male':        '화염레오',
-
   // 춤추새
   'baile':     '이글이글',
   'pom-pom':   '파칙파칙',
@@ -120,6 +117,10 @@ const FORM_LABEL_KO = {
 
   // 무한다이노
   'eternamax': '무한다이맥스',
+
+  // 성별
+  'male':        '수컷의 모습',
+  'female':      '암컷의 모습',
   
   // 리전폼
   'alola':      '알로라',
