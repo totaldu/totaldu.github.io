@@ -174,7 +174,7 @@ const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:4000/api/articles')
+    fetch('/api/articles')
       .then(res => res.json())
       .then(data => setArticles(data))
       .catch(err => console.error("API 연결 실패:", err));
