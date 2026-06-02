@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import koreanNames from '../data/pokemonKoreanNames.json';
 import { getKoreanName } from '../utils/pokemonUtils';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 
 const TYPE_COLORS = {
   normal: '#A8A77A', fire: '#EE8130', water: '#6390F0',
@@ -148,6 +149,9 @@ const PokemonDetailPage = () => {
   const [activeForm, setActiveForm] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const fromPage = searchParams.get('page') || 1;
 
   useEffect(() => {
     setLoading(true);
