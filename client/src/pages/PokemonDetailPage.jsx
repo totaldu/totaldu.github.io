@@ -49,6 +49,10 @@ const FORM_LABEL_KO = {
   'partner-cap': '너로정했다캡',
   'starter':     '파트너',
   'world-cap':   '월드캡',
+
+  //마임맨
+  'mime':        '마임맨',
+  'mime-galar':  '가라',
   
   // 테오키스
   'normal':    '노말',
