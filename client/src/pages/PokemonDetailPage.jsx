@@ -60,22 +60,29 @@ const getFormLabel = (formName) => {
   return FORM_LABEL_KO[suffix] ?? suffix;
 };
 
-// ✅ initialValue: 애니메이션 시작점 (첫 로드=0, 폼 전환=이전 폼 스탯값)
+// ✅ 이름 길이에 따른 폰트 크기 계산
+const getNameFontSize = (name) => {
+  const len = name.length;
+  if (len >= 7) return '1.05rem';
+  if (len >= 5) return '1.3rem';
+  if (len >= 4) return '1.5rem';
+  return '1.875rem';
+};
+
 const StatBar = ({ label, value, initialValue = 0 }) => {
   const MAX_STAT = 255;
   const targetPct  = Math.min((value        / MAX_STAT) * 100, 100);
   const initialPct = Math.min((initialValue / MAX_STAT) * 100, 100);
 
-  const [width, setWidth] = useState(initialPct); // ✅ 시작점에서 출발
+  const [width, setWidth] = useState(initialPct);
 
   useEffect(() => {
-    // ✅ 브라우저가 initialPct로 그린 직후 targetPct로 전환 → CSS transition 발동
     const raf = requestAnimationFrame(() => {
       const timer = setTimeout(() => setWidth(targetPct), 20);
       return () => clearTimeout(timer);
     });
     return () => cancelAnimationFrame(raf);
-  }, []); // ✅ 마운트 시 1회만 실행 (key 변경 = 리마운트 = 재실행)
+  }, []);
 
   const getColor = (v) => {
     if (v >= 120) return '#22c55e';
@@ -108,7 +115,7 @@ const PokemonDetailPage = () => {
   const [pokemon, setPokemon] = useState(null);
   const [forms, setForms] = useState([]);
   const [activeForm, setActiveForm] = useState(null);
-  const [prevStats, setPrevStats] = useState({}); // ✅ 폼 전환 직전 스탯 스냅샷
+  const [prevStats, setPrevStats] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchParams] = useSearchParams();
@@ -126,7 +133,7 @@ const PokemonDetailPage = () => {
       })
       .then(async (data) => {
         setPokemon(data);
-        setPrevStats({}); // ✅ 포켓몬 자체가 바뀌면 prevStats 초기화 → 0부터 시작
+        setPrevStats({});
         setActiveForm(data);
 
         const speciesRes = await fetch(data.species.url);
@@ -151,7 +158,6 @@ const PokemonDetailPage = () => {
       });
   }, [id]);
 
-  // ✅ 폼 전환: 현재 스탯을 prevStats에 저장 후 activeForm 교체
   const handleFormChange = (form) => {
     if (!activeForm || form.name === activeForm.name) return;
     const snapshot = {};
@@ -171,6 +177,7 @@ const PokemonDetailPage = () => {
   );
 
   const koreanName = getKoreanName(activeForm.name);
+  const displayName = koreanName || activeForm.name; // ✅ 변수로 분리
   const mainType = activeForm.types[0]?.type?.name || 'normal';
   const subType = activeForm.types[1]?.type?.name;
   const mainColor = TYPE_COLORS[mainType] || '#A8A77A';
@@ -196,7 +203,7 @@ const PokemonDetailPage = () => {
           {forms.map(form => (
             <button
               key={form.name}
-              onClick={() => handleFormChange(form)} // ✅ setActiveForm → handleFormChange
+              onClick={() => handleFormChange(form)}
               className={`px-4 py-1.5 rounded-full text-sm font-bold border transition-all ${
                 activeForm.name === form.name
                   ? 'bg-[#005596] text-white border-[#005596]'
@@ -217,20 +224,25 @@ const PokemonDetailPage = () => {
         >
           <img
             src={officialArt}
-            alt={koreanName || activeForm.name}
+            alt={displayName}
             className="w-56 h-56 object-contain drop-shadow-xl"
           />
           <p className="text-xs text-gray-400 font-mono font-bold mt-4">
             #{String(activeForm.id).padStart(4, '0')}
           </p>
+
+          {/* ✅ 핵심 수정: whiteSpace를 인라인 style로 이동 + 길이별 fontSize */}
           <h1
-            className="font-black text-gray-900 mt-1 whitespace-nowrap"
+            className="font-black mt-1"
             style={{
-              fontSize: `clamp(1rem, ${5.5 / (koreanName || activeForm.name).length}rem, 1.875rem)`
+              whiteSpace: 'nowrap',        /* ← Tailwind 클래스 대신 인라인으로 확실하게 */
+              color: '#111827',
+              fontSize: getNameFontSize(displayName),
             }}
           >
-            {koreanName || activeForm.name}
+            {displayName}
           </h1>
+
           {koreanName && (
             <p className="text-sm text-gray-400 capitalize mt-0.5">{activeForm.name}</p>
           )}
@@ -274,10 +286,10 @@ const PokemonDetailPage = () => {
             <div className="flex flex-col gap-3">
               {activeForm.stats.map(s => (
                 <StatBar
-                  key={`${activeForm.name}-${s.stat.name}`} // ✅ 폼 바뀌면 리마운트
+                  key={`${activeForm.name}-${s.stat.name}`}
                   label={STAT_KO[s.stat.name] ?? s.stat.name}
                   value={s.base_stat}
-                  initialValue={prevStats[s.stat.name] ?? 0} // ✅ 이전 폼 값에서 시작
+                  initialValue={prevStats[s.stat.name] ?? 0}
                 />
               ))}
             </div>
