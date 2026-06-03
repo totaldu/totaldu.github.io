@@ -195,7 +195,7 @@ export const FORM_LABEL_KO = {
 
   // 오거폰
   'wellspring-mask':    '우물의 가면',
-  'heartflame-mask':    '화덕의 가면',
+  'hearthflame-mask':    '화덕의 가면',
   'cornerstone-mask':   '주춧돌의 가면',
 
   // 테라파고스
