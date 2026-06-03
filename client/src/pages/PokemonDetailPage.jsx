@@ -223,7 +223,12 @@ const PokemonDetailPage = () => {
           <p className="text-xs text-gray-400 font-mono font-bold mt-4">
             #{String(activeForm.id).padStart(4, '0')}
           </p>
-          <h1 className="text-3xl font-black text-gray-900 mt-1">
+          <h1
+            className="font-black text-gray-900 mt-1 whitespace-nowrap"
+            style={{
+              fontSize: `clamp(1rem, ${5.5 / (koreanName || activeForm.name).length}rem, 1.875rem)`
+            }}
+          >
             {koreanName || activeForm.name}
           </h1>
           {koreanName && (
