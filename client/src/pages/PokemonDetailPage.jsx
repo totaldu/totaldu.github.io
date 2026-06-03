@@ -60,7 +60,6 @@ const getNameFontSize = (name) => {
   return '1.875rem';
 };
 
-// ✅ 폼 종류 판별 함수
 const getFormBadgeInfo = (formName) => {
   const suffix = formName.split('-').slice(1).join('-');
   if (suffix.startsWith('mega'))      return { type: 'mega',      label: 'MEGA',   color: '#8B5CF6' };
@@ -177,25 +176,20 @@ const PokemonDetailPage = () => {
     <div className="p-6 text-red-500 font-bold text-center">{error}</div>
   );
 
-  const koreanName = getKoreanName(activeForm.name);
+  const koreanName  = getKoreanName(activeForm.name);
   const displayName = koreanName || activeForm.name;
-  const mainType = activeForm.types[0]?.type?.name || 'normal';
-  const subType  = activeForm.types[1]?.type?.name;
-  const mainColor = TYPE_COLORS[mainType] || '#A8A77A';
-  const totalStats = activeForm.stats.reduce((sum, s) => sum + s.base_stat, 0);
+  const mainType    = activeForm.types[0]?.type?.name || 'normal';
+  const subType     = activeForm.types[1]?.type?.name;
+  const mainColor   = TYPE_COLORS[mainType] || '#A8A77A';
+  const totalStats  = activeForm.stats.reduce((sum, s) => sum + s.base_stat, 0);
 
   const officialArt =
     activeForm.sprites?.other?.['official-artwork']?.front_default
     || activeForm.sprites?.front_default
     || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${activeForm.id}.png`;
 
-  // ✅ 현재 기본 폼 (첫 번째 폼 or 이름이 순수 id인 폼)
-  const baseForm = forms[0] ?? pokemon;
-
-  // ✅ 메가/거다이 등 특수 폼만 필터링
+  const baseForm     = forms[0] ?? pokemon;
   const specialForms = forms.filter(f => getFormBadgeInfo(f.name) !== null);
-
-  // ✅ 현재 activeForm이 특수 폼인지 확인
   const activeFormBadge = getFormBadgeInfo(activeForm.name);
 
   return (
@@ -208,11 +202,10 @@ const PokemonDetailPage = () => {
         ← 도감으로 돌아가기
       </button>
 
-      {/* ── 상단 폼 탭 (메가/거다이 제외한 나머지 폼이 여럿일 때만) ── */}
-      {forms.length > 1 && (
+      {/* 상단 탭 — 메가/거다이 제외한 폼이 2개 이상일 때만 */}
+      {forms.filter(f => !getFormBadgeInfo(f.name)).length > 1 && (
         <div className="flex gap-2 flex-wrap">
           {forms.map(form => {
-            // 메가/거다이맥스는 탭 버튼에서 제외 (이미지 오버레이로 처리)
             if (getFormBadgeInfo(form.name)) return null;
             return (
               <button
@@ -238,31 +231,53 @@ const PokemonDetailPage = () => {
           className="md:w-80 flex flex-col items-center justify-center p-10 shrink-0"
           style={{ background: `linear-gradient(135deg, ${mainColor}33, ${mainColor}11)` }}
         >
-          {/* ✅ 이미지 + 오버레이 버튼 래퍼 */}
-          <div className="relative w-56 h-56">
+          {/* ✅ 이미지 컨테이너 — overflow-visible 로 버튼이 밖으로 삐져나와도 OK */}
+          <div className="relative w-56 h-56" style={{ overflow: 'visible' }}>
             <img
               src={officialArt}
               alt={displayName}
               className="w-full h-full object-contain drop-shadow-xl"
             />
 
-            {/* ✅ 특수 폼 오버레이 버튼들 (우상단 세로 스택) */}
+            {/* ✅ 오버레이 버튼 — 우상단, 가로 방향(row-reverse)으로 쌓임 */}
             {specialForms.length > 0 && (
-              <div className="absolute top-1 right-1 flex flex-col gap-1.5">
-                {/* 기본 폼 복귀 버튼 (특수 폼이 활성화됐을 때만 표시) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  display: 'flex',
+                  flexDirection: 'row',   /* ← 가로 배치 */
+                  alignItems: 'center',
+                  gap: '6px',
+                  transform: 'translateY(-50%)',  /* ← 이미지 상단 경계에 걸치게 */
+                }}
+              >
+                {/* 기본 폼 복귀 버튼 (특수 폼 활성 시에만 표시) */}
                 {activeFormBadge && (
                   <button
                     onClick={() => handleFormChange(baseForm)}
                     title="기본 폼으로 돌아가기"
                     style={{
-                      background: 'rgba(255,255,255,0.92)',
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      background: 'rgba(255,255,255,0.95)',
                       border: '1.5px solid #D1D5DB',
                       backdropFilter: 'blur(4px)',
+                      boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      transition: 'transform 0.15s ease',
+                      flexShrink: 0,
                     }}
-                    className="w-10 h-10 rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+                    onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.12)'}
+                    onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                   >
-                    {/* 포켓볼 아이콘 (SVG) */}
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    {/* 포켓볼 아이콘 */}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                       <circle cx="12" cy="12" r="10" stroke="#374151" strokeWidth="2"/>
                       <path d="M2 12h20" stroke="#374151" strokeWidth="2"/>
                       <circle cx="12" cy="12" r="3" fill="#374151"/>
@@ -270,9 +285,9 @@ const PokemonDetailPage = () => {
                   </button>
                 )}
 
-                {/* 메가/거다이 등 특수 폼 버튼들 */}
+                {/* 특수 폼 버튼들 — 왼쪽에서 오른쪽 순서로 */}
                 {specialForms.map(form => {
-                  const badge = getFormBadgeInfo(form.name);
+                  const badge    = getFormBadgeInfo(form.name);
                   const isActive = activeForm.name === form.name;
                   return (
                     <button
@@ -280,18 +295,28 @@ const PokemonDetailPage = () => {
                       onClick={() => handleFormChange(form)}
                       title={getFormLabel(form.name)}
                       style={{
-                        backgroundColor: isActive ? badge.color : 'rgba(255,255,255,0.92)',
+                        width: '36px',
+                        height: '36px',
+                        borderRadius: '50%',
+                        backgroundColor: isActive ? badge.color : 'rgba(255,255,255,0.95)',
                         border: `2px solid ${badge.color}`,
                         color: isActive ? '#fff' : badge.color,
                         backdropFilter: 'blur(4px)',
-                        fontSize: '0.55rem',
-                        letterSpacing: '0.03em',
+                        fontSize: '0.5rem',
+                        fontWeight: 900,
+                        letterSpacing: '0.02em',
                         boxShadow: isActive
-                          ? `0 0 10px ${badge.color}88`
+                          ? `0 0 12px ${badge.color}99`
                           : '0 2px 6px rgba(0,0,0,0.12)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
                         transition: 'all 0.2s ease',
+                        flexShrink: 0,
                       }}
-                      className="w-10 h-10 rounded-full flex items-center justify-center font-black hover:scale-110"
+                      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.12)'}
+                      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                     >
                       {badge.label}
                     </button>
@@ -368,6 +393,7 @@ const PokemonDetailPage = () => {
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
