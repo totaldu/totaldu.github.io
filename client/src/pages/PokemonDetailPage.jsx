@@ -113,7 +113,6 @@ const FORM_LABEL_KO = {
   'blade':       '블레이드폼',
 
   // 지가르데
-  '10-power-construct': '10%폼',         // ✅ zygarde-10-power-construct (power construct 특성)
   'complete':           '퍼펙트폼',
 
   // 후파
@@ -268,7 +267,6 @@ const HIDDEN_FORM_SUFFIXES = new Set([
   'violet-meteor',
   'curly-mega',
   'droopy-mega',
-  '10',                   // zygarde-10
 ]);
 
 // ✅ suffix 기반 정확한 매칭 (includes 대신 Set.has 사용 → '10'이 '10-power-construct' 오매칭 방지)
