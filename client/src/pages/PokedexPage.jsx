@@ -19,20 +19,37 @@ const TYPE_COLORS = {
   dark:     '#705746', steel:    '#B7B7CE', fairy:   '#D685AD',
 };
 const TYPE_KO = {
-  normal:   '노말',   fire:     '불꽃', water:   '물',    grass:   '풀',
-  electric: '전기',   ice:      '얼음', fighting:'격투',  poison:  '독',
-  ground:   '땅',     flying:   '비행', psychic: '에스퍼',bug:     '벌레',
-  rock:     '바위',   ghost:    '고스트',dragon: '드래곤',dark:    '악',
-  steel:    '강철',   fairy:    '페어리',
+  normal:   '노말',    fire:     '불꽃',   water:    '물',      grass:    '풀',
+  electric: '전기',    ice:      '얼음',   fighting: '격투',    poison:   '독',
+  ground:   '땅',      flying:   '비행',   psychic:  '에스퍼',  bug:      '벌레',
+  rock:     '바위',    ghost:    '고스트', dragon:   '드래곤',  dark:     '악',
+  steel:    '강철',    fairy:    '페어리',
+};
+
+/* ─────────────────────────────────────────────
+   배경 그라디언트 헬퍼
+   - 타입 1개: 기존 단색 그라디언트
+   - 타입 2개: 두 타입 색을 135deg로 절반씩
+───────────────────────────────────────────── */
+const getBgStyle = (mainColor, subColor) => {
+  if (subColor) {
+    return {
+      background: `linear-gradient(135deg, ${mainColor}55 0%, ${mainColor}55 50%, ${subColor}55 50%, ${subColor}55 100%)`,
+    };
+  }
+  return {
+    background: `linear-gradient(135deg, ${mainColor}33, ${mainColor}11)`,
+  };
 };
 
 /* ─────────────────────────────────────────────
    PokemonCard
 ───────────────────────────────────────────── */
 const PokemonCard = React.memo(({ pokemon, currentPage }) => {
-  const mainType  = pokemon.types[0]?.type?.name || 'normal';
-  const subType   = pokemon.types[1]?.type?.name;
-  const mainColor = TYPE_COLORS[mainType] || '#A8A77A';
+  const mainType   = pokemon.types[0]?.type?.name || 'normal';
+  const subType    = pokemon.types[1]?.type?.name;
+  const mainColor  = TYPE_COLORS[mainType] || '#A8A77A';
+  const subColor   = subType ? (TYPE_COLORS[subType] || '#aaa') : null;
   const koreanName = getKoreanName(pokemon.name);
 
   return (
@@ -40,9 +57,10 @@ const PokemonCard = React.memo(({ pokemon, currentPage }) => {
       to={`/pokedex/${pokemon.id}?page=${currentPage}`}
       className="group relative flex flex-col items-center rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg transition-all hover:-translate-y-1 overflow-hidden cursor-pointer bg-white"
     >
+      {/* ✅ 배경: 타입 2개면 두 색 절반씩, 1개면 단색 그라디언트 */}
       <div
-        className="w-full h-24 flex items-center justify-center"
-        style={{ background: `linear-gradient(135deg, ${mainColor}33, ${mainColor}11)` }}
+        className="w-full h-24 flex items-center justify-center transition-all"
+        style={getBgStyle(mainColor, subColor)}
       >
         <img
           src={
@@ -55,6 +73,7 @@ const PokemonCard = React.memo(({ pokemon, currentPage }) => {
           loading="lazy"
         />
       </div>
+
       <div className="w-full px-3 py-2 text-center">
         <p className="text-[11px] text-gray-400 font-mono font-bold">
           #{String(pokemon.id).padStart(4, '0')}
@@ -77,7 +96,7 @@ const PokemonCard = React.memo(({ pokemon, currentPage }) => {
           {subType && (
             <span
               className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white"
-              style={{ backgroundColor: TYPE_COLORS[subType] || '#aaa' }}
+              style={{ backgroundColor: subColor }}
             >
               {TYPE_KO[subType] || subType}
             </span>
@@ -108,50 +127,40 @@ const SkeletonCard = () => (
 ───────────────────────────────────────────── */
 const PokedexPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-
-  // ── URL → state 동기화 (뒤로가기 등에서 URL이 바뀔 때 반응)
   const urlPage = Number(searchParams.get('page')) || 1;
 
-  const [allPokemon,    setAllPokemon]    = useState([]);   // 전체 1025마리 목록 (url만)
-  const [pageData,      setPageData]      = useState([]);   // 현재 페이지 상세 데이터
-  const [loading,       setLoading]       = useState(true); // 전체 목록 로딩
-  const [detailLoading, setDetailLoading] = useState(false);// 상세 데이터 로딩
+  const [allPokemon,    setAllPokemon]    = useState([]);
+  const [pageData,      setPageData]      = useState([]);
+  const [loading,       setLoading]       = useState(true);
+  const [detailLoading, setDetailLoading] = useState(false);
   const [error,         setError]         = useState(null);
   const [currentPage,   setCurrentPage]   = useState(urlPage);
   const [searchQuery,   setSearchQuery]   = useState('');
 
-  /* ── ① URL page 변경 감지 → state 동기화 (뒤로/앞으로 버튼) ── */
+  /* ── ① URL page 변경 감지 → state 동기화 */
   useEffect(() => {
-    if (urlPage !== currentPage) {
-      setCurrentPage(urlPage);
-    }
+    if (urlPage !== currentPage) setCurrentPage(urlPage);
   }, [urlPage]); // eslint-disable-line
 
-  /* ── ② 전체 목록 최초 1회 fetch ── */
+  /* ── ② 전체 목록 최초 1회 fetch */
   useEffect(() => {
     setLoading(true);
     fetch('https://pokeapi.co/api/v2/pokemon?limit=1025&offset=0')
-      .then(res => {
-        if (!res.ok) throw new Error('fetch failed');
-        return res.json();
-      })
-      .then(data => {
-        setAllPokemon(data.results);
-        setLoading(false);
-      })
+      .then(res => { if (!res.ok) throw new Error(); return res.json(); })
+      .then(data => { setAllPokemon(data.results); setLoading(false); })
       .catch(() => {
         setError('포켓몬 데이터를 불러오지 못했습니다. 네트워크를 확인해 주세요.');
         setLoading(false);
       });
   }, []);
 
-  /* ── ③ 필터링 (useMemo로 불필요한 재계산 방지) ── */
+  /* ── ③ 필터링 */
   const filteredPokemon = useMemo(() => {
     if (!searchQuery) return allPokemon;
     const query = searchQuery.toLowerCase();
     return allPokemon.filter(p => {
-      const ko  = getKoreanName(p.name);
-      const en  = p.name.toLowerCase();
+      const ko = getKoreanName(p.name);
+      const en = p.name.toLowerCase();
       return (
         en.includes(query)
         || ko.includes(query)
@@ -160,9 +169,9 @@ const PokedexPage = () => {
     });
   }, [allPokemon, searchQuery]);
 
-  const totalPages  = Math.ceil(filteredPokemon.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredPokemon.length / ITEMS_PER_PAGE);
 
-  /* ── ④ 현재 슬라이스 (useMemo) ── */
+  /* ── ④ 현재 슬라이스 */
   const currentSlice = useMemo(() => (
     filteredPokemon.slice(
       (currentPage - 1) * ITEMS_PER_PAGE,
@@ -170,13 +179,11 @@ const PokedexPage = () => {
     )
   ), [filteredPokemon, currentPage]);
 
-  /* ── ⑤ 상세 데이터 fetch: currentSlice가 바뀔 때마다 ── */
+  /* ── ⑤ 상세 데이터 fetch */
   useEffect(() => {
     if (currentSlice.length === 0) { setPageData([]); return; }
-
     let cancelled = false;
     setDetailLoading(true);
-
     Promise.all(currentSlice.map(p => fetch(p.url).then(r => r.json())))
       .then(results => {
         if (cancelled) return;
@@ -188,19 +195,17 @@ const PokedexPage = () => {
         setError('상세 데이터를 불러오지 못했습니다.');
         setDetailLoading(false);
       });
+    return () => { cancelled = true; };
+  }, [currentSlice]);
 
-    return () => { cancelled = true; }; // ✅ 클린업 (빠른 페이지 이동 시 이전 응답 무시)
-  }, [currentSlice]);                   // ✅ currentSlice 자체를 deps로
-
-  /* ── ⑥ 검색 핸들러 ── */
+  /* ── ⑥ 검색 핸들러 */
   const handleSearch = useCallback((e) => {
-    const val = e.target.value;
-    setSearchQuery(val);
+    setSearchQuery(e.target.value);
     setCurrentPage(1);
-    setSearchParams({ page: '1' }, { replace: true }); // ✅ replace: 검색마다 히스토리 쌓지 않음
+    setSearchParams({ page: '1' }, { replace: true });
   }, [setSearchParams]);
 
-  /* ── ⑦ 페이지 이동 ── */
+  /* ── ⑦ 페이지 이동 */
   const goToPage = useCallback((page) => {
     const p = Math.max(1, Math.min(page, totalPages));
     setCurrentPage(p);
@@ -208,7 +213,7 @@ const PokedexPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [totalPages, setSearchParams]);
 
-  /* ── ⑧ 페이지 번호 범위 계산 ── */
+  /* ── ⑧ 페이지 번호 범위 */
   const pageNumbers = useMemo(() => {
     const delta = 2;
     const range = [];
@@ -220,7 +225,7 @@ const PokedexPage = () => {
     return range;
   }, [currentPage, totalPages]);
 
-  /* ── 렌더 ── */
+  /* ── 렌더 */
   return (
     <div className="w-full flex flex-col gap-6">
 
@@ -281,40 +286,27 @@ const PokedexPage = () => {
       {!loading && totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-2">
 
-          {/* 첫 페이지 */}
           <button
-            onClick={() => goToPage(1)}
-            disabled={currentPage === 1}
+            onClick={() => goToPage(1)} disabled={currentPage === 1}
             className="px-3 py-2 rounded-lg text-sm font-bold bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition-colors"
           >«</button>
 
-          {/* 이전 */}
           <button
-            onClick={() => goToPage(currentPage - 1)}
-            disabled={currentPage === 1}
+            onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}
             className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition-colors"
-          >
-            <ChevronLeft size={16} />
-          </button>
+          ><ChevronLeft size={16} /></button>
 
-          {/* 첫 페이지 + 말줄임 */}
           {pageNumbers[0] > 1 && (
             <>
-              <button
-                onClick={() => goToPage(1)}
+              <button onClick={() => goToPage(1)}
                 className="px-3 py-2 rounded-lg text-sm font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
               >1</button>
-              {pageNumbers[0] > 2 && (
-                <span className="px-1 text-gray-400 text-sm font-bold">…</span>
-              )}
+              {pageNumbers[0] > 2 && <span className="px-1 text-gray-400 text-sm font-bold">…</span>}
             </>
           )}
 
-          {/* 페이지 번호 */}
           {pageNumbers.map(num => (
-            <button
-              key={num}
-              onClick={() => goToPage(num)}
+            <button key={num} onClick={() => goToPage(num)}
               className={`px-3 py-2 rounded-lg text-sm font-bold transition-colors ${
                 num === currentPage
                   ? 'bg-[#005596] text-white shadow-sm'
@@ -323,32 +315,24 @@ const PokedexPage = () => {
             >{num}</button>
           ))}
 
-          {/* 끝 페이지 + 말줄임 */}
           {pageNumbers[pageNumbers.length - 1] < totalPages && (
             <>
               {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && (
                 <span className="px-1 text-gray-400 text-sm font-bold">…</span>
               )}
-              <button
-                onClick={() => goToPage(totalPages)}
+              <button onClick={() => goToPage(totalPages)}
                 className="px-3 py-2 rounded-lg text-sm font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
               >{totalPages}</button>
             </>
           )}
 
-          {/* 다음 */}
           <button
-            onClick={() => goToPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
+            onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}
             className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition-colors"
-          >
-            <ChevronRight size={16} />
-          </button>
+          ><ChevronRight size={16} /></button>
 
-          {/* 마지막 페이지 */}
           <button
-            onClick={() => goToPage(totalPages)}
-            disabled={currentPage === totalPages}
+            onClick={() => goToPage(totalPages)} disabled={currentPage === totalPages}
             className="px-3 py-2 rounded-lg text-sm font-bold bg-gray-100 hover:bg-gray-200 disabled:opacity-30 transition-colors"
           >»</button>
 
