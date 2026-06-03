@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import { getKoreanName } from '../utils/pokemonUtils';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { FORM_LABEL_KO } from '@/constants/formLabels';
+import megaIcon from '@/assets/mega-icon.png';
 
 const TYPE_COLORS = {
   normal: '#A8A77A', fire: '#EE8130', water: '#6390F0',
@@ -71,10 +72,6 @@ const getFormBadgeInfo = (formName) => {
 };
 
 // ✅ 폼 스프라이트 URL 가져오기 (front_default 우선, 없으면 official-artwork)
-const getFormSprite = (form) =>
-  form.sprites?.front_default
-  || form.sprites?.other?.['official-artwork']?.front_default
-  || null;
 
 const StatBar = ({ label, value, initialValue = 0 }) => {
   const MAX_STAT = 255;
@@ -302,7 +299,6 @@ const PokemonDetailPage = () => {
                 {specialForms.map(form => {
                   const badge    = getFormBadgeInfo(form.name);
                   const isActive = activeForm.name === form.name;
-                  const sprite   = getFormSprite(form); // ✅ 해당 폼의 스프라이트
 
                   return (
                     <button
