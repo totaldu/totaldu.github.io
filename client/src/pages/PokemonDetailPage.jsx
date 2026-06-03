@@ -330,7 +330,7 @@ const PokemonDetailPage = () => {
                       onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                     >
                       {/* ✅ 메가 계열은 스프라이트 이미지, 나머지는 텍스트 레이블 */}
-                      {badge.useSprite && sprite ? (
+                      {badge.useSprite ? (
                         <img
                           src={megaIcon}
                           alt="MEGA"
