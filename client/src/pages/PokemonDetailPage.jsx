@@ -51,6 +51,7 @@ const FORM_LABEL_KO = {
   // 마임맨
   'mime':        '마임맨',
   'mime-galar':  '가라르의 모습',
+  'mr-mime-galar': '마임맨',
 
   // 켄타로스
   'paldea-combat-breed': '팔데아의 모습-컴뱃종',
