@@ -36,6 +36,8 @@ const HIDDEN_FORM_SUFFIXES = new Set([
   'orange-meteor','yellow-meteor','green-meteor',
   'blue-meteor','indigo-meteor','violet-meteor',
   'curly-mega','droopy-mega',
+   'limited-build', 'sprinting-build',
+  'swimming-build', 'gliding-build'
 ]);
 
 const isHiddenForm = (formName) => {
