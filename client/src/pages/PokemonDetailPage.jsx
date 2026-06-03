@@ -111,7 +111,6 @@ const FORM_LABEL_KO = {
   'white':     '화이트큐레무',
 
   // 개굴닌자
-  'battle-bond': '일러스트2',
   'ash':         '지우개굴닌자',
 
   // 킬가르도
@@ -121,9 +120,7 @@ const FORM_LABEL_KO = {
   // 지가르데
   '50':                 '50%폼',
   '10-power-construct': '10%폼',
-  '50-power-construct': '50%폼',
   'complete':           '퍼펙트폼',
-  '10':                 '10%폼',
 
   // 후파
   'unbound':            '굴레를 벗어난 후파',
@@ -144,12 +141,6 @@ const FORM_LABEL_KO = {
 
   // 메테노
   'red-meteor':      '유성의 모습',
-  'orange-meteor':   '유성의 모습',
-  'yellow-meteor':   '유성의 모습',
-  'green-meteor':      '유성의 모습',
-  'blue-meteor':     '유성의 모습',
-  'indigo-meteor':   '유성의 모습',
-  'violet-meteor':   '유성의 모습',
   'red':             '빨간색 코어',
   'orange':          '주황색 코어',
   'yellow':          '노란색 코어',
@@ -160,10 +151,8 @@ const FORM_LABEL_KO = {
 
   // 따라큐
   'disguised':       '둔갑한 모습',
-  'busted':          '들킨 모습',
   'totem-disguised': '주인 포켓몬-둔갑한 모습',
-  'totem-busted':    '주인 포켓몬-들킨 모습',
-
+  
   // 네크로즈마
   'dawn':            '새벽',
   'ultra':           '울트라네크로즈마',
@@ -225,11 +214,9 @@ const FORM_LABEL_KO = {
   'hero':               '마이티폼',
 
   // 싸리용
-  'curvy':              '젖힌 모습',
+  'curly':              '젖힌 모습',
   'droopy':             '늘어진 모습',
   'stretchy':           '뻗은 모습',
-  'curvy-mega':         '젖힌 모습-메가진화',
-  'droopy-mega':        '늘어진 모습-메가진화',
   'stretchy-mega':      '뻗은 모습-메가진화',
 
   // 노고고치
@@ -268,6 +255,25 @@ const FORM_LABEL_KO = {
   'mega-z': '메가진화-Z',
   'gmax': '거다이맥스',
 };
+
+const HIDDEN_FORM_KEYWORDS = [
+  'totem-busted',       // 주인 포켓몬-들킨 모습
+  'busted',             // 미미큐 깨진 폼 (전투 중 자동 전환, 별도 선택 불필요)
+  'battle-bond',        // 결속 게코가 (ash와 동일)
+  '50-power-construct', // 50%폼
+  '10',                 // 10%폼
+  'orange-meteor',      //유성의 모습
+  'yellow-meteor',      //유성의 모습
+  'green-meteor',       //유성의 모습
+  'blue-meteor',        //유성의 모습
+  'indigo-meteor',      //유성의 모습
+  'violet-meteor',      //유성의 모습
+  'curly-mega',         //젖힌 모습-메가진화
+  'droopy-mega',        //늘어진 모습-메가진화
+];
+
+const isHiddenForm = (formName) =>
+  HIDDEN_FORM_KEYWORDS.some(keyword => formName.includes(keyword));
 
 const getFormLabel = (formName) => {
   const parts = formName.split('-');
