@@ -1,7 +1,6 @@
 // client/src/pages/PokemonDetailPage.jsx
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import koreanNames from '../data/pokemonKoreanNames.json';
+import { useParams } from 'react-router-dom';
 import { getKoreanName } from '../utils/pokemonUtils';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 
@@ -32,7 +31,6 @@ const STAT_KO = {
 };
 
 const FORM_LABEL_KO = {
-
   // 피카츄
   'rock-star':   '하드록',
   'belle':       '마담',
@@ -66,12 +64,12 @@ const FORM_LABEL_KO = {
 
   // 가이오가, 그란돈
   'primal':      '원시회귀',
-  
+
   // 테오키스
   'normal':      '노멀폼',
   'attack':      '어택폼',
   'defense':     '디펜스폼',
-  'speed':       '스피드',
+  'speed':       '스피드폼',
 
   // 불비달마
   'standard':       '노말모드',
@@ -86,11 +84,11 @@ const FORM_LABEL_KO = {
   // 케르디오
   'ordinary':  '통상의 모습',
   'resolute':  '각오의 모습',
-  
+
   // 디아루가, 펄기아, 기라티나
   'origin':    '오리진폼',
   'altered':   '어나더폼',
-  
+
   // 쉐이미
   'land':      '랜드폼',
   'sky':       '스카이폼',
@@ -110,16 +108,13 @@ const FORM_LABEL_KO = {
   'black':     '블랙큐레무',
   'white':     '화이트큐레무',
 
-  // 개굴닌자
-  'ash':         '지우개굴닌자',
-
   // 킬가르도
   'shield':      '실드폼',
   'blade':       '블레이드폼',
 
   // 지가르데
-  '50':                 '50%폼',
-  '10-power-construct': '10%폼',
+  '10':                 '10%폼',         // ✅ zygarde-10
+  '10-power-construct': '10%폼',         // ✅ zygarde-10-power-construct (power construct 특성)
   'complete':           '퍼펙트폼',
 
   // 후파
@@ -152,10 +147,12 @@ const FORM_LABEL_KO = {
   // 따라큐
   'disguised':       '둔갑한 모습',
   'totem-disguised': '주인 포켓몬-둔갑한 모습',
-  
+
   // 네크로즈마
-  'dawn':            '새벽',
+  'dawn':            '새벽의 날개',
   'ultra':           '울트라네크로즈마',
+  'dusk-mane':       '황혼의 갈기',
+  'dawn-wings':      '새벽의 날개',
 
   // 마기아나
   'original':        '500년 전의 색',
@@ -190,11 +187,13 @@ const FORM_LABEL_KO = {
   // 무한다이노
   'eternamax': '무한다이맥스',
 
-   // 자루도
+  // 자루도
   'dada':               '아빠',
 
   // 버드렉스
   'shadow':             '흑마 탄 모습',
+  'ice-rider':          '빙설마 탄 모습',
+  'shadow-rider':       '고스트마 탄 모습',
 
   // 다투곰
   'bloodmoon':          '붉은 달',
@@ -241,39 +240,43 @@ const FORM_LABEL_KO = {
 
   // 주인 포켓몬
   'totem':       '주인 포켓몬',
-  
+
   // 리전폼
   'alola':      '알로라의 모습',
   'galar':      '가라르의 모습',
   'hisui':      '히스이의 모습',
   'paldea':     '팔데아의 모습',
-  
+
   // 배틀 기믹
-  'mega': '메가진화',
+  'mega':   '메가진화',
   'mega-x': '메가진화-X',
   'mega-y': '메가진화-Y',
   'mega-z': '메가진화-Z',
-  'gmax': '거다이맥스',
+  'gmax':   '거다이맥스',
 };
 
-const HIDDEN_FORM_KEYWORDS = [
-  'totem-busted',       // 주인 포켓몬-들킨 모습
-  'busted',             // 미미큐 깨진 폼 (전투 중 자동 전환, 별도 선택 불필요)
-  'battle-bond',        // 결속 게코가 (ash와 동일)
-  '50-power-construct', // 50%폼
-  '10',                 // 10%폼
-  'orange-meteor',      //유성의 모습
-  'yellow-meteor',      //유성의 모습
-  'green-meteor',       //유성의 모습
-  'blue-meteor',        //유성의 모습
-  'indigo-meteor',      //유성의 모습
-  'violet-meteor',      //유성의 모습
-  'curly-mega',         //젖힌 모습-메가진화
-  'droopy-mega',        //늘어진 모습-메가진화
-];
+// ✅ 숨길 폼의 suffix를 정확히 일치시키는 Set
+const HIDDEN_FORM_SUFFIXES = new Set([
+  'busted',              // 미미큐 깨진 폼
+  'totem-busted',        // 미미큐 주인-깨진 폼
+  'battle-bond',         // 결속 게코가
+  '50-power-construct',  // 지가르데 50% (파워컨스트럭트) → 기본폼과 동일 외형
+  'orange-meteor',
+  'yellow-meteor',
+  'green-meteor',
+  'blue-meteor',
+  'indigo-meteor',
+  'violet-meteor',
+  'curly-mega',
+  'droopy-mega',
+]);
 
-const isHiddenForm = (formName) =>
-  HIDDEN_FORM_KEYWORDS.some(keyword => formName.includes(keyword));
+// ✅ suffix 기반 정확한 매칭 (includes 대신 Set.has 사용 → '10'이 '10-power-construct' 오매칭 방지)
+const isHiddenForm = (formName) => {
+  const parts = formName.split('-');
+  const suffix = parts.slice(1).join('-');
+  return HIDDEN_FORM_SUFFIXES.has(suffix);
+};
 
 const getFormLabel = (formName) => {
   const parts = formName.split('-');
@@ -295,12 +298,8 @@ const StatBar = ({ label, value }) => {
 
   return (
     <div className="flex items-center gap-3 mb-2">
-      <span className="w-20 text-right text-sm text-gray-500 shrink-0">
-        {label}
-      </span>
-      <span className="w-8 text-sm font-bold text-gray-800 shrink-0">
-        {value}
-      </span>
+      <span className="w-20 text-right text-sm text-gray-500 shrink-0">{label}</span>
+      <span className="w-8 text-sm font-bold text-gray-800 shrink-0">{value}</span>
       <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
         <div
           className={`h-3 rounded-full ${getColor(value)}`}
@@ -343,7 +342,10 @@ const PokemonDetailPage = () => {
           const formDetails = await Promise.all(
             varieties.map(v => fetch(v.pokemon.url).then(r => r.json()))
           );
-          setForms(formDetails);
+
+          // ✅ 핵심 수정: 필터 실제 적용
+          const visibleForms = formDetails.filter(f => !isHiddenForm(f.name));
+          setForms(visibleForms);
         } else {
           setForms([data]);
         }
@@ -448,7 +450,6 @@ const PokemonDetailPage = () => {
 
         {/* 오른쪽: 키/몸무게 + 종족값 */}
         <div className="flex-1 p-8 flex flex-col justify-center gap-6">
-
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-gray-50 rounded-2xl p-4 text-center">
               <p className="text-xs text-gray-400 font-bold mb-1">키</p>
@@ -477,7 +478,6 @@ const PokemonDetailPage = () => {
               ))}
             </div>
           </div>
-
         </div>
       </div>
     </div>
