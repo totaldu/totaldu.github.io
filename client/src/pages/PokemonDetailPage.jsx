@@ -71,6 +71,7 @@ const getFormBadgeInfo = (formName) => {
   return null;
 };
 
+// ── StatBar ──────────────────────────────────────────────────────────────────
 const StatBar = ({ label, value, initialValue = 0 }) => {
   const MAX_STAT = 255;
   const targetPct  = Math.min((value        / MAX_STAT) * 100, 100);
@@ -111,18 +112,74 @@ const StatBar = ({ label, value, initialValue = 0 }) => {
   );
 };
 
+// ── NavArrowButton ────────────────────────────────────────────────────────────
+const NavArrowButton = ({ direction, onClick, disabled }) => {
+  const isLeft = direction === 'left';
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      style={{
+        position:        'absolute',
+        top:             '50%',
+        [isLeft ? 'left' : 'right']: '-56px',
+        transform:       'translateY(-50%)',
+        width:           '44px',
+        height:          '44px',
+        borderRadius:    '50%',
+        border:          '1.5px solid #E5E7EB',
+        backgroundColor: disabled ? '#F9FAFB' : '#ffffff',
+        boxShadow:       disabled ? 'none' : '0 2px 8px rgba(0,0,0,0.10)',
+        cursor:          disabled ? 'default' : 'pointer',
+        display:         'flex',
+        alignItems:      'center',
+        justifyContent:  'center',
+        color:           disabled ? '#D1D5DB' : '#374151',
+        fontSize:        '1.3rem',
+        fontWeight:      700,
+        lineHeight:      1,
+        transition:      'all 0.2s ease',
+        zIndex:          20,
+        opacity:         disabled ? 0.4 : 1,
+        userSelect:      'none',
+      }}
+      onMouseEnter={e => {
+        if (!disabled) {
+          e.currentTarget.style.backgroundColor = '#F3F4F6';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+        }
+      }}
+      onMouseLeave={e => {
+        if (!disabled) {
+          e.currentTarget.style.backgroundColor = '#ffffff';
+          e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.10)';
+        }
+      }}
+    >
+      {isLeft ? '‹' : '›'}
+    </button>
+  );
+};
+
+// ── PokemonDetailPage ─────────────────────────────────────────────────────────
+const MAX_POKEMON_ID = 1025;
+const BTN_SIZE = 48;
+
 const PokemonDetailPage = () => {
   const { id } = useParams();
-  const [pokemon, setPokemon] = useState(null);
-  const [forms, setForms] = useState([]);
+  const [pokemon, setPokemon]     = useState(null);
+  const [forms, setForms]         = useState([]);
   const [activeForm, setActiveForm] = useState(null);
   const [prevStats, setPrevStats] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const fromPage = Number(searchParams.get('page')) || 1;
+  const [loading, setLoading]     = useState(true);
+  const [error, setError]         = useState(null);
+  const [searchParams]            = useSearchParams();
+  const navigate                  = useNavigate();
+  const fromPage                  = Number(searchParams.get('page')) || 1;
 
+  const numericId = parseInt(id, 10);
+
+  // ── 데이터 페치 ─────────────────────────────────────────────────────────────
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -137,9 +194,9 @@ const PokemonDetailPage = () => {
         setPrevStats({});
         setActiveForm(data);
 
-        const speciesRes = await fetch(data.species.url);
+        const speciesRes  = await fetch(data.species.url);
         const speciesData = await speciesRes.json();
-        const varieties = speciesData.varieties;
+        const varieties   = speciesData.varieties;
 
         if (varieties.length > 1) {
           const formDetails = await Promise.all(
@@ -159,6 +216,22 @@ const PokemonDetailPage = () => {
       });
   }, [id]);
 
+  // ── 키보드 내비게이션 ────────────────────────────────────────────────────────
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === 'ArrowLeft'  && numericId > 1)             handleNav(numericId - 1);
+      if (e.key === 'ArrowRight' && numericId < MAX_POKEMON_ID) handleNav(numericId + 1);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [numericId]); // eslint-disable-line
+
+  // ── 내비게이션 ───────────────────────────────────────────────────────────────
+  const handleNav = (targetId) => {
+    navigate(`/pokemon/${targetId}?page=${fromPage}`);
+  };
+
+  // ── 폼 변경 ─────────────────────────────────────────────────────────────────
   const handleFormChange = (form) => {
     if (!activeForm || form.name === activeForm.name) return;
     const snapshot = {};
@@ -167,6 +240,7 @@ const PokemonDetailPage = () => {
     setActiveForm(form);
   };
 
+  // ── 로딩 / 에러 ──────────────────────────────────────────────────────────────
   if (loading) return (
     <div className="flex items-center justify-center h-64 text-gray-400 font-bold animate-pulse">
       불러오는 중...
@@ -177,6 +251,7 @@ const PokemonDetailPage = () => {
     <div className="p-6 text-red-500 font-bold text-center">{error}</div>
   );
 
+  // ── 파생 데이터 ──────────────────────────────────────────────────────────────
   const koreanName  = getKoreanName(activeForm.name);
   const displayName = koreanName || activeForm.name;
   const mainType    = activeForm.types[0]?.type?.name || 'normal';
@@ -192,11 +267,11 @@ const PokemonDetailPage = () => {
   const baseForm     = forms[0] ?? pokemon;
   const specialForms = forms.filter(f => getFormBadgeInfo(f.name) !== null);
 
-  const BTN_SIZE = 48;
-
+  // ── 렌더 ─────────────────────────────────────────────────────────────────────
   return (
     <div className="w-full flex flex-col gap-6">
 
+      {/* 도감으로 돌아가기 */}
       <button
         onClick={() => navigate(`/pokedex?page=${fromPage}`)}
         className="inline-flex items-center gap-1 text-sm font-bold text-[#005596] hover:underline w-fit"
@@ -204,6 +279,7 @@ const PokemonDetailPage = () => {
         ← 도감으로 돌아가기
       </button>
 
+      {/* 일반 폼 탭 (특수 폼 제외) */}
       {forms.filter(f => !getFormBadgeInfo(f.name)).length > 1 && (
         <div className="flex gap-2 flex-wrap">
           {forms.map(form => {
@@ -225,97 +301,114 @@ const PokemonDetailPage = () => {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-6 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+      {/* ── 카드 + 화살표 래퍼 ── */}
+      {/* ✅ px-14 로 좌우 공간 확보 → 화살표가 카드 바깥에 위치 */}
+      <div className="relative px-14">
 
-        {/* ── 좌측 이미지 패널 ── */}
-        <div
-          className="md:w-80 flex flex-col items-center justify-center p-10 shrink-0"
-          style={{ background: `linear-gradient(135deg, ${mainColor}33, ${mainColor}11)` }}
-        >
-          {/* 이미지 + 오버레이 버튼 래퍼 */}
+        {/* ✅ 이전 포켓몬 화살표 */}
+        <NavArrowButton
+          direction="left"
+          onClick={() => handleNav(numericId - 1)}
+          disabled={numericId <= 1}
+        />
+
+        {/* ✅ 다음 포켓몬 화살표 */}
+        <NavArrowButton
+          direction="right"
+          onClick={() => handleNav(numericId + 1)}
+          disabled={numericId >= MAX_POKEMON_ID}
+        />
+
+        {/* ── 메인 카드 ── */}
+        <div className="flex flex-col md:flex-row gap-6 bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+
+          {/* ══ 좌측 이미지 패널 ══ */}
           <div
-            className="relative"
-            style={{
-              width:    '224px',
-              height:   '224px',
-              overflow: 'visible',
-            }}
+            className="md:w-80 flex flex-col items-center justify-center p-10 shrink-0"
+            style={{ background: `linear-gradient(135deg, ${mainColor}33, ${mainColor}11)` }}
           >
-            <img
-              src={officialArt}
-              alt={displayName}
-              className="w-full h-full object-contain drop-shadow-xl"
-            />
+            {/* 이미지 + 오버레이 버튼 래퍼 */}
+            <div
+              className="relative"
+              style={{ width: '224px', height: '224px', overflow: 'visible' }}
+            >
+              <img
+                src={officialArt}
+                alt={displayName}
+                className="w-full h-full object-contain drop-shadow-xl"
+              />
 
-            {/* 오버레이 버튼 — 우상단 돌출 */}
-            {specialForms.length > 0 && (
-              <div
-                style={{
-                  position:      'absolute',
-                  top:           `${-(BTN_SIZE / 2)}px`,
-                  right:         `${-(BTN_SIZE / 2)}px`,
-                  display:       'flex',
-                  flexDirection: 'row',
-                  alignItems:    'center',
-                  gap:           '8px',
-                }}
-              >
-                {specialForms.map(form => {
-                  const badge    = getFormBadgeInfo(form.name);
-                  const isActive = activeForm.name === form.name;
+              {/* ✅ 오버레이 버튼 — 이미지 우상단 바깥으로 충분히 돌출 */}
+              {specialForms.length > 0 && (
+                <div
+                  style={{
+                    position:      'absolute',
+                    top:           '-28px',   // ✅ 이미지 위로 더 올림
+                    right:         '-28px',   // ✅ 이미지 오른쪽으로 더 밀어냄
+                    display:       'flex',
+                    flexDirection: 'row',
+                    alignItems:    'center',
+                    gap:           '8px',
+                    zIndex:        10,
+                  }}
+                >
+                  {specialForms.map(form => {
+                    const badge    = getFormBadgeInfo(form.name);
+                    const isActive = activeForm.name === form.name;
 
-                  return (
-                    <button
-                      key={form.name}
-                      onClick={() => {
-                        if (isActive) {
-                          handleFormChange(baseForm);
-                        } else {
-                          handleFormChange(form);
-                        }
-                      }}
-                      title={isActive ? '기본 폼으로 돌아가기' : getFormLabel(form.name)}
-                      style={{
-                        width:           `${BTN_SIZE}px`,
-                        height:          `${BTN_SIZE}px`,
-                        borderRadius:    '50%',
-                        backgroundColor: isActive ? `${badge.color}22` : 'rgba(255,255,255,0.95)',
-                        border:          `2px solid ${badge.color}`,
-                        padding:         0,
-                        overflow:        'hidden',
-                        backdropFilter:  'blur(6px)',
-                        boxShadow:       isActive
-                          ? `0 0 14px ${badge.color}99, 0 2px 8px rgba(0,0,0,0.12)`
-                          : '0 2px 8px rgba(0,0,0,0.12)',
-                        display:         'flex',
-                        alignItems:      'center',
-                        justifyContent:  'center',
-                        cursor:          'pointer',
-                        transition:      'all 0.2s ease',
-                        flexShrink:      0,
-                        outline:         isActive ? `3px solid ${badge.color}` : 'none',
-                        outlineOffset:   '2px',
-                      }}
-                      onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.12)'}
-                      onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-                    >
-                      {/* ✅ 활성/비활성 모두 동일한 아이콘 유지 — X 아이콘 없음 */}
-                      {badge.useSprite ? (
-                        <img
-                          src={megaIcon}
-                          alt="MEGA"
-                          style={{ width: '42px', height: '42px', objectFit: 'contain' }}
-                        />
-                      ) : (
-                        <span style={{ fontSize: '0.5rem', fontWeight: 900, color: badge.color }}>
-                          {badge.label}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+                    return (
+                      <button
+                        key={form.name}
+                        onClick={() => {
+                          if (isActive) {
+                            handleFormChange(baseForm);
+                          } else {
+                            handleFormChange(form);
+                          }
+                        }}
+                        title={isActive ? '기본 폼으로 돌아가기' : getFormLabel(form.name)}
+                        style={{
+                          width:           `${BTN_SIZE}px`,
+                          height:          `${BTN_SIZE}px`,
+                          borderRadius:    '50%',
+                          backgroundColor: isActive ? `${badge.color}22` : 'rgba(255,255,255,0.95)',
+                          border:          `2px solid ${badge.color}`,
+                          padding:         0,
+                          overflow:        'hidden',
+                          backdropFilter:  'blur(6px)',
+                          boxShadow:       isActive
+                            ? `0 0 14px ${badge.color}99, 0 2px 8px rgba(0,0,0,0.12)`
+                            : '0 2px 8px rgba(0,0,0,0.12)',
+                          display:         'flex',
+                          alignItems:      'center',
+                          justifyContent:  'center',
+                          cursor:          'pointer',
+                          transition:      'all 0.2s ease',
+                          flexShrink:      0,
+                          outline:         isActive ? `3px solid ${badge.color}` : 'none',
+                          outlineOffset:   '2px',
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.12)'}
+                        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                      >
+                        {/* ✅ 활성/비활성 모두 동일한 아이콘 유지 — X 아이콘 없음 */}
+                        {badge.useSprite ? (
+                          <img
+                            src={megaIcon}
+                            alt="MEGA"
+                            style={{ width: '42px', height: '42px', objectFit: 'contain' }}
+                          />
+                        ) : (
+                          <span style={{ fontSize: '0.5rem', fontWeight: 900, color: badge.color }}>
+                            {badge.label}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
             {/* 번호 / 이름 / 영문명 / 타입 */}
             <p className="text-xs text-gray-400 font-mono font-bold mt-4">
@@ -351,41 +444,41 @@ const PokemonDetailPage = () => {
               )}
             </div>
           </div>
-        </div>
 
-        {/* ── 우측 스탯 패널 ── */}
-        <div className="flex-1 p-8 flex flex-col justify-center gap-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 rounded-2xl p-4 text-center">
-              <p className="text-xs text-gray-400 font-bold mb-1">키</p>
-              <p className="text-xl font-black text-gray-800">{(activeForm.height / 10).toFixed(1)}m</p>
+          {/* ══ 우측 스탯 패널 ══ */}
+          <div className="flex-1 p-8 flex flex-col justify-center gap-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gray-50 rounded-2xl p-4 text-center">
+                <p className="text-xs text-gray-400 font-bold mb-1">키</p>
+                <p className="text-xl font-black text-gray-800">{(activeForm.height / 10).toFixed(1)}m</p>
+              </div>
+              <div className="bg-gray-50 rounded-2xl p-4 text-center">
+                <p className="text-xs text-gray-400 font-bold mb-1">몸무게</p>
+                <p className="text-xl font-black text-gray-800">{(activeForm.weight / 10).toFixed(1)}kg</p>
+              </div>
             </div>
-            <div className="bg-gray-50 rounded-2xl p-4 text-center">
-              <p className="text-xs text-gray-400 font-bold mb-1">몸무게</p>
-              <p className="text-xl font-black text-gray-800">{(activeForm.weight / 10).toFixed(1)}kg</p>
+
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-black text-gray-900">종족값</h2>
+                <span className="text-sm font-bold text-gray-400">
+                  합계 <span className="text-[#005596] text-base">{totalStats}</span>
+                </span>
+              </div>
+              <div className="flex flex-col gap-3">
+                {activeForm.stats.map(s => (
+                  <StatBar
+                    key={`${activeForm.name}-${s.stat.name}`}
+                    label={STAT_KO[s.stat.name] ?? s.stat.name}
+                    value={s.base_stat}
+                    initialValue={prevStats[s.stat.name] ?? 0}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-black text-gray-900">종족값</h2>
-              <span className="text-sm font-bold text-gray-400">
-                합계 <span className="text-[#005596] text-base">{totalStats}</span>
-              </span>
-            </div>
-            <div className="flex flex-col gap-3">
-              {activeForm.stats.map(s => (
-                <StatBar
-                  key={`${activeForm.name}-${s.stat.name}`}
-                  label={STAT_KO[s.stat.name] ?? s.stat.name}
-                  value={s.base_stat}
-                  initialValue={prevStats[s.stat.name] ?? 0}
-                />
-              ))}
-            </div>
-          </div>
         </div>
-
       </div>
     </div>
   );
