@@ -1,3 +1,4 @@
+// client/src/App.jsx
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { Search, Menu, User, LogIn, ChevronRight, Info, BookOpen, Globe, FileText, Sparkles, Zap, Timer } from 'lucide-react';
@@ -7,12 +8,9 @@ import PokedexLayout from './pages/PokedexLayout';
 import PokedexPage from './pages/PokedexPage';
 import PokemonDetailPage from './pages/PokemonDetailPage';
 
-// ✅ API Base URL: 로컬 개발 시 localhost:4000, 배포 시 Vercel 백엔드 자동 선택
 const API_BASE = import.meta.env.DEV
   ? "http://localhost:4000"
   : "https://down-up17-github-io.vercel.app";
-
-// --- 1. 상세 페이지 컴포넌트들 ---
 
 const PartyPage = () => (
   <div className="min-h-screen bg-white p-10 md:p-20">
@@ -30,10 +28,7 @@ const BattlePage = () => (
   <div className="w-full h-full">
     <h1 className="text-2xl font-black text-gray-900 mb-2">배틀 정보</h1>
     <p className="text-gray-400 text-sm mb-8 font-medium">원하는 항목을 선택하세요.</p>
-
-    {/* ✅ 2열 그리드로 카드를 화면 너비에 맞게 꽉 채움 */}
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
-
       <Link
         to="/battle/type-chart"
         className="group flex flex-col justify-between p-8 bg-blue-50 hover:bg-blue-100 rounded-2xl border border-blue-100 transition-all hover:shadow-md"
@@ -61,13 +56,10 @@ const BattlePage = () => (
         </div>
         <ChevronRight className="mt-6 group-hover:translate-x-1 transition-transform text-teal-400" />
       </Link>
-
     </div>
   </div>
 );
 
-
-// --- 신규 추가: 스피드 순위 상세 페이지 ---
 const SpeedRankPage = () => (
   <div className="min-h-screen bg-white p-10 md:p-20">
     <div className="max-w-4xl mx-auto">
@@ -100,7 +92,6 @@ const CommunityPage = () => (
   </div>
 );
 
-// --- 2. 메인 홈 화면 ---
 const MainHome = ({ articles, searchQuery, setSearchQuery }) => (
   <>
     <section className="relative w-full bg-gradient-to-br from-[#0a8d87] via-[#15b291] to-[#005596] min-h-[calc(100vh-80px)] px-4 overflow-hidden flex items-center">
@@ -108,19 +99,17 @@ const MainHome = ({ articles, searchQuery, setSearchQuery }) => (
         <div className="absolute -top-24 -left-24 w-96 h-96 bg-white rounded-full blur-3xl"></div>
         <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-cyan-300 rounded-full blur-3xl"></div>
       </div>
-
       <div className="relative max-w-4xl mx-auto text-center w-full">
         <h2 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-md">무엇을 도와드릴까요?</h2>
         <p className="text-white/80 text-lg mb-12 font-medium">데이터 기반의 프라이빗 위키 시스템</p>
-
         <div className="relative group max-w-3xl mx-auto">
           <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 to-blue-500 rounded-[2rem] blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
           <div className="relative flex items-center bg-white rounded-[1.8rem] shadow-2xl overflow-hidden border border-white/20">
             <div className="pl-8 text-gray-400"><Search size={24} strokeWidth={3} /></div>
-            <input 
-              type="text" 
-              className="w-full py-6 px-6 text-xl text-gray-800 placeholder-gray-400 outline-none font-medium" 
-              placeholder="포켓몬, 파티, 배틀 전략 검색..." 
+            <input
+              type="text"
+              className="w-full py-6 px-6 text-xl text-gray-800 placeholder-gray-400 outline-none font-medium"
+              placeholder="포켓몬, 파티, 배틀 전략 검색..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -143,7 +132,7 @@ const MainHome = ({ articles, searchQuery, setSearchQuery }) => (
       <div className="flex items-center justify-between mb-10">
         <h3 className="text-3xl font-black text-gray-900 flex items-center gap-3">
           <div className="w-10 h-10 bg-[#0a8d87] rounded-xl flex items-center justify-center">
-             <FileText color="white" size={20} />
+            <FileText color="white" size={20} />
           </div>
           최근 등록된 정보
         </h3>
@@ -151,7 +140,6 @@ const MainHome = ({ articles, searchQuery, setSearchQuery }) => (
           전체보기 <ChevronRight size={18} />
         </button>
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {articles.length > 0 ? (
           articles.map(art => (
@@ -173,13 +161,11 @@ const MainHome = ({ articles, searchQuery, setSearchQuery }) => (
   </>
 );
 
-// --- 3. App 전체 로직 및 라우팅 설정 ---
 const App = () => {
   const [articles, setArticles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    // ✅ API_BASE를 사용하여 환경에 따라 로컬/프로덕션 자동 분기
     fetch(`${API_BASE}/api/articles`)
       .then(res => res.json())
       .then(data => setArticles(data))
@@ -195,33 +181,33 @@ const App = () => {
               <span className="bg-[#005596] text-white px-3 py-1 rounded-xl text-sm tracking-widest uppercase">Total</span>
               <span>DU</span>
             </Link>
-
             <nav className="hidden lg:flex items-center space-x-10 font-bold text-gray-600">
               <Link to="/pokedex" className="hover:text-[#005596] transition-colors">포켓몬 도감</Link>
               <Link to="/party" className="hover:text-[#005596] transition-colors">추천 파티</Link>
               <Link to="/battle" className="hover:text-[#005596] transition-colors">배틀 정보</Link>
               <Link to="/community" className="hover:text-[#005596] transition-colors">커뮤니티</Link>
             </nav>
-
             <div className="flex items-center gap-3">
-               <button className="hidden sm:flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-50 px-5 py-2.5 rounded-full border border-gray-200 hover:bg-gray-100 transition-all">
-                 <LogIn size={16} /> 로그인
-               </button>
-               <button className="lg:hidden p-2 text-gray-600"><Menu size={28} /></button>
+              <button className="hidden sm:flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-50 px-5 py-2.5 rounded-full border border-gray-200 hover:bg-gray-100 transition-all">
+                <LogIn size={16} /> 로그인
+              </button>
+              <button className="lg:hidden p-2 text-gray-600"><Menu size={28} /></button>
             </div>
           </div>
         </header>
 
-        {/* 경로에 따른 페이지 렌더링 설정 */}
         <Routes>
           <Route path="/" element={<MainHome articles={articles} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
+
+          {/* ✅ PokedexLayout 중첩 라우트 */}
           <Route path="/pokedex" element={<PokedexLayout />}>
             <Route index element={<PokedexPage />} />
+            {/* ✅ 상세 페이지: /pokedex/:id 로 통일 */}
             <Route path=":id" element={<PokemonDetailPage />} />
           </Route>
+
           <Route path="/party" element={<PartyPage />} />
 
-          {/* BattleLayout을 부모로 하고 하위 라우트를 중첩합니다 */}
           <Route path="/battle" element={<BattleLayout />}>
             <Route index element={<BattlePage />} />
             <Route path="type-chart" element={<TypeChartPage />} />
@@ -232,7 +218,7 @@ const App = () => {
         </Routes>
 
         <footer className="mt-auto py-12 bg-white text-center border-t border-gray-100">
-          <p className="text-gray-400 text-sm font-medium"> 2026 TotalDU </p>
+          <p className="text-gray-400 text-sm font-medium">2026 TotalDU</p>
         </footer>
       </div>
     </BrowserRouter>
