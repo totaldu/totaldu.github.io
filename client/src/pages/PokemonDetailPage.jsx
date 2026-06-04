@@ -341,7 +341,11 @@ const PokemonDetailPage = () => {
           {/* ══ 좌측 이미지 패널 ══ */}
           <div
             className="md:w-80 flex flex-col items-center justify-center p-10 shrink-0"
-            style={{ background:`linear-gradient(135deg, ${mainColor}33, ${mainColor}11)` }}
+            style={{
+              background: subType
+                ? `linear-gradient(135deg, ${mainColor}55 0%, ${mainColor}55 50%, ${TYPE_COLORS[subType] ?? '#aaa'}55 50%, ${TYPE_COLORS[subType] ?? '#aaa'}55 100%)`
+                : `linear-gradient(135deg, ${mainColor}33, ${mainColor}11)`
+            }}
           >
             {/* 이미지 + 오버레이 버튼 */}
             <div className="relative" style={{ width:'224px', height:'224px', overflow:'visible' }}>
