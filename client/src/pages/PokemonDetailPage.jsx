@@ -44,7 +44,12 @@ const isHiddenForm = (formName) => {
   const suffix = formName.split('-').slice(1).join('-');
   return HIDDEN_FORM_SUFFIXES.has(suffix);
 };
+const FORM_NAME_OVERRIDE = {
+  'eiscue-ice':    '아이스페이스',
+  'calyrex-ice':   '백마 탄 모습',
+};
 const getFormLabel = (formName) => {
+  if (FORM_NAME_OVERRIDE[formName]) return FORM_NAME_OVERRIDE[formName];
   const parts  = formName.split('-');
   if (parts.length === 1) return getKoreanName(formName);
   const suffix = parts.slice(1).join('-');
