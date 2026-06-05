@@ -542,7 +542,7 @@ const PokemonDetailPage = () => {
                       : (FIRST_VERSION[numericId] ?? 'GSC');
                     const GEN_OPTIONS = [
                       { value: 'gen1',   label: 'RGBY'                     },
-                      { value: 'modern', label: `${firstVer} - ${lastVer}` },
+                      { value: 'modern', label: `${firstVer} - ${lastVer} (최신)` },
                     ];
                     const idx = GEN_OPTIONS.findIndex(o => o.value === genView);
                     return (
