@@ -10,6 +10,11 @@ permissions:
   pages: write
   id-token: write
 
+# upload-pages-artifact 내부의 upload-artifact가 아직 Node.js 20을 사용함
+# 해당 액션이 공식 업데이트될 때까지 강제로 Node.js 24에서 실행
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
