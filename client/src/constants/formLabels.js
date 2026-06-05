@@ -137,6 +137,7 @@ export const FORM_LABEL_KO = {
   'low-key-gmax':   '로우한 모습-거다이맥스',
 
   // 빙큐보
+  'ice-face':       '아이스페이스',
   'noice':          '나이스페이스',
 
   // 모르페코
@@ -160,7 +161,7 @@ export const FORM_LABEL_KO = {
 
   // 버드렉스
   'shadow':             '흑마 탄 모습',
-  'ice-rider':          '빙설마 탄 모습',
+  'ice-rider':          '백마 탄 모습',
   'shadow-rider':       '고스트마 탄 모습',
 
   // 다투곰
