@@ -197,9 +197,8 @@ const PokemonDetailPage = () => {
   const [prevStats,  setPrevStats]  = useState({});
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState(null);
-  const [bgBase,     setBgBase]     = useState(null);  // 고정 배경
-  const [bgNext,     setBgNext]     = useState(null);  // fade-in 될 새 배경
-  const [bgVisible,  setBgVisible]  = useState(false);
+  const [bgOverlay,  setBgOverlay]  = useState(null);  // 구 배경 fade-out
+  const [bgFading,   setBgFading]   = useState(false);
 
   /* ── 내비게이션 ── */
   const handleNav = useCallback((targetId) => {
@@ -265,11 +264,10 @@ const PokemonDetailPage = () => {
     return () => { cancelled = true; };   // ✅ 클린업: 이전 fetch 무시
   }, [id]);                               // ✅ id 변경 시마다 재실행
 
-  /* 포켓몬 변경 시 bgBase 초기화 */
+  /* 포켓몬 변경 시 오버레이 초기화 */
   useEffect(() => {
-    setBgBase(null);
-    setBgNext(null);
-    setBgVisible(false);
+    setBgOverlay(null);
+    setBgFading(false);
   }, [id]);
 
   /* ── 키보드 내비게이션 ── */
@@ -289,14 +287,16 @@ const PokemonDetailPage = () => {
     activeForm.stats.forEach(s => { snapshot[s.stat.name] = s.base_stat; });
     setPrevStats(snapshot);
 
-    const newMainType  = form.types[0]?.type?.name || 'normal';
-    const newSubType   = form.types[1]?.type?.name;
-    const newBg = computeBg(TYPE_COLORS[newMainType] || '#A8A77A', newSubType);
-    setBgNext(newBg);
-    setBgVisible(false);
-    requestAnimationFrame(() => requestAnimationFrame(() => setBgVisible(true)));
+    // 현재(구) 배경을 오버레이로 캡처해 fade-out
+    const oldBg = computeBg(
+      TYPE_COLORS[activeForm.types[0]?.type?.name || 'normal'] || '#A8A77A',
+      activeForm.types[1]?.type?.name
+    );
+    setBgOverlay(oldBg);
+    setBgFading(false);
+    requestAnimationFrame(() => requestAnimationFrame(() => setBgFading(true)));
 
-    setActiveForm(form);
+    setActiveForm(form);  // 패널 배경은 즉시 새 색상으로 전환
   };
 
   /* ── 로딩 / 에러 ── */
@@ -381,18 +381,18 @@ const PokemonDetailPage = () => {
           {/* ══ 좌측 이미지 패널 ══ */}
           <div
             className="md:w-80 flex flex-col items-center justify-center p-10 shrink-0"
-            style={{ position: 'relative', background: bgBase ?? computeBg(mainColor, subType) }}
+            style={{ position: 'relative', background: computeBg(mainColor, subType) }}
           >
-            {bgNext && (
+            {bgOverlay && (
               <div
                 style={{
-                  position: 'absolute', inset: 0,
-                  background: bgNext,
-                  opacity: bgVisible ? 1 : 0,
+                  position: 'absolute', inset: 0, zIndex: 0,
+                  background: bgOverlay,
+                  opacity: bgFading ? 0 : 1,
                   transition: 'opacity 0.6s ease',
                   pointerEvents: 'none',
                 }}
-                onTransitionEnd={() => { setBgBase(bgNext); setBgNext(null); setBgVisible(false); }}
+                onTransitionEnd={() => { setBgOverlay(null); setBgFading(false); }}
               />
             )}
             {/* 이미지 + 오버레이 버튼 */}
