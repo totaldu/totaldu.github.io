@@ -4,6 +4,7 @@ import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { getKoreanName } from '../utils/pokemonUtils';
 import { FORM_LABEL_KO } from '@/constants/formLabels';
 import { GEN1_SPECIAL }  from '@/constants/gen1Special';
+import { LAST_VERSION }  from '@/constants/lastVersion';
 import megaIcon from '@/assets/mega-icon.png';
 
 /* ─────────────────────────────────────────────
@@ -530,9 +531,10 @@ const PokemonDetailPage = () => {
                 <div className="flex items-center gap-3">
                   <h2 className="text-lg font-black text-gray-900">종족값</h2>
                   {isGen1Pokemon && (() => {
+                    const lastVer = LAST_VERSION[numericId] ?? 'SV';
                     const GEN_OPTIONS = [
-                      { value: 'modern', label: 'GSC~최신' },
-                      { value: 'gen1',   label: 'RGBY'    },
+                      { value: 'modern', label: `GSC - ${lastVer}` },
+                      { value: 'gen1',   label: 'RGBY'             },
                     ];
                     const idx = GEN_OPTIONS.findIndex(o => o.value === genView);
                     return (
