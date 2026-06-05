@@ -78,6 +78,9 @@ export const FORM_LABEL_KO = {
   'black':     '블랙큐레무',
   'white':     '화이트큐레무',
 
+  // 플라엣테
+  'eternal':     '영원의 꽃',
+
   // 킬가르도
   'shield':      '실드폼',
   'blade':       '블레이드폼',

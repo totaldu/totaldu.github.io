@@ -66,6 +66,12 @@ const isHiddenForm = (formName) => {
   const suffix = formName.split('-').slice(1).join('-');
   return HIDDEN_FORM_SUFFIXES.has(suffix);
 };
+
+// 특수 폼이 기본 폼이 아닌 특정 폼에서만 전환되어야 하는 경우
+// key: 특수 폼 이름, value: 부모 폼 이름
+const SPECIAL_FORM_PARENT = {
+  'floette-mega': 'floette-eternal',
+};
 const FORM_NAME_OVERRIDE = {
   'eiscue-ice':      '아이스페이스',
   'calyrex-ice':     '백마 탄 모습',
@@ -444,7 +450,8 @@ const PokemonDetailPage = () => {
               {specialForms.length > 0 && (
                 activeForm.name === baseForm.name ||
                 getFormBadgeInfo(activeForm.name) !== null ||
-                activeForm.name === 'magearna-original'
+                activeForm.name === 'magearna-original' ||
+                specialForms.some(f => SPECIAL_FORM_PARENT[f.name] === activeForm.name)
               ) && (
                 <div style={{
                   position:      'absolute',
@@ -459,10 +466,16 @@ const PokemonDetailPage = () => {
                   {specialForms.map(form => {
                     const badge    = getFormBadgeInfo(form.name);
                     const isActive = activeForm.name === form.name;
+                    const parent   = SPECIAL_FORM_PARENT[form.name];
+                    // 부모 폼이 지정된 경우 해당 폼 또는 자기 자신일 때만 표시
+                    if (parent && activeForm.name !== parent && !isActive) return null;
+                    const returnTo = parent
+                      ? (forms.find(f => f.name === parent) ?? baseForm)
+                      : baseForm;
                     return (
                       <button
                         key={form.name}
-                        onClick={() => isActive ? handleFormChange(baseForm) : handleFormChange(form)}
+                        onClick={() => isActive ? handleFormChange(returnTo) : handleFormChange(form)}
                         title={isActive ? '기본 폼으로 돌아가기' : getFormLabel(form.name)}
                         style={{
                           width:           `${BTN_SIZE}px`,
