@@ -40,10 +40,22 @@ const HIDDEN_FORM_SUFFIXES = new Set([
   'swimming-build', 'gliding-build'
 ]);
 
-const computeBg = (mainColor, subType) =>
-  subType
-    ? `linear-gradient(135deg, ${mainColor}66 0%, ${mainColor}44 40%, ${TYPE_COLORS[subType] ?? '#aaa'}44 60%, ${TYPE_COLORS[subType] ?? '#aaa'}66 100%)`
-    : `linear-gradient(135deg, ${mainColor}44, ${mainColor}11)`;
+const blendWhite = (hex, a) => {
+  const h = hex.length === 4
+    ? `#${hex[1]}${hex[1]}${hex[2]}${hex[2]}${hex[3]}${hex[3]}`
+    : hex;
+  const r = parseInt(h.slice(1,3),16), g = parseInt(h.slice(3,5),16), b = parseInt(h.slice(5,7),16);
+  return `rgb(${Math.round(r*a+255*(1-a))},${Math.round(g*a+255*(1-a))},${Math.round(b*a+255*(1-a))})`;
+};
+// 항상 4-stop 불투명 그라데이션 → 브라우저가 색상 보간 가능
+const computeBg = (mainColor, subType) => {
+  const m1 = blendWhite(mainColor, 0.40);
+  const m2 = blendWhite(mainColor, 0.27);
+  const sub = subType ? (TYPE_COLORS[subType] ?? '#aaaaaa') : mainColor;
+  const s1  = blendWhite(sub, subType ? 0.27 : 0.10);
+  const s2  = blendWhite(sub, subType ? 0.40 : 0.10);
+  return `linear-gradient(135deg, ${m1} 0%, ${m2} 40%, ${s1} 60%, ${s2} 100%)`;
+};
 
 const isHiddenForm = (formName) => {
   const suffix = formName.split('-').slice(1).join('-');
@@ -183,9 +195,6 @@ const PokemonDetailPage = () => {
   const [forms,      setForms]      = useState([]);
   const [activeForm, setActiveForm] = useState(null);
   const [prevStats,  setPrevStats]  = useState({});
-  const [bgFixed,    setBgFixed]    = useState(null);
-  const [bgOverlay,  setBgOverlay]  = useState(null);
-  const [bgVisible,  setBgVisible]  = useState(false);
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState(null);
 
@@ -263,31 +272,12 @@ const PokemonDetailPage = () => {
     return () => window.removeEventListener('keydown', handler);
   }, [numericId, handleNav]);
 
-  /* activeForm 초기 세팅 시 bgFixed 동기화 */
-  useEffect(() => {
-    if (!activeForm) return;
-    const t = activeForm.types[0]?.type?.name || 'normal';
-    const s = activeForm.types[1]?.type?.name;
-    setBgFixed(computeBg(TYPE_COLORS[t] || '#A8A77A', s));
-    setBgOverlay(null);
-    setBgVisible(false);
-  }, [id]);   // 포켓몬이 바뀔 때만 고정 배경 리셋
-
   /* ── 폼 변경 ── */
   const handleFormChange = (form) => {
     if (!activeForm || form.name === activeForm.name) return;
     const snapshot = {};
     activeForm.stats.forEach(s => { snapshot[s.stat.name] = s.base_stat; });
     setPrevStats(snapshot);
-
-    const newMainType  = form.types[0]?.type?.name || 'normal';
-    const newSubType   = form.types[1]?.type?.name;
-    const newBg = computeBg(TYPE_COLORS[newMainType] || '#A8A77A', newSubType);
-
-    setBgOverlay(newBg);
-    setBgVisible(false);
-    requestAnimationFrame(() => requestAnimationFrame(() => setBgVisible(true)));
-
     setActiveForm(form);
   };
 
@@ -374,27 +364,10 @@ const PokemonDetailPage = () => {
           <div
             className="md:w-80 flex flex-col items-center justify-center p-10 shrink-0"
             style={{
-              position: 'relative',
-              background: bgFixed ?? computeBg(mainColor, subType),
+              background:  computeBg(mainColor, subType),
+              transition: 'background 0.6s ease',
             }}
           >
-            {bgOverlay && (
-              <div
-                style={{
-                  position:      'absolute',
-                  inset:          0,
-                  background:     bgOverlay,
-                  opacity:        bgVisible ? 1 : 0,
-                  transition:     'opacity 0.6s ease',
-                  pointerEvents: 'none',
-                }}
-                onTransitionEnd={() => {
-                  setBgFixed(bgOverlay);
-                  setBgOverlay(null);
-                  setBgVisible(false);
-                }}
-              />
-            )}
             {/* 이미지 + 오버레이 버튼 */}
             <div className="relative" style={{ width:'224px', height:'224px', overflow:'visible' }}>
               <img
