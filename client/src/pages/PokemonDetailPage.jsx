@@ -578,16 +578,24 @@ const PokemonDetailPage = () => {
 
                     const safeView = GEN_OPTIONS.some(o => o.value === genView) ? genView : GEN_OPTIONS[GEN_OPTIONS.length - 1].value;
                     const idx = GEN_OPTIONS.findIndex(o => o.value === safeView);
+
+                    const changeView = (newView) => {
+                      const snapshot = {};
+                      displayStats.forEach(s => { snapshot[s.stat.name] = s.base_stat; });
+                      setPrevStats(snapshot);
+                      setGenView(newView);
+                    };
+
                     return (
                       <div className="flex items-center gap-1">
                         <button
-                          onClick={() => setGenView(GEN_OPTIONS[Math.max(0, idx - 1)].value)}
+                          onClick={() => changeView(GEN_OPTIONS[Math.max(0, idx - 1)].value)}
                           className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-xs transition-colors"
                           aria-label="이전 버전"
                         >◀</button>
                         <select
                           value={safeView}
-                          onChange={e => setGenView(e.target.value)}
+                          onChange={e => changeView(e.target.value)}
                           className="px-2 py-1 bg-white border border-gray-200 rounded text-xs font-medium shadow-sm"
                         >
                           {GEN_OPTIONS.map(o => (
@@ -595,7 +603,7 @@ const PokemonDetailPage = () => {
                           ))}
                         </select>
                         <button
-                          onClick={() => setGenView(GEN_OPTIONS[Math.min(GEN_OPTIONS.length - 1, idx + 1)].value)}
+                          onClick={() => changeView(GEN_OPTIONS[Math.min(GEN_OPTIONS.length - 1, idx + 1)].value)}
                           className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-xs transition-colors"
                           aria-label="다음 버전"
                         >▶</button>
@@ -610,7 +618,7 @@ const PokemonDetailPage = () => {
               <div className="flex flex-col gap-3">
                 {displayStats.map(s => (
                   <StatBar
-                    key={`${activeForm.name}-${s.stat.name}-${genView}`}
+                    key={`${activeForm.name}-${s.stat.name}`}
                     label={STAT_KO[s.stat.name] ?? s.stat.name}
                     value={s.base_stat}
                     initialValue={prevStats[s.stat.name] ?? 0}
