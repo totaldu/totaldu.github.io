@@ -68,8 +68,10 @@ const isHiddenForm = (formName) => {
 const FORM_NAME_OVERRIDE = {
   'eiscue-ice':      '아이스페이스',
   'calyrex-ice':     '백마 탄 모습',
-  'lycanroc-dusk':   '황혼의 모습',
-  'necrozma-dusk':   '황혼의 갈기',
+  'lycanroc-dusk':    '황혼의 모습',
+  'necrozma-dusk':    '황혼의 갈기',
+  'zacian-crowned':   '검왕',
+  'zamazenta-crowned':'방패왕',
 };
 const getFormLabel = (formName) => {
   if (FORM_NAME_OVERRIDE[formName]) return FORM_NAME_OVERRIDE[formName];
