@@ -531,8 +531,8 @@ const PokemonDetailPage = () => {
                   <h2 className="text-lg font-black text-gray-900">종족값</h2>
                   {isGen1Pokemon && (() => {
                     const GEN_OPTIONS = [
-                      { value: 'modern', label: '최신' },
-                      { value: 'gen1',   label: 'RGBY' },
+                      { value: 'modern', label: 'GSC~최신' },
+                      { value: 'gen1',   label: 'RGBY'    },
                     ];
                     const idx = GEN_OPTIONS.findIndex(o => o.value === genView);
                     return (
