@@ -396,7 +396,7 @@ const PokemonDetailPage = () => {
               />
             )}
             {/* 이미지 + 오버레이 버튼 */}
-            <div className="relative" style={{ width:'224px', height:'224px', overflow:'visible' }}>
+            <div className="relative" style={{ width:'224px', height:'224px', overflow:'visible', zIndex: 1 }}>
               <img
                 src={officialArt}
                 alt={displayName}
@@ -466,6 +466,7 @@ const PokemonDetailPage = () => {
             </div>
 
             {/* 번호 / 이름 / 영문명 / 타입 */}
+            <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <p className="text-xs text-gray-400 font-mono font-bold mt-4">
               #{String(activeForm.id).padStart(4, '0')}
             </p>
@@ -488,6 +489,7 @@ const PokemonDetailPage = () => {
                 </span>
               )}
             </div>
+            </div>{/* 텍스트 wrapper 닫기 */}
           </div>
 
           {/* ══ 우측 스탯 패널 ══ */}
