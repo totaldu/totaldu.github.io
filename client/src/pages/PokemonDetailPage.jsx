@@ -561,11 +561,11 @@ const PokemonDetailPage = () => {
                       const oldFirst = isGen1Pokemon ? 'GSC' : firstVer;
                       GEN_OPTIONS.push({
                         value: 'oldStat',
-                        label: `${oldFirst} - ${lastOld} (${prevGen}세대까지)`,
+                        label: `${oldFirst} - ${lastOld}`,
                       });
                       GEN_OPTIONS.push({
                         value: 'modern',
-                        label: `${firstNew} - ${lastVer} (최신, ${change.changedInGen}세대부터)`,
+                        label: `${firstNew} - ${lastVer} (최신)`,
                       });
                     } else if (isGen1Pokemon) {
                       GEN_OPTIONS.push({
