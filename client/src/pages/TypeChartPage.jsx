@@ -84,12 +84,12 @@ const TypeChartPage = () => {
   ];
 
   const versions = [
+    { id: 'type_table_v1', label: 'RGBY',                  size: 15, matrix: matrixV1 },
+    { id: 'type_table_v2', label: 'GS - BW2',              size: 17, matrix: matrixV2 },
     { id: 'type_table_v3', label: 'XY - Champions (최신)', size: 18, matrix: matrixV3 },
-    { id: 'type_table_v2', label: 'GS - BW2', size: 17, matrix: matrixV2 },
-    { id: 'type_table_v1', label: 'RGBY', size: 15, matrix: matrixV1 },
   ];
 
-  const [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
+  const [selectedVersionIndex, setSelectedVersionIndex] = useState(versions.length - 1);
 
   const currentVersion = versions[selectedVersionIndex];
   const currentSize = currentVersion.size;
