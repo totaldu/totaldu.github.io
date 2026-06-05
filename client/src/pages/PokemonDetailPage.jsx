@@ -40,6 +40,11 @@ const HIDDEN_FORM_SUFFIXES = new Set([
   'swimming-build', 'gliding-build'
 ]);
 
+const computeBg = (mainColor, subType) =>
+  subType
+    ? `linear-gradient(135deg, ${mainColor}66 0%, ${mainColor}44 40%, ${TYPE_COLORS[subType] ?? '#aaa'}44 60%, ${TYPE_COLORS[subType] ?? '#aaa'}66 100%)`
+    : `linear-gradient(135deg, ${mainColor}44, ${mainColor}11)`;
+
 const isHiddenForm = (formName) => {
   const suffix = formName.split('-').slice(1).join('-');
   return HIDDEN_FORM_SUFFIXES.has(suffix);
@@ -178,6 +183,8 @@ const PokemonDetailPage = () => {
   const [forms,      setForms]      = useState([]);
   const [activeForm, setActiveForm] = useState(null);
   const [prevStats,  setPrevStats]  = useState({});
+  const [bgOverlay,  setBgOverlay]  = useState(null);
+  const [bgFading,   setBgFading]   = useState(false);
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState(null);
 
@@ -261,6 +268,14 @@ const PokemonDetailPage = () => {
     const snapshot = {};
     activeForm.stats.forEach(s => { snapshot[s.stat.name] = s.base_stat; });
     setPrevStats(snapshot);
+
+    const curMainType  = activeForm.types[0]?.type?.name || 'normal';
+    const curSubType   = activeForm.types[1]?.type?.name;
+    const curMainColor = TYPE_COLORS[curMainType] || '#A8A77A';
+    setBgOverlay(computeBg(curMainColor, curSubType));
+    setBgFading(false);
+    requestAnimationFrame(() => requestAnimationFrame(() => setBgFading(true)));
+
     setActiveForm(form);
   };
 
@@ -347,12 +362,23 @@ const PokemonDetailPage = () => {
           <div
             className="md:w-80 flex flex-col items-center justify-center p-10 shrink-0"
             style={{
-              background: subType
-                ? `linear-gradient(135deg, ${mainColor}66 0%, ${mainColor}44 40%, ${TYPE_COLORS[subType] ?? '#aaa'}44 60%, ${TYPE_COLORS[subType] ?? '#aaa'}66 100%)`
-                : `linear-gradient(135deg, ${mainColor}44, ${mainColor}11)`,
-              transition: 'background 0.6s ease',
+              position: 'relative',
+              background: computeBg(mainColor, subType),
             }}
           >
+            {bgOverlay && (
+              <div
+                style={{
+                  position:   'absolute',
+                  inset:       0,
+                  background:  bgOverlay,
+                  opacity:     bgFading ? 0 : 1,
+                  transition:  'opacity 0.6s ease',
+                  pointerEvents: 'none',
+                }}
+                onTransitionEnd={() => setBgOverlay(null)}
+              />
+            )}
             {/* 이미지 + 오버레이 버튼 */}
             <div className="relative" style={{ width:'224px', height:'224px', overflow:'visible' }}>
               <img
