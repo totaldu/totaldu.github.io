@@ -6,7 +6,7 @@ import { FORM_LABEL_KO } from '@/constants/formLabels';
 import { GEN1_SPECIAL }  from '@/constants/gen1Special';
 import { LAST_VERSION }  from '@/constants/lastVersion';
 import { FIRST_VERSION } from '@/constants/firstVersion';
-import { STAT_CHANGES, GEN_LAST_VERSION, GEN_FIRST_VERSION } from '@/constants/statChanges';
+import { STAT_CHANGES, FORM_STAT_CHANGES, GEN_LAST_VERSION, GEN_FIRST_VERSION } from '@/constants/statChanges';
 import megaIcon from '@/assets/mega-icon.png';
 
 /* ─────────────────────────────────────────────
@@ -343,12 +343,14 @@ const PokemonDetailPage = () => {
         return order.indexOf(a.stat.name) - order.indexOf(b.stat.name);
       });
     }
-    if (genView === 'oldStat' && STAT_CHANGES[numericId]) {
-      const overrides = STAT_CHANGES[numericId].oldStats;
-      return activeForm.stats.map(s => ({
-        ...s,
-        base_stat: overrides[s.stat.name] ?? s.base_stat,
-      }));
+    if (genView === 'oldStat') {
+      const change = FORM_STAT_CHANGES[activeForm.name] ?? STAT_CHANGES[numericId];
+      if (change) {
+        return activeForm.stats.map(s => ({
+          ...s,
+          base_stat: change.oldStats[s.stat.name] ?? s.base_stat,
+        }));
+      }
     }
     return activeForm.stats;
   })();
@@ -545,20 +547,23 @@ const PokemonDetailPage = () => {
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <h2 className="text-lg font-black text-gray-900">종족값</h2>
-                  {activeForm.name === baseForm.name && (() => {
+                  {(() => {
                     const lastVer  = LAST_VERSION[numericId]  ?? 'SV';
                     const firstVer = FIRST_VERSION[numericId] ?? 'RGBY';
-                    const change   = STAT_CHANGES[numericId];
+                    const isBase   = activeForm.name === baseForm.name;
+                    const formChange = FORM_STAT_CHANGES[activeForm.name];
+                    const change   = formChange ?? (isBase ? STAT_CHANGES[numericId] : null);
 
                     const GEN_OPTIONS = [];
-                    if (isGen1Pokemon) {
+                    if (isBase && isGen1Pokemon) {
                       GEN_OPTIONS.push({ value: 'gen1', label: 'RGBY' });
                     }
                     if (change) {
                       const prevGen  = change.changedInGen - 1;
-                      const lastOld  = GEN_LAST_VERSION[prevGen]          ?? 'BW2';
+                      const lastOld  = GEN_LAST_VERSION[prevGen]             ?? 'BW2';
                       const firstNew = GEN_FIRST_VERSION[change.changedInGen] ?? 'XY';
-                      const oldFirst = isGen1Pokemon ? 'GSC' : firstVer;
+                      const oldFirst = formChange?.firstVersion
+                        ?? (isGen1Pokemon ? 'GSC' : firstVer);
                       GEN_OPTIONS.push({
                         value: 'oldStat',
                         label: oldFirst === lastOld ? oldFirst : `${oldFirst} - ${lastOld}`,
@@ -567,7 +572,7 @@ const PokemonDetailPage = () => {
                         value: 'modern',
                         label: firstNew === lastVer ? `${firstNew} (최신)` : `${firstNew} - ${lastVer} (최신)`,
                       });
-                    } else if (isGen1Pokemon) {
+                    } else if (isBase && isGen1Pokemon) {
                       GEN_OPTIONS.push({
                         value: 'modern',
                         label: `GSC - ${lastVer} (최신)`,

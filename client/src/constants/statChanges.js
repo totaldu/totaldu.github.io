@@ -83,3 +83,9 @@ export const STAT_CHANGES = {
 // 세대 경계 버전 상수
 export const GEN_LAST_VERSION  = { 5: 'BW2', 6: 'ORAS', 7: 'USUM', 8: 'PLA' };
 export const GEN_FIRST_VERSION = { 6: 'XY',  7: 'SM',   8: 'SwSh', 9: 'SV'  };
+
+// 특정 폼(메가 등)의 세대별 종족값 변경
+// firstVersion: 해당 폼이 처음 등장한 버전
+export const FORM_STAT_CHANGES = {
+  'alakazam-mega': { changedInGen: 7, firstVersion: 'XY', oldStats: { 'special-defense': 95 } },
+};
