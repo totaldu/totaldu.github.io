@@ -132,13 +132,19 @@ const StatBar = ({ label, value, initialValue = 0 }) => {
     <div className="flex items-center gap-3">
       <span className="w-20 text-right text-sm text-gray-500 shrink-0">{label}</span>
       <span className="w-8 text-sm font-bold text-gray-800 shrink-0">{value}</span>
-      <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
-        <div style={{
-          height:'100%', borderRadius:'9999px',
-          backgroundColor: getColor(value),
-          width:`${width}%`,
-          transition:'width 700ms cubic-bezier(0.4,0,0.2,1)',
-        }} />
+      <div className="flex-1 flex flex-col gap-0.5">
+        <div className="flex justify-between">
+          <span className="text-[10px] text-gray-400 leading-none">0</span>
+          <span className="text-[10px] text-gray-400 leading-none">255</span>
+        </div>
+        <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
+          <div style={{
+            height:'100%', borderRadius:'9999px',
+            backgroundColor: getColor(value),
+            width:`${width}%`,
+            transition:'width 700ms cubic-bezier(0.4,0,0.2,1)',
+          }} />
+        </div>
       </div>
     </div>
   );
