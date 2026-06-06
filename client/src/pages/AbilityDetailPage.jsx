@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import abilityKo from '@/data/abilityKoreanNames.json';
+import abilityKoDescs from '@/data/abilityKoreanDescs.json';
 import { getKoreanName } from '../utils/pokemonUtils';
 
 // 이름에 하이픈이 포함되어 있지만 기본 폼인 포켓몬 목록
@@ -67,7 +68,7 @@ const AbilityDetailPage = () => {
       ?.flavor_text
       ?.replace(/[\n\f]/g, ' ')
       .trim();
-  const description = getDesc('ko') ?? getDesc('en') ?? '설명 없음';
+  const description = getDesc('ko') ?? abilityKoDescs[name] ?? getDesc('en') ?? '설명 없음';
 
   // 배울 수 있는 포켓몬: 기본 폼 + 메가진화 + 리전폼만 표시, ID 순 정렬
   const pokemonList = data.pokemon

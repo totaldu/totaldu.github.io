@@ -8,6 +8,7 @@ import { LAST_VERSION }  from '@/constants/lastVersion';
 import { FIRST_VERSION } from '@/constants/firstVersion';
 import { STAT_CHANGES, FORM_STAT_CHANGES, GEN_LAST_VERSION, GEN_FIRST_VERSION, CHAMPIONS_AVG_STATS } from '@/constants/statChanges';
 import abilityKo from '@/data/abilityKoreanNames.json';
+import abilityKoDescs from '@/data/abilityKoreanDescs.json';
 import megaIcon from '@/assets/mega-icon.png';
 
 /* ─────────────────────────────────────────────
@@ -362,9 +363,9 @@ const PokemonDetailPage = () => {
                 ?.flavor_text
                 ?.replace(/[\n\f]/g, ' ')
                 .trim();
-            return [a.ability.name, get('ko') ?? get('en') ?? null];
+            return [a.ability.name, get('ko') ?? abilityKoDescs[a.ability.name] ?? get('en') ?? null];
           })
-          .catch(() => [a.ability.name, null])
+          .catch(() => [a.ability.name, abilityKoDescs[a.ability.name] ?? null])
       )
     ).then(results => {
       if (cancelled) return;
