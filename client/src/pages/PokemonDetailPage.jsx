@@ -78,6 +78,17 @@ const isRegionalForm = (formName) =>
 const SPECIAL_FORM_PARENT = {
   'floette-mega': 'floette-eternal',
 };
+
+// PokeAPI에 특성 데이터가 없는 챔피언스 전용 폼 하드코딩
+// { ability: { name } , is_hidden, slot } — PokeAPI 구조와 동일
+const FORM_ABILITIES = {
+  'raichu-mega-x': [{ ability: { name: 'electric-surge' }, is_hidden: false, slot: 1 }],
+  'raichu-mega-y': [{ ability: { name: 'no-guard'       }, is_hidden: false, slot: 1 }],
+};
+
+// activeForm 특성 배열 반환 (비어있으면 하드코딩 fallback)
+const getFormAbilities = (form) =>
+  form?.abilities?.length ? form.abilities : (FORM_ABILITIES[form?.name] ?? []);
 const FORM_NAME_OVERRIDE = {
   'eiscue-ice':      '아이스페이스',
   'calyrex-ice':     '백마 탄 모습',
@@ -349,10 +360,11 @@ const PokemonDetailPage = () => {
 
   /* 폼(activeForm) 변경 시 특성 설명 fetch */
   useEffect(() => {
-    if (!activeForm?.abilities?.length) return;
+    const abilities = getFormAbilities(activeForm);
+    if (!abilities.length) return;
     let cancelled = false;
     Promise.all(
-      activeForm.abilities.map(a =>
+      abilities.map(a =>
         fetch(`https://pokeapi.co/api/v2/ability/${a.ability.name}`)
           .then(r => r.json())
           .then(d => {
@@ -651,8 +663,9 @@ const PokemonDetailPage = () => {
 
             {/* 특성 */}
             {(() => {
-              const regular = activeForm.abilities.filter(a => !a.is_hidden);
-              const hidden  = activeForm.abilities.find(a => a.is_hidden);
+              const abilities = getFormAbilities(activeForm);
+              const regular = abilities.filter(a => !a.is_hidden);
+              const hidden  = abilities.find(a => a.is_hidden);
 
               const renderPill = (a, isHidden) => {
                 const desc = abilityDescs[a.ability.name];
