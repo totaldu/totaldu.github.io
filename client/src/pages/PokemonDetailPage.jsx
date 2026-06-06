@@ -377,7 +377,7 @@ const PokemonDetailPage = () => {
 
   /* ── 파생 데이터 ── */
   const koreanName  = getKoreanName(activeForm.name);
-  const displayName = koreanName || activeForm.name;
+  const displayName = getFormLabel(activeForm.name);
   const mainType    = activeForm.types[0]?.type?.name || 'normal';
   const subType     = activeForm.types[1]?.type?.name;
   const mainColor   = TYPE_COLORS[mainType] || '#A8A77A';
