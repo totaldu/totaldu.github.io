@@ -539,6 +539,8 @@ const PokemonDetailPage = () => {
           ? [...base].sort((a, b) => getSizeIdx(a.name) - getSizeIdx(b.name))
           : base;
         setForms(finalForms);
+        // 크기 폼이 있으면 소과종(index 0)을 기본으로 표시
+        if (hasSizeForm) setActiveForm(finalForms[0]);
         setEvolutionChain(chainData.chain);
         setLoading(false);
       })
