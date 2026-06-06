@@ -7,6 +7,7 @@ import { GEN1_SPECIAL }  from '@/constants/gen1Special';
 import { LAST_VERSION }  from '@/constants/lastVersion';
 import { FIRST_VERSION } from '@/constants/firstVersion';
 import { STAT_CHANGES, FORM_STAT_CHANGES, GEN_LAST_VERSION, GEN_FIRST_VERSION, CHAMPIONS_AVG_STATS } from '@/constants/statChanges';
+import abilityKo from '@/data/abilityKoreanNames.json';
 import megaIcon from '@/assets/mega-icon.png';
 
 /* ─────────────────────────────────────────────
@@ -591,16 +592,31 @@ const PokemonDetailPage = () => {
 
           {/* ══ 우측 스탯 패널 ══ */}
           <div className="flex-1 p-8 flex flex-col justify-center gap-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 rounded-2xl p-4 text-center">
-                <p className="text-xs text-gray-400 font-bold mb-1">키</p>
-                <p className="text-xl font-black text-gray-800">{(activeForm.height / 10).toFixed(1)}m</p>
-              </div>
-              <div className="bg-gray-50 rounded-2xl p-4 text-center">
-                <p className="text-xs text-gray-400 font-bold mb-1">몸무게</p>
-                <p className="text-xl font-black text-gray-800">{(activeForm.weight / 10).toFixed(1)}kg</p>
-              </div>
-            </div>
+
+            {/* 특성 */}
+            {(() => {
+              const regular = activeForm.abilities.filter(a => !a.is_hidden);
+              const hidden  = activeForm.abilities.find(a => a.is_hidden);
+              return (
+                <div className="bg-gray-50 rounded-2xl p-4">
+                  <p className="text-xs text-gray-400 font-bold mb-2">특성</p>
+                  <div className="flex flex-wrap gap-2">
+                    {regular.map(a => (
+                      <span key={a.ability.name}
+                        className="px-3 py-1 bg-white border border-gray-200 rounded-full text-sm font-semibold text-gray-700 shadow-sm">
+                        {abilityKo[a.ability.name] ?? a.ability.name}
+                      </span>
+                    ))}
+                    {hidden && (
+                      <span className="px-3 py-1 bg-white border border-dashed border-gray-300 rounded-full text-sm font-semibold text-gray-400 flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-gray-300 leading-none">숨겨진</span>
+                        {abilityKo[hidden.ability.name] ?? hidden.ability.name}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
 
             <div>
               <div className="flex items-center justify-between mb-4">
@@ -715,6 +731,19 @@ const PokemonDetailPage = () => {
                 ))}
               </div>
             </div>
+
+            {/* 키 / 몸무게 */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-gray-50 rounded-2xl p-4 text-center">
+                <p className="text-xs text-gray-400 font-bold mb-1">키</p>
+                <p className="text-xl font-black text-gray-800">{(activeForm.height / 10).toFixed(1)}m</p>
+              </div>
+              <div className="bg-gray-50 rounded-2xl p-4 text-center">
+                <p className="text-xs text-gray-400 font-bold mb-1">몸무게</p>
+                <p className="text-xl font-black text-gray-800">{(activeForm.weight / 10).toFixed(1)}kg</p>
+              </div>
+            </div>
+
           </div>
 
         </div>
