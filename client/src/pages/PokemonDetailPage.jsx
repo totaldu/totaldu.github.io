@@ -679,10 +679,10 @@ const PokemonDetailPage = () => {
                     </button>
                     {/* 말풍선 툴팁 */}
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block z-50 pointer-events-none">
-                      <div className="bg-white text-gray-700 text-xs rounded-lg px-3 py-2 shadow-lg border border-gray-200"
+                      <div className="bg-white text-gray-700 text-xs rounded-lg px-3 py-2 shadow-lg border border-gray-200 text-center"
                         style={{ whiteSpace: 'nowrap' }}>
-                        pokémon champions에 등장하는 포켓몬들의<br />
-                        <span style={{ paddingLeft: '1em' }}>종족값 평균입니다.</span>
+                        pokémon champions에 등장하는<br />
+                        포켓몬들의 종족값 평균입니다.
                       </div>
                     </div>
                   </div>
