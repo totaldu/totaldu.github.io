@@ -21,11 +21,18 @@ const HYPHENATED_BASE_NAMES = new Set([
 
 const REGIONAL_KEYWORDS = ['alola','galar','hisui','paldea'];
 
-// 기본 폼이거나 메가진화/리전폼인 경우에만 표시
+// 리전 키워드가 포함되더라도 실제 리전폼이 아닌 폼 (명시적 제외)
+const EXCLUDED_NAMES = new Set([
+  'pikachu-alola-cap',  // 알로라캡 피카츄 — 리전폼이 아닌 의상 폼
+]);
+
+// 기본 폼이거나 메가진화/원시회귀/리전폼인 경우에만 표시
 const shouldShowInAbilityList = (pokemonName) => {
-  if (!pokemonName.includes('-')) return true;           // 하이픈 없음 → 기본 폼
+  if (EXCLUDED_NAMES.has(pokemonName)) return false;       // 명시적 제외
+  if (!pokemonName.includes('-')) return true;             // 하이픈 없음 → 기본 폼
   if (HYPHENATED_BASE_NAMES.has(pokemonName)) return true; // 하이픈 포함 기본 폼
-  if (pokemonName.includes('mega')) return true;          // 메가진화 예외
+  if (pokemonName.includes('mega')) return true;           // 메가진화 예외
+  if (pokemonName.includes('primal')) return true;         // 원시회귀 예외 (그란돈/가이오가)
   if (REGIONAL_KEYWORDS.some(r => pokemonName.includes(r))) return true; // 리전폼 예외
   return false;
 };
