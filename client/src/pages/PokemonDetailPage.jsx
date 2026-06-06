@@ -415,7 +415,11 @@ const PokemonDetailPage = () => {
 
   /* ── 파생 데이터 ── */
   const koreanName  = getKoreanName(activeForm.name);
-  const displayName = getFormLabel(activeForm.name);
+  // 메가진화·거다이맥스만 이름 앞에 접두어 표시, 나머지는 기본 한국어 이름
+  const formParts   = activeForm.name.split('-');
+  const displayName = (formParts.includes('mega') || formParts.includes('gmax'))
+    ? getFormLabel(activeForm.name)
+    : (koreanName || activeForm.name);
   const mainType    = activeForm.types[0]?.type?.name || 'normal';
   const subType     = activeForm.types[1]?.type?.name;
   const mainColor   = TYPE_COLORS[mainType] || '#A8A77A';
