@@ -81,6 +81,7 @@ const isRegionalForm = (formName) =>
 const SPECIAL_FORM_PARENT = {
   'floette-mega':   'floette-eternal',
   'necrozma-ultra': ['necrozma-dusk', 'necrozma-dawn'], // 황혼의 갈기·새벽의 날개에서만 진입
+  'zygarde-mega':   'zygarde-complete',                 // 퍼펙트폼에서만 진입
 };
 
 // SPECIAL_FORM_PARENT 값을 배열로 정규화
@@ -753,12 +754,25 @@ const PokemonDetailPage = () => {
                 className="w-full h-full object-contain drop-shadow-xl"
               />
 
-              {specialForms.length > 0 && (
-                activeForm.name === baseForm.name ||
-                getFormBadgeInfo(activeForm.name) !== null ||
-                activeForm.name === 'magearna-original' ||
-                specialForms.some(f => getFormParents(f.name).includes(activeForm.name))
-              ) && (
+              {(() => {
+                if (!specialForms.length) return null;
+
+                // 실제로 표시될 버튼이 하나라도 있는지 먼저 확인
+                const hasVisible = specialForms.some(form => {
+                  const isActive = activeForm.name === form.name;
+                  if (isActive) return true;
+                  const parents = getFormParents(form.name);
+                  if (!parents.length) {
+                    // 부모 제한 없음 → 기본 폼·특수 폼 상태에서 표시
+                    return activeForm.name === baseForm.name
+                        || activeForm.name === 'magearna-original'
+                        || getFormBadgeInfo(activeForm.name) !== null;
+                  }
+                  return parents.includes(activeForm.name);
+                });
+                if (!hasVisible) return null;
+
+                return (
                 <div style={{
                   position:      'absolute',
                   top:           '-28px',
@@ -819,7 +833,8 @@ const PokemonDetailPage = () => {
                     );
                   })}
                 </div>
-              )}
+                );
+              })()}
             </div>
 
             {/* 번호 / 이름 / 영문명 / 타입 */}
