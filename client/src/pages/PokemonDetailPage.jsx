@@ -102,6 +102,15 @@ const getFormLabel = (formName) => {
     return `메가${baseKo}${middleStr}${variantStr}`;
   }
 
+  // 거다이맥스: 이름에 'gmax'가 포함된 경우 → 거다이맥스[한국어이름]
+  const gmaxIdx = parts.indexOf('gmax');
+  if (gmaxIdx !== -1) {
+    const baseKo    = getKoreanName(parts[0]) || parts[0];
+    const middle    = parts.slice(1, gmaxIdx).join('-');
+    const middleStr = middle ? ` (${FORM_LABEL_KO[middle] ?? middle})` : '';
+    return `거다이맥스${baseKo}${middleStr}`;
+  }
+
   const suffix = parts.slice(1).join('-');
   return FORM_LABEL_KO[suffix] ?? suffix;
 };
