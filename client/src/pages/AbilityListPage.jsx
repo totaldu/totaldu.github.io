@@ -2,7 +2,17 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Search } from 'lucide-react';
+import { getChoseong } from 'es-hangul';
 import abilityKo from '@/data/abilityKoreanNames.json';
+
+// 겹자음 → 분리 초성 확장 (PokedexPage와 동일)
+const expandConsonants = (q) => q
+  .replace(/ㄳ/g, 'ㄱㅅ')
+  .replace(/ㄶ/g, 'ㄴㅎ')
+  .replace(/ㄻ/g, 'ㄹㅁ')
+  .replace(/ㄼ/g, 'ㄹㅂ')
+  .replace(/ㄽ/g, 'ㄹㅅ')
+  .replace(/ㅀ/g, 'ㄹㅎ');
 
 const AbilityListPage = () => {
   const [search, setSearch] = useState('');
@@ -11,10 +21,19 @@ const AbilityListPage = () => {
     const entries = Object.entries(abilityKo)
       .sort((a, b) => a[1].localeCompare(b[1], 'ko'));
     if (!search.trim()) return entries;
-    const q = search.trim().toLowerCase();
-    return entries.filter(([en, ko]) =>
-      ko.includes(q) || en.toLowerCase().includes(q)
-    );
+
+    const q            = search.trim().toLowerCase();
+    const expandedQ    = expandConsonants(q);
+
+    return entries.filter(([en, ko]) => {
+      const choseong = getChoseong(ko);
+      return (
+        ko.includes(q)
+        || en.toLowerCase().includes(q)
+        || choseong.includes(q)
+        || choseong.includes(expandedQ)
+      );
+    });
   }, [search]);
 
   return (
@@ -31,7 +50,7 @@ const AbilityListPage = () => {
           type="text"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          placeholder="특성 이름 검색..."
+          placeholder="특성 이름 검색 (한글/영문/초성)..."
           className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-[#005596] bg-white"
         />
       </div>
