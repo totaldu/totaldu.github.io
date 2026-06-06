@@ -147,11 +147,11 @@ const getNameFontSize = (name) => {
 };
 const getFormBadgeInfo = (formName) => {
   const suffix = formName.split('-').slice(1).join('-');
-  if (suffix.startsWith('mega'))      return { type:'mega',      label:'MEGA',   color:'#8B5CF6', useSprite:true  };
-  if (suffix.startsWith('gmax'))      return { type:'gmax',      label:'G-MAX',  color:'#DC2626', useSprite:false };
-  if (suffix.startsWith('primal'))    return { type:'primal',    label:'PRIMAL', color:'#D97706', useSprite:false };
-  if (suffix.startsWith('ultra'))     return { type:'ultra',     label:'ULTRA',  color:'#0EA5E9', useSprite:false };
-  if (suffix.startsWith('eternamax')) return { type:'eternamax', label:'E-MAX',  color:'#DC2626', useSprite:false };
+  if (suffix.startsWith('mega'))   return { type:'mega',   label:'MEGA',   color:'#8B5CF6', useSprite:true  };
+  if (suffix.startsWith('gmax'))   return { type:'gmax',   label:'G-MAX',  color:'#DC2626', useSprite:false };
+  if (suffix.startsWith('primal')) return { type:'primal', label:'PRIMAL', color:'#D97706', useSprite:false };
+  if (suffix.startsWith('ultra'))  return { type:'ultra',  label:'ULTRA',  color:'#0EA5E9', useSprite:false };
+  // eternamax는 일반 폼 탭으로 표시
   return null;
 };
 
