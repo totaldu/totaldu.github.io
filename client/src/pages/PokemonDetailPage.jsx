@@ -108,7 +108,7 @@ const getFormLabel = (formName) => {
     const baseKo    = getKoreanName(parts[0]) || parts[0];
     const middle    = parts.slice(1, gmaxIdx).join('-');
     const middleStr = middle ? ` (${FORM_LABEL_KO[middle] ?? middle})` : '';
-    return `거다이맥스${baseKo}${middleStr}`;
+    return `거다이맥스 ${baseKo}${middleStr}`;
   }
 
   const suffix = parts.slice(1).join('-');
