@@ -610,7 +610,7 @@ const PokemonDetailPage = () => {
                     ))}
                     {hidden && (
                       <span className="px-3 py-1 bg-white border border-dashed border-gray-300 rounded-full text-sm font-semibold text-gray-700 flex items-center gap-1.5">
-                        <span className="text-[10px] font-bold text-gray-300 leading-none">숨겨진</span>
+                        <span className="text-[10px] font-bold text-gray-700 leading-none">숨겨진</span>
                         {abilityKo[hidden.ability.name] ?? hidden.ability.name}
                       </span>
                     )}
