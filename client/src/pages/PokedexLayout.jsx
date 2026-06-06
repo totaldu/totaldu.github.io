@@ -1,12 +1,11 @@
 // client/src/pages/PokedexLayout.jsx
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { BookOpen, Zap, List } from 'lucide-react';
+import { BookOpen, Sparkles, List } from 'lucide-react';
 
 const navItems = [
-  { to: '/pokedex',        label: '도감 목록',      icon: <List size={16} />,     end: true },
-  { to: '/pokedex/stats',  label: '종족값 랭킹',    icon: <Zap size={16} /> },
-  // 이후 추가할 메뉴는 여기에 계속 넣으면 됩니다
+  { to: '/pokedex',           label: '도감 목록',   icon: <List size={16} />,     end: true },
+  { to: '/pokedex/abilities', label: '특성 도감',   icon: <Sparkles size={16} /> },
 ];
 
 const PokedexLayout = () => {

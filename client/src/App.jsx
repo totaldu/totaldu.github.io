@@ -7,6 +7,8 @@ import BattleLayout from './pages/BattleLayout';
 import PokedexLayout from './pages/PokedexLayout';
 import PokedexPage from './pages/PokedexPage';
 import PokemonDetailPage from './pages/PokemonDetailPage';
+import AbilityListPage from './pages/AbilityListPage';
+import AbilityDetailPage from './pages/AbilityDetailPage';
 
 const API_BASE = import.meta.env.DEV
   ? "http://localhost:4000"
@@ -202,7 +204,8 @@ const App = () => {
           {/* ✅ PokedexLayout 중첩 라우트 */}
           <Route path="/pokedex" element={<PokedexLayout />}>
             <Route index element={<PokedexPage />} />
-            {/* ✅ 상세 페이지: /pokedex/:id 로 통일 */}
+            <Route path="abilities" element={<AbilityListPage />} />
+            <Route path="ability/:name" element={<AbilityDetailPage />} />
             <Route path=":id" element={<PokemonDetailPage />} />
           </Route>
 
