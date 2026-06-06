@@ -599,8 +599,8 @@ const PokemonDetailPage = () => {
               const regular = activeForm.abilities.filter(a => !a.is_hidden);
               const hidden  = activeForm.abilities.find(a => a.is_hidden);
               return (
-                <div className="bg-gray-50 rounded-2xl p-4">
-                  <p className="text-xs text-gray-400 font-bold mb-2">특성</p>
+                <div className="bg-gray-50 rounded-2xl px-4 pt-2 pb-4">
+                  <p className="text-xs text-gray-400 font-bold text-center mb-3">특성</p>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {regular.map(a => (
                       <span key={a.ability.name}
