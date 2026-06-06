@@ -635,7 +635,7 @@ const PokemonDetailPage = () => {
                     }
                     if (change) {
                       const prevGen  = change.changedInGen - 1;
-                      const lastOld  = GEN_LAST_VERSION[prevGen]             ?? 'BW2';
+                      const lastOld  = change.lastOldVersion ?? GEN_LAST_VERSION[prevGen] ?? 'BW2';
                       const firstNew = GEN_FIRST_VERSION[change.changedInGen] ?? 'XY';
                       const oldFirst = formChange?.firstVersion
                         ?? (isGen1Pokemon ? 'GSC' : firstVer);

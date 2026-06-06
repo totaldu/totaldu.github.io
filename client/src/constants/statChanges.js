@@ -76,8 +76,8 @@ export const STAT_CHANGES = {
 
   // ── 9세대(SV)부터 변경 ──────────────────────────────────────
   // 8세대
-  888: { changedInGen: 9, oldStats: { 'attack': 130 } },                 // 자시안
-  889: { changedInGen: 9, oldStats: { 'attack': 130 } },                 // 자마젠타
+  888: { changedInGen: 9, lastOldVersion: 'SwSh', oldStats: { 'attack': 130 } },  // 자시안 (BDSP·PLA 미등장)
+  889: { changedInGen: 9, lastOldVersion: 'SwSh', oldStats: { 'attack': 130 } },  // 자마젠타 (BDSP·PLA 미등장)
 };
 
 // 세대 경계 버전 상수
@@ -88,10 +88,10 @@ export const GEN_FIRST_VERSION = { 6: 'XY',  7: 'SM',   8: 'SwSh', 9: 'SV'  };
 // firstVersion: 해당 폼이 처음 등장한 버전
 export const FORM_STAT_CHANGES = {
   'alakazam-mega':    { changedInGen: 7, firstVersion: 'XY',  oldStats: { 'special-defense': 95 } },
-  // 자시안 검왕: SwSh 공격 170 → SV에서 하향
-  'zacian-crowned':    { changedInGen: 9, firstVersion: 'SwSh', oldStats: { 'attack': 170 } },
-  // 자마젠타 방패왕: SwSh 92/130/145/80/145/128 → SV에서 변경
-  'zamazenta-crowned': { changedInGen: 9, firstVersion: 'SwSh', oldStats: { 'hp': 92, 'attack': 130, 'defense': 145, 'special-attack': 80, 'special-defense': 145, 'speed': 128 } },
+  // 자시안 검왕: SwSh 공격 170 → SV에서 하향 (BDSP·PLA 미등장)
+  'zacian-crowned':    { changedInGen: 9, firstVersion: 'SwSh', lastOldVersion: 'SwSh', oldStats: { 'attack': 170 } },
+  // 자마젠타 방패왕: SwSh 92/130/145/80/145/128 → SV에서 변경 (BDSP·PLA 미등장)
+  'zamazenta-crowned': { changedInGen: 9, firstVersion: 'SwSh', lastOldVersion: 'SwSh', oldStats: { 'hp': 92, 'attack': 130, 'defense': 145, 'special-attack': 80, 'special-defense': 145, 'speed': 128 } },
 };
 
 // Champions 등장 포켓몬(184마리) 기준 스탯 평균값
