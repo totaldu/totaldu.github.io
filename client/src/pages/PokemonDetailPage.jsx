@@ -84,6 +84,7 @@ const FORM_NAME_OVERRIDE = {
   'necrozma-dusk':    '황혼의 갈기',
   'zacian-crowned':   '검왕',
   'zamazenta-crowned':'방패왕',
+  'greninja-ash':     '지우개굴닌자',
 };
 const getFormLabel = (formName) => {
   if (FORM_NAME_OVERRIDE[formName]) return FORM_NAME_OVERRIDE[formName];
