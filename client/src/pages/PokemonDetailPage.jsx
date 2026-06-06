@@ -76,8 +76,18 @@ const isRegionalForm = (formName) =>
 
 // 특수 폼이 기본 폼이 아닌 특정 폼에서만 전환되어야 하는 경우
 // key: 특수 폼 이름, value: 부모 폼 이름
+// value: 이 특수 폼으로 진입 가능한 부모 폼 이름(들)
+// 단일 문자열 또는 문자열 배열 지원
 const SPECIAL_FORM_PARENT = {
-  'floette-mega': 'floette-eternal',
+  'floette-mega':   'floette-eternal',
+  'necrozma-ultra': ['necrozma-dusk', 'necrozma-dawn'], // 황혼의 갈기·새벽의 날개에서만 진입
+};
+
+// SPECIAL_FORM_PARENT 값을 배열로 정규화
+const getFormParents = (formName) => {
+  const p = SPECIAL_FORM_PARENT[formName];
+  if (!p) return [];
+  return Array.isArray(p) ? p : [p];
 };
 
 // PokeAPI에 특성 데이터가 없는 챔피언스 전용 폼 하드코딩
@@ -747,7 +757,7 @@ const PokemonDetailPage = () => {
                 activeForm.name === baseForm.name ||
                 getFormBadgeInfo(activeForm.name) !== null ||
                 activeForm.name === 'magearna-original' ||
-                specialForms.some(f => SPECIAL_FORM_PARENT[f.name] === activeForm.name)
+                specialForms.some(f => getFormParents(f.name).includes(activeForm.name))
               ) && (
                 <div style={{
                   position:      'absolute',
@@ -762,11 +772,11 @@ const PokemonDetailPage = () => {
                   {specialForms.map(form => {
                     const badge    = getFormBadgeInfo(form.name);
                     const isActive = activeForm.name === form.name;
-                    const parent   = SPECIAL_FORM_PARENT[form.name];
-                    // 부모 폼이 지정된 경우 해당 폼 또는 자기 자신일 때만 표시
-                    if (parent && activeForm.name !== parent && !isActive) return null;
-                    const returnTo = parent
-                      ? (forms.find(f => f.name === parent) ?? baseForm)
+                    const parents  = getFormParents(form.name);
+                    // 부모 폼이 지정된 경우 해당 폼(들) 또는 자기 자신일 때만 표시
+                    if (parents.length && !parents.includes(activeForm.name) && !isActive) return null;
+                    const returnTo = parents.length
+                      ? (forms.find(f => parents.includes(f.name)) ?? baseForm)
                       : baseForm;
                     return (
                       <button
