@@ -3,52 +3,102 @@
 // Bulbagarden Archives: URL = media/upload/{md5[0]}/{md5[0:2]}/{filename}
 import SparkMD5 from 'spark-md5';
 import nameToId from '@/data/pokemonNameToId.json';
+import knownKeys from '@/data/championsSprites.json';
 
 const BASE_URL = 'https://archives.bulbagarden.net/media/upload';
+const KNOWN    = new Set(knownKeys);
 
 const buildUrl = (filename) => {
   const hash = SparkMD5.hash(filename);
   return `${BASE_URL}/${hash[0]}/${hash.slice(0, 2)}/${filename}`;
 };
 
+/** key = "Menu_CP_" 뒤, ".png" 앞 문자열 (e.g. "0658-Mega") */
+const tryKey = (key) => {
+  if (!KNOWN.has(key)) return null;
+  return buildUrl(`Menu_CP_${key}.png`);
+};
+
 /**
- * PokeAPI 포켓몬 이름 → Champions sprite URL
- * 스프라이트가 존재하지 않으면 null 반환 → 호출측에서 PokeAPI 스프라이트로 폴백
+ * PokeAPI 폼명 전체 → 챔피언스 스프라이트 오버라이드
+ * 일반 패턴(mega / 리전폼 / 1어절 접미사)으로 추론 불가능한 예외만 등록
+ */
+const NAME_OVERRIDE = {
+  'floette-eternal':            { base: 'floette',   suffix: '-Eternal'       },
+  'furfrou-la-reine':           { base: 'furfrou',   suffix: '-La_Reine'      },
+  'gourgeist-super':            { base: 'gourgeist', suffix: '-Jumbo'         },
+  'maushold-family-of-three':   { base: 'maushold',  suffix: '-Three'         },
+  'tauros-paldea-combat-breed': { base: 'tauros',    suffix: '-Paldea_Combat' },
+};
+
+/**
+ * PokeAPI 포켓몬/폼 이름 → Champions sprite URL
+ * 스프라이트가 없으면 null 반환 → 호출 측에서 PokeAPI 스프라이트로 폴백
  *
- * 지원 폼: base / Mega / Mega_X / Mega_Y / Alola / Galar / Hisui / Paldea / Primal
+ * 우선순위:
+ *   1. nameToId 직접 조회 (기본 폼)
+ *   2. NAME_OVERRIDE (예외 폼)
+ *   3. 패턴 파싱 (mega / primal / 리전폼 / 일반 1어절 접미사)
+ *      → championsSprites.json Set으로 존재 여부 검증
  */
 export const getChampionsSpriteUrl = (pokemonName) => {
-  // 기본 폼 직접 조회 (하이픈 포함 기본 폼도 포함)
+  if (!pokemonName) return null;
+
+  // ── 1. 기본 폼 직접 조회 ──────────────────────────────────────────────────
   if (nameToId[pokemonName] !== undefined) {
-    const padded   = String(nameToId[pokemonName]).padStart(4, '0');
-    return buildUrl(`Menu_CP_${padded}.png`);
+    return tryKey(String(nameToId[pokemonName]).padStart(4, '0'));
   }
 
-  // 폼 접미사 파싱
+  // ── 2. 전체 이름 오버라이드 ───────────────────────────────────────────────
+  if (NAME_OVERRIDE[pokemonName]) {
+    const { base, suffix } = NAME_OVERRIDE[pokemonName];
+    const dexNum = nameToId[base];
+    if (dexNum === undefined) return null;
+    return tryKey(String(dexNum).padStart(4, '0') + suffix);
+  }
+
+  // ── 3. 패턴 파싱 ─────────────────────────────────────────────────────────
   const parts = pokemonName.split('-');
   let champSuffix = '';
-  let baseParts   = [...parts];
+  let baseParts;
+  let useBaseFallback = false; // 폼 스프라이트 없을 때 기본 폼으로 대체 허용 여부
 
   const megaIdx = parts.indexOf('mega');
   if (megaIdx !== -1) {
-    const next = parts[megaIdx + 1];
+    const next  = parts[megaIdx + 1];
     champSuffix = next === 'x' ? '-Mega_X' : next === 'y' ? '-Mega_Y' : '-Mega';
     baseParts   = parts.slice(0, megaIdx);
+
   } else if (parts.includes('primal')) {
     champSuffix = '-Primal';
     baseParts   = parts.filter(p => p !== 'primal');
+
   } else if (parts.includes('alola')) {
     champSuffix = '-Alola';
     baseParts   = parts.filter(p => p !== 'alola');
+
   } else if (parts.includes('galar')) {
     champSuffix = '-Galar';
     baseParts   = parts.filter(p => p !== 'galar');
+
   } else if (parts.includes('hisui')) {
     champSuffix = '-Hisui';
     baseParts   = parts.filter(p => p !== 'hisui');
+
   } else if (parts.includes('paldea')) {
     champSuffix = '-Paldea';
     baseParts   = parts.filter(p => p !== 'paldea');
+
+  } else if (parts.length >= 2) {
+    // 일반: 마지막 세그먼트를 대문자화해 접미사로 사용
+    // castform-rainy→-Rainy / rotom-heat→-Heat / florges-blue→-Blue 등
+    const last  = parts[parts.length - 1];
+    champSuffix = '-' + last.charAt(0).toUpperCase() + last.slice(1);
+    baseParts   = parts.slice(0, -1);
+    useBaseFallback = true; // 해당 폼 스프라이트 없으면 기본 폼으로 대체
+
+  } else {
+    return null;
   }
 
   const baseName = baseParts.join('-');
@@ -56,5 +106,11 @@ export const getChampionsSpriteUrl = (pokemonName) => {
   if (dexNum === undefined) return null;
 
   const padded = String(dexNum).padStart(4, '0');
-  return buildUrl(`Menu_CP_${padded}${champSuffix}.png`);
+  const result = tryKey(padded + champSuffix);
+  if (result) return result;
+
+  // 일반 패턴에서만: 폼 스프라이트 없을 때 기본 폼 스프라이트로 대체
+  // (예: lycanroc-midday → 기본 lycanroc 스프라이트, gourgeist-average → 기본 gourgeist 스프라이트)
+  if (useBaseFallback) return tryKey(padded);
+  return null;
 };
