@@ -91,16 +91,23 @@ const getFormParents = (formName) => {
   return Array.isArray(p) ? p : [p];
 };
 
-// PokeAPI에 특성 데이터가 없는 챔피언스 전용 폼 하드코딩
+// PokeAPI에 특성 데이터가 없는 챔피언스 전용 폼 하드코딩 (폴백)
 // { ability: { name } , is_hidden, slot } — PokeAPI 구조와 동일
 const FORM_ABILITIES = {
   'raichu-mega-x': [{ ability: { name: 'electric-surge' }, is_hidden: false, slot: 1 }],
   'raichu-mega-y': [{ ability: { name: 'no-guard'       }, is_hidden: false, slot: 1 }],
 };
 
-// activeForm 특성 배열 반환 (비어있으면 하드코딩 fallback)
+// PokeAPI 데이터와 무관하게 항상 이 특성으로 강제 표시
+const FORCED_FORM_ABILITIES = {
+  'darmanitan-zen':       [{ ability: { name: 'zen-mode' }, is_hidden: false, slot: 1 }],
+  'darmanitan-galar-zen': [{ ability: { name: 'zen-mode' }, is_hidden: false, slot: 1 }],
+};
+
+// activeForm 특성 배열 반환 (강제 override → PokeAPI → 하드코딩 fallback)
 const getFormAbilities = (form) =>
-  form?.abilities?.length ? form.abilities : (FORM_ABILITIES[form?.name] ?? []);
+  FORCED_FORM_ABILITIES[form?.name]
+  ?? (form?.abilities?.length ? form.abilities : (FORM_ABILITIES[form?.name] ?? []));
 const FORM_NAME_OVERRIDE = {
   'eiscue-ice':      '아이스페이스',
   'calyrex-ice':     '백마 탄 모습',
@@ -361,17 +368,17 @@ const EvoNode = ({ node, currentSpeciesId }) => {
         ${isCurrent
           ? 'border-[#005596] bg-blue-50 shadow-sm'
           : 'border-gray-100 bg-white hover:border-[#005596]'}`}
-      style={{ minWidth:'68px' }}
+      style={{ minWidth:'84px' }}
     >
       <img
         src={sprite}
         alt={koName}
-        className="w-12 h-12 object-contain"
+        className="w-16 h-16 object-contain"
         loading="lazy"
         onError={e => { e.target.onerror = null; e.target.src = fallbackUrl; }}
       />
       <span className="text-[10px] font-bold text-gray-700 text-center leading-tight"
-            style={{ maxWidth:'60px', wordBreak:'keep-all' }}>
+            style={{ maxWidth:'76px', wordBreak:'keep-all' }}>
         {koName}
       </span>
       <span className="text-[9px] text-gray-400 font-mono">

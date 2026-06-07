@@ -7,7 +7,7 @@ export default function BattleLayoutIntegratedSidebar() {
   const items = [
     { to: '', label: '개요', icon: Zap },
     { to: 'type-chart', label: '타입 상성표', icon: Zap },
-    { to: 'speed-rank', label: '스피드 순위', icon: Timer },
+    { to: 'attack-order', label: '공격 순서', icon: Timer },
   ];
 
   return (
