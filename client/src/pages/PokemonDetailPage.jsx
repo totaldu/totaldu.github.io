@@ -687,6 +687,7 @@ const PokemonDetailPage = () => {
     activeForm.sprites?.other?.['official-artwork']?.front_default
     || activeForm.sprites?.front_default
     || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${activeForm.id}.png`;
+  const mainChampUrl = getChampionsSpriteUrl(activeForm.name);
 
   const baseForm     = forms[0] ?? pokemon;
   const specialForms = forms.filter(f => getFormBadgeInfo(f.name) !== null);
@@ -769,9 +770,10 @@ const PokemonDetailPage = () => {
             {/* 이미지 + 오버레이 버튼 */}
             <div className="relative" style={{ width:'224px', height:'224px', overflow:'visible', zIndex: 1 }}>
               <img
-                src={officialArt}
+                src={mainChampUrl ?? officialArt}
                 alt={displayName}
                 className="w-full h-full object-contain drop-shadow-xl"
+                onError={e => { e.target.onerror = null; e.target.src = officialArt; }}
               />
 
               {(() => {
