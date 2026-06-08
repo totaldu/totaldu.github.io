@@ -110,6 +110,18 @@ const PokemonCard = ({ p }) => {
   );
 };
 
+const GENERATION_LABEL = {
+  'generation-i':    { gen: '1세대', games: '레드·그린·블루·피카츄' },
+  'generation-ii':   { gen: '2세대', games: '골드·실버·크리스탈' },
+  'generation-iii':  { gen: '3세대', games: '루비·사파이어·에메랄드' },
+  'generation-iv':   { gen: '4세대', games: '다이아몬드·펄·플라티나' },
+  'generation-v':    { gen: '5세대', games: '블랙·화이트' },
+  'generation-vi':   { gen: '6세대', games: 'X·Y' },
+  'generation-vii':  { gen: '7세대', games: '썬·문' },
+  'generation-viii': { gen: '8세대', games: '소드·실드' },
+  'generation-ix':   { gen: '9세대', games: '스칼렛·바이올렛' },
+};
+
 // ─── 메인 페이지 ─────────────────────────────────────────────────────────────
 const AbilityDetailPage = () => {
   const { name } = useParams();
@@ -181,9 +193,22 @@ const AbilityDetailPage = () => {
 
       {/* 특성 정보 카드 */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 flex flex-col gap-3">
-        <div>
-          <h1 className="text-2xl font-black text-gray-900">{koName}</h1>
-          <p className="text-sm text-gray-400 mt-0.5">{name}</p>
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-black text-gray-900">{koName}</h1>
+            <p className="text-sm text-gray-400 mt-0.5">{name}</p>
+          </div>
+          {data.generation && (() => {
+            const info = GENERATION_LABEL[data.generation.name];
+            return info ? (
+              <div className="flex flex-col items-end gap-0.5 shrink-0">
+                <span className="text-xs font-bold text-white bg-[#005596] rounded-full px-3 py-1">
+                  첫 등장 {info.gen}
+                </span>
+                <span className="text-[11px] text-gray-400">{info.games}</span>
+              </div>
+            ) : null;
+          })()}
         </div>
         <div className="bg-gray-50 rounded-xl px-5 py-4 text-sm text-gray-700 leading-relaxed">
           {description}
