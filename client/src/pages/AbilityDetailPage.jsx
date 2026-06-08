@@ -1,8 +1,10 @@
 // client/src/pages/AbilityDetailPage.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
 import abilityKo from '@/data/abilityKoreanNames.json';
 import abilityKoDescs from '@/data/abilityKoreanDescs.json';
+import abilityKoDetailDescs from '@/data/abilityKoreanDetailDescs.json';
 import { getKoreanName } from '../utils/pokemonUtils';
 import { getChampionsSpriteUrl } from '../utils/championsSprite';
 
@@ -111,9 +113,10 @@ const PokemonCard = ({ p }) => {
 // ─── 메인 페이지 ─────────────────────────────────────────────────────────────
 const AbilityDetailPage = () => {
   const { name } = useParams();
-  const [data,    setData]    = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState(null);
+  const [data,       setData]       = useState(null);
+  const [loading,    setLoading]    = useState(true);
+  const [error,      setError]      = useState(null);
+  const [showDetail, setShowDetail] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -149,6 +152,15 @@ const AbilityDetailPage = () => {
       .trim();
   const description = getDesc('ko') ?? abilityKoDescs[name] ?? getDesc('en') ?? '설명 없음';
 
+  // 상세 설명: 한국어 상세 JSON 우선, 없으면 PokeAPI effect_entries 영어
+  const getEffectEntry = (lang) =>
+    data.effect_entries
+      .find(e => e.language.name === lang)
+      ?.effect
+      ?.replace(/\n/g, ' ')
+      .trim();
+  const detailDescription = abilityKoDetailDescs[name] ?? getEffectEntry('en') ?? null;
+
   // 배울 수 있는 포켓몬: ID 순 정렬 후 필터
   const allPokemon = data.pokemon.map(p => {
     const url = p.pokemon.url;
@@ -176,6 +188,26 @@ const AbilityDetailPage = () => {
         <div className="bg-gray-50 rounded-xl px-5 py-4 text-sm text-gray-700 leading-relaxed">
           {description}
         </div>
+
+        {detailDescription && (
+          <div className="border border-gray-100 rounded-xl overflow-hidden">
+            <button
+              onClick={() => setShowDetail(v => !v)}
+              className="w-full flex items-center justify-between px-5 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
+            >
+              <span>상세 효과</span>
+              <ChevronDown
+                size={16}
+                className={`transition-transform duration-200 ${showDetail ? 'rotate-180' : ''}`}
+              />
+            </button>
+            {showDetail && (
+              <div className="px-5 py-4 text-sm text-gray-700 leading-relaxed border-t border-gray-100 bg-gray-50">
+                {detailDescription}
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 포켓몬 목록 */}
