@@ -110,16 +110,48 @@ const PokemonCard = ({ p }) => {
   );
 };
 
-const GENERATION_LABEL = {
-  'generation-i':    { gen: '1세대', games: '레드·그린·블루·피카츄' },
-  'generation-ii':   { gen: '2세대', games: '골드·실버·크리스탈' },
-  'generation-iii':  { gen: '3세대', games: '루비·사파이어·에메랄드' },
-  'generation-iv':   { gen: '4세대', games: '다이아몬드·펄·플라티나' },
-  'generation-v':    { gen: '5세대', games: '블랙·화이트' },
-  'generation-vi':   { gen: '6세대', games: 'X·Y' },
-  'generation-vii':  { gen: '7세대', games: '썬·문' },
-  'generation-viii': { gen: '8세대', games: '소드·실드' },
-  'generation-ix':   { gen: '9세대', games: '스칼렛·바이올렛' },
+// 버전 그룹 출시 순서 (앞쪽일수록 오래된 버전)
+const VERSION_GROUP_ORDER = [
+  'red-blue', 'yellow',
+  'gold-silver', 'crystal',
+  'ruby-sapphire', 'firered-leafgreen', 'emerald',
+  'diamond-pearl', 'platinum', 'heartgold-soulsilver',
+  'black-white', 'black-2-white-2',
+  'x-y', 'omega-ruby-alpha-sapphire',
+  'sun-moon', 'ultra-sun-ultra-moon', 'lets-go-pikachu-lets-go-eevee',
+  'sword-shield', 'the-isle-of-armor', 'the-crown-tundra',
+  'scarlet-violet', 'the-teal-mask', 'the-indigo-disk',
+];
+
+const VERSION_GROUP_LABEL = {
+  'ruby-sapphire':              'RS',
+  'firered-leafgreen':          'FRLG',
+  'emerald':                    'E',
+  'diamond-pearl':              'DP',
+  'platinum':                   'Pt',
+  'heartgold-soulsilver':       'HGSS',
+  'black-white':                'BW',
+  'black-2-white-2':            'BW2',
+  'x-y':                        'XY',
+  'omega-ruby-alpha-sapphire':  'ORAS',
+  'sun-moon':                   'SM',
+  'ultra-sun-ultra-moon':       'USUM',
+  'lets-go-pikachu-lets-go-eevee': 'LGPE',
+  'sword-shield':               'SwSh',
+  'the-isle-of-armor':          'SwSh 갑옷의 외딴섬',
+  'the-crown-tundra':           'SwSh 왕관의 설원',
+  'scarlet-violet':             'SV',
+  'the-teal-mask':              'SV 벽록의 가면',
+  'the-indigo-disk':            'SV 남청의 원반',
+};
+
+// flavor_text_entries 에서 가장 오래된 버전 그룹 추출
+const getFirstVersionLabel = (flavorEntries) => {
+  const groups = flavorEntries.map(e => e.version_group.name);
+  const earliest = [...new Set(groups)].sort(
+    (a, b) => VERSION_GROUP_ORDER.indexOf(a) - VERSION_GROUP_ORDER.indexOf(b)
+  )[0];
+  return earliest ? (VERSION_GROUP_LABEL[earliest] ?? null) : null;
 };
 
 // ─── 메인 페이지 ─────────────────────────────────────────────────────────────
@@ -193,20 +225,13 @@ const AbilityDetailPage = () => {
 
       {/* 특성 정보 카드 */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 flex flex-col gap-3">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-2xl font-black text-gray-900">{koName}</h1>
-            <p className="text-sm text-gray-400 mt-0.5">{name}</p>
-          </div>
-          {data.generation && (() => {
-            const info = GENERATION_LABEL[data.generation.name];
-            return info ? (
-              <div className="flex flex-col items-end gap-0.5 shrink-0">
-                <span className="text-xs font-bold text-white bg-[#005596] rounded-full px-3 py-1">
-                  첫 등장 {info.gen}
-                </span>
-                <span className="text-[11px] text-gray-400">{info.games}</span>
-              </div>
+        <div>
+          <h1 className="text-2xl font-black text-gray-900">{koName}</h1>
+          <p className="text-sm text-gray-400 mt-0.5">{name}</p>
+          {(() => {
+            const label = getFirstVersionLabel(data.flavor_text_entries);
+            return label ? (
+              <p className="text-xs text-gray-600 mt-1">첫 등장 {label}</p>
             ) : null;
           })()}
         </div>
