@@ -10,10 +10,14 @@ const expandConsonants = (q) => q
   .replace(/ㄳ/g, 'ㄱㅅ')
   .replace(/ㄵ/g, 'ㄴㅈ')
   .replace(/ㄶ/g, 'ㄴㅎ')
+  .replace(/ㄺ/g, 'ㄹㄱ')
   .replace(/ㄻ/g, 'ㄹㅁ')
   .replace(/ㄼ/g, 'ㄹㅂ')
   .replace(/ㄽ/g, 'ㄹㅅ')
-  .replace(/ㅀ/g, 'ㄹㅎ');
+  .replace(/ㄾ/g, 'ㄹㅌ')
+  .replace(/ㄿ/g, 'ㄹㅍ')
+  .replace(/ㅀ/g, 'ㄹㅎ')
+  .replace(/ㅄ/g, 'ㅂㅅ');
 
 const AbilityListPage = () => {
   const [search, setSearch] = useState('');
