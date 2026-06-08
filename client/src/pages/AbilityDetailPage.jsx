@@ -160,7 +160,7 @@ const AbilityDetailPage = () => {
   const [data,       setData]       = useState(null);
   const [loading,    setLoading]    = useState(true);
   const [error,      setError]      = useState(null);
-  const [showDetail, setShowDetail] = useState(true);
+  const [showDetail, setShowDetail] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -248,7 +248,7 @@ const AbilityDetailPage = () => {
               onClick={() => setShowDetail(v => !v)}
               className="w-full flex items-center justify-between px-5 py-3 text-sm font-bold text-gray-600 hover:bg-gray-50 transition-colors"
             >
-              <span>상세 효과</span>
+              <span>상세 설명</span>
               <ChevronDown
                 size={16}
                 className={`transition-transform duration-200 ${showDetail ? 'rotate-180' : ''}`}
