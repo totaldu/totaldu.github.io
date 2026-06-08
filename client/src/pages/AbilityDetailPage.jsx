@@ -225,13 +225,15 @@ const AbilityDetailPage = () => {
 
       {/* 특성 정보 카드 */}
       <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8 flex flex-col gap-3">
-        <div>
+        <div className="relative flex flex-col items-center text-center">
           <h1 className="text-2xl font-black text-gray-900">{koName}</h1>
           <p className="text-sm text-gray-400 mt-0.5">{name}</p>
           {(() => {
             const label = getFirstVersionLabel(data.flavor_text_entries);
             return label ? (
-              <p className="text-xs text-gray-600 mt-1">첫 등장 {label}</p>
+              <span className="absolute right-0 top-0 text-xs font-bold text-white bg-[#005596] rounded-full px-3 py-1">
+                첫 등장 {label}
+              </span>
             ) : null;
           })()}
         </div>
