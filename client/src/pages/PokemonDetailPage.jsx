@@ -821,7 +821,7 @@ const PokemonDetailPage = () => {
                 return (
                 <div style={{
                   position:      'absolute',
-                  top:           '-28px',
+                  top:           '-56px',
                   right:         '-28px',
                   display:       'flex',
                   flexDirection: 'row',
