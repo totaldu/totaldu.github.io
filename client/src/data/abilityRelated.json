@@ -15,5 +15,10 @@
   "mold-breaker": ["mycelium-might"],
   "gulp-missile": ["disguise", "neutralizing-gas"],
   "disguise": ["gulp-missile"],
-  "neutralizing-gas": ["gulp-missile"]
+  "neutralizing-gas": ["gulp-missile"],
+  "guts": ["quick-feet", "flare-boost", "toxic-boost", "marvel-scale"],
+  "quick-feet": ["guts"],
+  "flare-boost": ["guts"],
+  "toxic-boost": ["guts"],
+  "marvel-scale": ["guts"]
 }

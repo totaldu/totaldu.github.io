@@ -40,6 +40,9 @@ const EXTRA_ABILITY_POKEMON = {
 const EXCLUDED_NAMES = new Set([
   'pikachu-alola-cap',        // 알로라캡 피카츄 — 리전폼이 아닌 의상 폼
   'maushold-family-of-three', // 파밀리쥐 세 식구 — 네 식구(기본)만 표시
+  'mimikyu-busted',           // 따라큐 벗겨진폼 — 기본폼과 동일 특성
+  'mimikyu-totem-disguised',  // 따라큐 거대 변장폼
+  'mimikyu-totem-busted',     // 따라큐 거대 벗겨진폼
 ]);
 
 // 이름 패턴 기반 기본 판별 (nameMap 없이 바로 결정 가능한 것만)
