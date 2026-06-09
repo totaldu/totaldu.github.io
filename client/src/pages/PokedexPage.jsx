@@ -4,10 +4,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getChoseong } from 'es-hangul';
 import { getKoreanName } from '../utils/pokemonUtils';
-import championsKeys from '@/data/championsSprites.json';
+import { hasChampionsForm } from '../utils/championsSprite';
 import championsLogo from '@/assets/champions-logo.png';
-
-const CHAMPIONS_BASE_IDS = new Set(championsKeys.filter(k => !k.includes('-')));
 
 /* ─────────────────────────────────────────────
    상수
@@ -59,7 +57,7 @@ const PokemonCard = React.memo(({ pokemon, currentPage }) => {
     pokemon.sprites?.other?.['official-artwork']?.front_default
     || pokemon.sprites?.front_default
     || `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemon.id}.png`;
-  const isChampions = CHAMPIONS_BASE_IDS.has(String(pokemon.id).padStart(4, '0'));
+  const isChampions = hasChampionsForm(pokemon.name);
 
   return (
     <Link
