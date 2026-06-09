@@ -65,21 +65,9 @@ export const getChampionsSpriteUrl = (pokemonName) => {
 
   const megaIdx = parts.indexOf('mega');
   if (megaIdx !== -1) {
-    const next     = parts[megaIdx + 1];
-    const megaPart = next === 'x' ? '_X' : next === 'y' ? '_Y' : '';
-    baseParts      = parts.slice(0, megaIdx);
-
-    // 리전폼+메가 조합 처리 (예: samurott-hisui-mega → 0503-Hisui_Mega)
-    const REGIONS    = ['alola', 'galar', 'hisui', 'paldea'];
-    const regionIdx  = baseParts.findIndex(p => REGIONS.includes(p));
-    if (regionIdx !== -1) {
-      const region    = baseParts[regionIdx];
-      const regionStr = region.charAt(0).toUpperCase() + region.slice(1);
-      champSuffix = `-${regionStr}_Mega${megaPart}`;
-      baseParts   = baseParts.filter((_, i) => i !== regionIdx);
-    } else {
-      champSuffix = `-Mega${megaPart}`;
-    }
+    const next  = parts[megaIdx + 1];
+    champSuffix = next === 'x' ? '-Mega_X' : next === 'y' ? '-Mega_Y' : '-Mega';
+    baseParts   = parts.slice(0, megaIdx);
 
   } else if (parts.includes('primal')) {
     champSuffix = '-Primal';
