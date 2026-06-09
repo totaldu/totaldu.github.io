@@ -780,7 +780,7 @@ const PokemonDetailPage = () => {
               <img
                 src={championsLogo}
                 alt="Pokémon Champions"
-                style={{ position: 'absolute', top: '12px', left: '12px', width: '44px', height: 'auto', zIndex: 2 }}
+                style={{ position: 'absolute', top: '12px', left: '12px', width: '64px', height: 'auto', zIndex: 2 }}
               />
             )}
             {bgOverlay && (

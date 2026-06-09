@@ -76,7 +76,7 @@ const PokemonCard = React.memo(({ pokemon, currentPage }) => {
             src={championsLogo}
             alt="Pokémon Champions"
             className="absolute top-1 left-1 z-10"
-            style={{ width: '28px', height: 'auto' }}
+            style={{ width: '40px', height: 'auto' }}
           />
         )}
         <img
