@@ -6,5 +6,7 @@
   "blaze": ["dry-skin"],
   "torrent": ["dry-skin"],
   "arena-trap": ["shadow-tag"],
-  "shadow-tag": ["arena-trap"]
+  "shadow-tag": ["arena-trap"],
+  "piercing-drill": ["unseen-fist"],
+  "unseen-fist": ["piercing-drill"]
 }
