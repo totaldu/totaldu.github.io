@@ -27,6 +27,14 @@ const HYPHENATED_BASE_NAMES = new Set([
 
 const REGIONAL_KEYWORDS = ['alola','galar','hisui','paldea'];
 
+// PokeAPI 특성 데이터에 없는 챔피언스 전용 폼을 특성별로 수동 등록
+// key: 특성 이름, value: 추가할 포켓몬 { id, name, is_hidden }
+// (PokemonDetailPage의 FORM_ABILITIES와 대응)
+const EXTRA_ABILITY_POKEMON = {
+  'electric-surge': [{ id: 10304, name: 'raichu-mega-x', is_hidden: false }],
+  'no-guard':       [{ id: 10305, name: 'raichu-mega-y', is_hidden: false }],
+};
+
 // 특성 목록에서 명시적으로 제외할 폼
 const EXCLUDED_NAMES = new Set([
   'pikachu-alola-cap',        // 알로라캡 피카츄 — 리전폼이 아닌 의상 폼
@@ -215,7 +223,10 @@ const AbilityDetailPage = () => {
     const id  = parseInt(url.split('/').filter(Boolean).pop(), 10);
     return { id, name: p.pokemon.name, is_hidden: p.is_hidden };
   });
-  const pokemonList = buildPokemonList(allPokemon).sort((a, b) => a.id - b.id);
+  // 챔피언스 전용 폼(PokeAPI 특성 데이터 부재) 수동 추가 — 중복 제외
+  const extra = (EXTRA_ABILITY_POKEMON[name] ?? [])
+    .filter(e => !allPokemon.some(p => p.name === e.name));
+  const pokemonList = buildPokemonList([...allPokemon, ...extra]).sort((a, b) => a.id - b.id);
 
   // normal / hidden 분리
   const regular = pokemonList.filter(p => !p.is_hidden);

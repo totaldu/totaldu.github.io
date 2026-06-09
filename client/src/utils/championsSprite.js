@@ -70,6 +70,9 @@ export const getChampionsSpriteUrl = (pokemonName) => {
     const next  = parts[megaIdx + 1];
     champSuffix = next === 'x' ? '-Mega_X' : next === 'y' ? '-Mega_Y' : '-Mega';
     baseParts   = parts.slice(0, megaIdx);
+    // 메가 전용 챔피언스 스프라이트가 없으면 기본 폼 스프라이트로 대체
+    // (예: 라이츄 메가 X/Y는 Bulbagarden에 0026-Mega 파일이 없음 → 0026 기본 사용)
+    useBaseFallback = true;
 
   } else if (parts.includes('primal')) {
     champSuffix = '-Primal';
