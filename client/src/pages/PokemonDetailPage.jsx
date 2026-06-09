@@ -396,15 +396,20 @@ const EvoNode = ({ node, currentSpeciesId }) => {
   // ── 분기 3개 이상 → 그리드 레이아웃 ─────────────────────────────────────
   if (node.evolves_to.length >= 3) {
     const cols      = node.evolves_to.length <= 3 ? 3 : 4;
-    const gridStyle = { display:'grid', gridTemplateColumns:`repeat(${cols}, minmax(0, 1fr))`, gap:'16px 12px' };
+    const gridStyle = { display:'grid', gridTemplateColumns:`repeat(${cols}, minmax(0, 1fr))`, gap:'16px 0' };
     return (
       <div className="flex items-center gap-6">
         {bubble}
         <div style={gridStyle}>
           {node.evolves_to.map((evo, i) => {
-            const cond = getEvoCondition(evo.evolution_details);
+            const cond        = getEvoCondition(evo.evolution_details);
+            const isLastInRow = (i + 1) % cols === 0 || i === node.evolves_to.length - 1;
             return (
-              <div key={i} className="flex flex-col items-center gap-0.5">
+              <div key={i} className="flex flex-col items-center gap-0.5"
+                style={{
+                  padding:     '0 8px',
+                  borderRight: isLastInRow ? 'none' : '1px solid #E5E7EB',
+                }}>
                 {cond && (
                   <span className="text-[9px] text-gray-500 text-center leading-tight"
                         style={{ maxWidth:'80px', wordBreak:'keep-all' }}>
@@ -425,23 +430,32 @@ const EvoNode = ({ node, currentSpeciesId }) => {
   return (
     <div className="flex items-center gap-1">
       {bubble}
-      <div className={`flex flex-col ${node.evolves_to.length > 1 ? 'gap-3' : ''}`}>
+      <div className="flex flex-col">
         {node.evolves_to.map((evo, i) => {
           const cond = getEvoCondition(evo.evolution_details);
           return (
-            <div key={i} className="flex items-center gap-1">
-              <div className="flex flex-col items-center justify-center gap-0.5 px-1"
-                   style={{ minWidth:'64px' }}>
-                {cond && (
-                  <span className="text-[9px] text-gray-500 text-center leading-tight"
-                        style={{ maxWidth:'64px', wordBreak:'keep-all' }}>
-                    {cond}
-                  </span>
-                )}
-                <span className="text-gray-300 text-xl leading-none">→</span>
+            <React.Fragment key={i}>
+              {i > 0 && (
+                <div style={{
+                  height:'1px',
+                  background:'linear-gradient(to right, transparent, #E5E7EB 15%, #E5E7EB 85%, transparent)',
+                  margin:'6px 0',
+                }} />
+              )}
+              <div className="flex items-center gap-1">
+                <div className="flex flex-col items-center justify-center gap-0.5 px-1"
+                     style={{ minWidth:'64px' }}>
+                  {cond && (
+                    <span className="text-[9px] text-gray-500 text-center leading-tight"
+                          style={{ maxWidth:'64px', wordBreak:'keep-all' }}>
+                      {cond}
+                    </span>
+                  )}
+                  <span className="text-gray-300 text-xl leading-none">→</span>
+                </div>
+                <EvoNode node={evo} currentSpeciesId={currentSpeciesId} />
               </div>
-              <EvoNode node={evo} currentSpeciesId={currentSpeciesId} />
-            </div>
+            </React.Fragment>
           );
         })}
       </div>
