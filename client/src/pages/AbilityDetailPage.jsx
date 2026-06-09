@@ -104,6 +104,7 @@ const PokemonCard = ({ p }) => {
         alt={komonName}
         className="w-14 h-16 object-contain"
         loading="lazy"
+        referrerPolicy="no-referrer"
         onError={e => { e.target.onerror = null; e.target.src = fallbackUrl; }}
       />
       <span className="text-[11px] font-bold text-gray-700 text-center leading-tight line-clamp-2">

@@ -378,6 +378,7 @@ const EvoNode = ({ node, currentSpeciesId }) => {
         alt={koName}
         className="w-16 h-16 object-contain"
         loading="lazy"
+        referrerPolicy="no-referrer"
         onError={e => { e.target.onerror = null; e.target.src = fallbackUrl; }}
       />
       <span className="text-[10px] font-bold text-gray-700 text-center leading-tight"
