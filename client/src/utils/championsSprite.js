@@ -29,6 +29,8 @@ const NAME_OVERRIDE = {
   'gourgeist-super':            { base: 'gourgeist', suffix: '-Jumbo'         },
   'maushold-family-of-three':   { base: 'maushold',  suffix: '-Three'         },
   'tauros-paldea-combat-breed': { base: 'tauros',    suffix: '-Paldea_Combat' },
+  'tauros-paldea-blaze-breed':  { base: 'tauros',    suffix: '-Paldea_Blaze'  },
+  'tauros-paldea-aqua-breed':   { base: 'tauros',    suffix: '-Paldea_Aqua'   },
 };
 
 /**
@@ -90,11 +92,19 @@ export const getChampionsSpriteUrl = (pokemonName) => {
     baseParts   = parts.filter(p => p !== 'paldea');
 
   } else if (parts.length >= 2) {
-    // 일반: 마지막 세그먼트를 대문자화해 접미사로 사용
-    // castform-rainy→-Rainy / rotom-heat→-Heat / florges-blue→-Blue 등
-    const last  = parts[parts.length - 1];
-    champSuffix = '-' + last.charAt(0).toUpperCase() + last.slice(1);
-    baseParts   = parts.slice(0, -1);
+    // 일반: nameToId에서 알려진 최장 prefix를 base로, 나머지를 폼 세그먼트로 분리
+    //   castform-rainy → base[castform] + form[rainy] → -Rainy
+    //   alcremie-ruby-cream → base[alcremie] + form[ruby,cream] → -Ruby_Cream
+    //   vivillon-high-plains → base[vivillon] + form[high,plains] → -High_Plains
+    let splitAt = -1;
+    for (let i = parts.length - 1; i >= 1; i--) {
+      if (nameToId[parts.slice(0, i).join('-')] !== undefined) { splitAt = i; break; }
+    }
+    if (splitAt === -1) return null;
+    baseParts = parts.slice(0, splitAt);
+    champSuffix = '-' + parts.slice(splitAt)
+      .map(s => s.charAt(0).toUpperCase() + s.slice(1))
+      .join('_');
     useBaseFallback = true; // 해당 폼 스프라이트 없으면 기본 폼으로 대체
 
   } else {
