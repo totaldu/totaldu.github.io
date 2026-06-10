@@ -283,7 +283,7 @@ const AbilityDetailPage = () => {
             ) : null;
           })()}
         </div>
-        <div className="bg-gray-50 rounded-xl px-5 py-4 text-sm text-gray-700 leading-relaxed">
+        <div className="bg-gray-50 rounded-xl px-5 py-4 text-sm text-gray-700 leading-relaxed whitespace-pre-line">
           {description}
         </div>
 
@@ -301,7 +301,7 @@ const AbilityDetailPage = () => {
             </button>
             {showDetail && (
               <div className="px-5 py-4 text-sm text-gray-700 leading-relaxed border-t border-gray-100 bg-gray-50 flex flex-col gap-3">
-                <span>{detailDescription}</span>
+                <span className="whitespace-pre-line">{detailDescription}</span>
                 {abilityDetailExtras[name]?.map((extra, i) => (
                   <div key={i} className="flex flex-col gap-1.5 pt-3 border-t border-gray-200 items-start">
                     <span className="text-sm font-bold text-gray-700">{extra.title}</span>
