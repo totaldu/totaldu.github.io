@@ -1,8 +1,8 @@
 {
-  "drought": ["protosynthesis", "dry-skin"],
+  "drought": ["protosynthesis", "dry-skin", "snow-warning", "drizzle", "sand-stream"],
   "protosynthesis": ["drought"],
   "dry-skin": ["drought", "drizzle"],
-  "drizzle": ["dry-skin"],
+  "drizzle": ["dry-skin", "snow-warning", "drought", "sand-stream"],
   "rough-skin": ["iron-barbs"],
   "iron-barbs": ["rough-skin"],
   "torrent": ["blaze", "overgrow"],
@@ -26,5 +26,21 @@
   "quick-feet": ["guts"],
   "flare-boost": ["guts"],
   "toxic-boost": ["guts"],
-  "marvel-scale": ["guts"]
+  "marvel-scale": ["guts"],
+  "snow-cloak": ["slush-rush"],
+  "slush-rush": ["snow-cloak", "sand-rush", "swift-swim", "chlorophyll"],
+  "sand-rush": ["slush-rush"],
+  "swift-swim": ["slush-rush"],
+  "chlorophyll": ["slush-rush"],
+  "snow-warning": ["sand-stream", "drizzle", "drought"],
+  "sand-stream": ["snow-warning", "drought", "drizzle"],
+  "normalize": ["dragonize", "pixilate", "aerilate"],
+  "dragonize": ["normalize", "pixilate", "aerilate"],
+  "pixilate": ["normalize", "dragonize", "aerilate"],
+  "aerilate": ["normalize", "dragonize", "pixilate"],
+  "well-baked-body": ["flash-fire"],
+  "flash-fire": ["well-baked-body"],
+  "seed-sower": ["sand-spit", "grassy-surge"],
+  "sand-spit": ["seed-sower"],
+  "grassy-surge": ["seed-sower"]
 }
