@@ -218,7 +218,7 @@ const AbilityDetailPage = () => {
       ?.flavor_text
       ?.replace(/[\n\f]/g, ' ')
       .trim();
-  const description = getDesc('ko') ?? abilityKoDescs[name] ?? getDesc('en') ?? '설명 없음';
+  const description = abilityKoDescs[name] ?? getDesc('ko') ?? getDesc('en') ?? '설명 없음';
 
   // 상세 설명: 한국어 상세 JSON 우선, 없으면 PokeAPI effect_entries 영어
   const getEffectEntry = (lang) =>
