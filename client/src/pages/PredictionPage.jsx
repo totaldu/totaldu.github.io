@@ -26,22 +26,6 @@ const fmtUpdated = (v) => {
   }) + ' KST';
 };
 
-// 막대형 확률 행
-const ProbRow = ({ label, value, color, sub }) => (
-  <div className="flex items-center gap-3">
-    <span className="w-28 sm:w-36 text-sm font-bold text-white/80 shrink-0 truncate">{label}</span>
-    <div className="flex-1 h-5 bg-white/5 rounded-full overflow-hidden">
-      <div
-        className="h-full rounded-full flex items-center justify-end pr-2 text-[11px] font-black text-white/90"
-        style={{ width: `${Math.max(value, 4)}%`, backgroundColor: color }}
-      >
-        {value}%
-      </div>
-    </div>
-    {sub != null && <span className="w-10 text-xs text-white/40 shrink-0 text-right">{sub}</span>}
-  </div>
-);
-
 // 시뮬레이션 결과(예측) 렌더
 const SimulationView = ({ comp }) => (
   <div className="flex flex-col gap-8">
@@ -52,18 +36,6 @@ const SimulationView = ({ comp }) => (
       {comp.iterations > 0 && <span className="text-white/50">반복: <strong className="text-white/80">{comp.iterations.toLocaleString()}회</strong></span>}
       {comp.generatedAt && <span className="text-white/50">생성: <strong className="text-white/80">{comp.generatedAt}</strong></span>}
     </div>
-
-    {/* 상황별 확률 */}
-    {comp.situations?.length > 0 && (
-      <section>
-        <h3 className="text-sm font-black text-[#E8C77E] mb-4 uppercase tracking-wider">상황별 확률</h3>
-        <div className="flex flex-col gap-2.5">
-          {comp.situations.map((s, i) => (
-            <ProbRow key={i} label={s.label} value={s.prob} color={comp.color} />
-          ))}
-        </div>
-      </section>
-    )}
 
     {/* 예상 순위 / 우승·진출 확률 */}
     {comp.standings?.length > 0 && (
