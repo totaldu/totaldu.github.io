@@ -9,6 +9,7 @@ import PokedexPage from './pages/PokedexPage';
 import PokemonDetailPage from './pages/PokemonDetailPage';
 import AbilityListPage from './pages/AbilityListPage';
 import AbilityDetailPage from './pages/AbilityDetailPage';
+import StatsPage from './pages/StatsPage';
 
 const API_BASE = import.meta.env.DEV
   ? "http://localhost:4000"
@@ -421,6 +422,7 @@ const App = () => {
               <Link to="/party" className="hover:text-[#005596] transition-colors">추천 파티</Link>
               <Link to="/battle" className="hover:text-[#005596] transition-colors">배틀 정보</Link>
               <Link to="/community" className="hover:text-[#005596] transition-colors">커뮤니티</Link>
+              <Link to="/stats" className="hover:text-[#005596] transition-colors">통계</Link>
             </nav>
             <div className="flex items-center gap-3">
               <button className="hidden sm:flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-50 px-5 py-2.5 rounded-full border border-gray-200 hover:bg-gray-100 transition-all">
@@ -451,6 +453,7 @@ const App = () => {
           </Route>
 
           <Route path="/community" element={<CommunityPage />} />
+          <Route path="/stats" element={<StatsPage />} />
         </Routes>
 
         <footer className="mt-auto py-12 bg-white text-center border-t border-gray-100">
