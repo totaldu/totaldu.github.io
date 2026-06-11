@@ -1,7 +1,7 @@
 // client/src/App.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
-import { Search, Menu, User, LogIn, ChevronRight, ChevronDown, Info, BookOpen, Globe, FileText, Sparkles, Zap, Timer, Gamepad2, Swords, Check } from 'lucide-react';
+import { Search, Menu, User, LogIn, ChevronRight, ChevronDown, Info, BookOpen, Globe, FileText, Sparkles, Zap, Timer, Gamepad2, Swords, Check, Target } from 'lucide-react';
 import TypeChartPage from './pages/TypeChartPage';
 import BattleLayout from './pages/BattleLayout';
 import PokedexLayout from './pages/PokedexLayout';
@@ -9,7 +9,7 @@ import PokedexPage from './pages/PokedexPage';
 import PokemonDetailPage from './pages/PokemonDetailPage';
 import AbilityListPage from './pages/AbilityListPage';
 import AbilityDetailPage from './pages/AbilityDetailPage';
-import StatsPage from './pages/StatsPage';
+import PredictionPage from './pages/PredictionPage';
 
 const API_BASE = import.meta.env.DEV
   ? "http://localhost:4000"
@@ -462,8 +462,14 @@ const LolHome = () => (
         <Gamepad2 size={16} /> LoL Esports
       </div>
       <h2 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-md">League of Legends 통계</h2>
-      <p className="text-white/60 text-lg font-medium">리그·팀·선수 데이터를 준비 중입니다.</p>
-      <p className="text-white/40 text-sm mt-2 font-medium">상단에서 다시 포켓몬으로 전환할 수 있습니다.</p>
+      <p className="text-white/60 text-lg font-medium mb-8">GPR 데이터를 기반으로 직접 승부를 예측해보세요.</p>
+      <Link
+        to="/lol/prediction"
+        className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-[#C8963E] text-[#1e2328] font-black hover:bg-[#E8C77E] transition-all shadow-lg active:scale-95"
+      >
+        <Target size={18} /> 승부예측 시작하기
+      </Link>
+      <p className="text-white/40 text-sm mt-6 font-medium">상단에서 다시 포켓몬으로 전환할 수 있습니다.</p>
     </div>
   </section>
 );
@@ -503,10 +509,9 @@ const App = () => {
                   <Link to="/party" className="hover:text-[#005596] transition-colors">추천 파티</Link>
                   <Link to="/battle" className="hover:text-[#005596] transition-colors">배틀 정보</Link>
                   <Link to="/community" className="hover:text-[#005596] transition-colors">커뮤니티</Link>
-                  <Link to="/stats" className="hover:text-[#005596] transition-colors">통계</Link>
                 </>
               ) : (
-                <span className="text-sm font-bold text-[#C8963E] bg-[#C8963E]/10 px-4 py-1.5 rounded-full border border-[#C8963E]/30">준비 중</span>
+                <Link to="/lol/prediction" className="hover:text-[#C8963E] transition-colors">승부예측</Link>
               )}
             </nav>
             <div className="flex items-center gap-3">
@@ -540,7 +545,7 @@ const App = () => {
           </Route>
 
           <Route path="/community" element={<CommunityPage />} />
-          <Route path="/stats" element={<StatsPage />} />
+          <Route path="/lol/prediction" element={<PredictionPage />} />
         </Routes>
 
         <footer className="mt-auto py-12 bg-white text-center border-t border-gray-100">
