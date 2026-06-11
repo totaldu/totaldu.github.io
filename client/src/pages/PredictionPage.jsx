@@ -243,7 +243,7 @@ const PredictionPage = () => {
           <div className="w-11 h-11 bg-[#C8963E] rounded-xl flex items-center justify-center shrink-0">
             <Target color="white" size={22} />
           </div>
-          <h1 className="text-3xl md:text-4xl font-black">LoL 승부예측</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-white">LoL 승부예측</h1>
         </div>
         <p className="text-white/50 text-sm font-medium mb-1">
           9개 대회의 몬테카를로 시뮬레이션 예측과 종료 대회의 실제 결과를 한곳에서.
@@ -286,7 +286,7 @@ const PredictionPage = () => {
                   <BarChart3 size={18} color="#1e2328" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black">GPR 팀 랭킹</h2>
+                  <h2 className="text-xl font-black text-white">GPR 팀 랭킹</h2>
                   <p className="text-xs text-white/40">Global Power Rankings · {gprTeams.teams.length}팀 · 갱신 {gprTeams.updatedAt}</p>
                 </div>
               </div>
@@ -300,7 +300,7 @@ const PredictionPage = () => {
                     <ScopeIcon scope={comp.scope} size={18} color={textOn(comp.color)} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black">{comp.name}</h2>
+                    <h2 className="text-xl font-black text-white">{comp.name}</h2>
                     <p className="text-xs text-white/40">{comp.scope === 'intl' ? '국제 대회' : '지역 리그'}</p>
                   </div>
                 </div>
