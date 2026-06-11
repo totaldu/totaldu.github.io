@@ -5,12 +5,8 @@ import { Target, Trophy, ExternalLink, Globe, Flag, Crown, Hourglass, BarChart3 
 import sim from '../data/lolSim.json';
 import gpr from '../data/lolGpr.json';
 import gprTeams from '../data/gprTeams.json';
-
-// 리그 → 색 (지역 GPR 색 재사용)
-const leagueColor = Object.fromEntries(gpr.regions.map((r) => [r.key, r.color]));
-// GPR 점수 내림차순 전체 랭킹
-const gprRanked = [...gprTeams.teams].sort((a, b) => b.score - a.score);
-const gprMaxScore = Math.max(...gprRanked.map((t) => t.score));
+import GprTable from '../components/GprTable';
+import { textOn, lighten } from '../utils/colorContrast';
 
 const statusMeta = {
   finished: { label: '종료', color: '#34D399', bg: 'rgba(52,211,153,0.15)' },
@@ -19,68 +15,6 @@ const statusMeta = {
 };
 
 const ScopeIcon = ({ scope, ...rest }) => (scope === 'intl' ? <Globe {...rest} /> : <Flag {...rest} />);
-
-const _rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
-const _lum = (hex) => { const [r, g, b] = _rgb(hex); return 0.299 * r + 0.587 * g + 0.114 * b; };
-// 칩(배경 색) 위 글자: 밝은 칩일 때만 어두운 글자, 그 외엔 흰색
-const textOn = (hex) => (_lum(hex) > 150 ? '#1e2328' : '#ffffff');
-// 어두운 배경 위 글자색: 원색을 흰색 쪽으로 밝혀 묻히지 않게
-const lighten = (hex, amt = 0.45) => {
-  const [r, g, b] = _rgb(hex).map((c) => Math.round(c + (255 - c) * amt));
-  return `rgb(${r}, ${g}, ${b})`;
-};
-
-// GPR 팀별 데이터 전체 랭킹
-const GprView = () => (
-  <div className="flex flex-col gap-5">
-    <p className="text-sm text-white/50">
-      lolesports GPR 팀별 점수(레이팅) 전체 랭킹입니다. 이 점수가 시뮬레이션 승률 산출의 기준입니다.
-    </p>
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm border-collapse">
-        <thead>
-          <tr className="text-white/40 text-xs border-b border-white/10">
-            <th className="text-left font-bold py-2 pr-2">#</th>
-            <th className="text-left font-bold py-2 pr-2">팀</th>
-            <th className="text-left font-bold py-2 px-2">리그</th>
-            <th className="text-left font-bold py-2 px-3 w-1/3">GPR 점수</th>
-            <th className="text-right font-bold py-2 pl-2">전적</th>
-          </tr>
-        </thead>
-        <tbody>
-          {gprRanked.map((t, i) => {
-            const col = leagueColor[t.league] || '#888';
-            return (
-              <tr key={t.short} className="border-b border-white/5">
-                <td className="py-2 pr-2 text-white/40 font-mono">{i + 1}</td>
-                <td className="py-2 pr-2">
-                  <span className="font-bold text-white/90">{t.name}</span>
-                  <span className="text-white/40 text-xs ml-1.5">{t.short}</span>
-                </td>
-                <td className="py-2 px-2">
-                  <span className="text-xs font-black px-2 py-0.5 rounded" style={{ color: textOn(col), backgroundColor: col }}>
-                    {t.league}
-                  </span>
-                </td>
-                <td className="py-2 px-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1 h-3.5 bg-white/5 rounded-full overflow-hidden min-w-[60px]">
-                      <div className="h-full rounded-full" style={{ width: `${(t.score / gprMaxScore) * 100}%`, backgroundColor: col }} />
-                    </div>
-                    <span className="font-mono font-black tabular-nums" style={{ color: lighten(col) }}>{t.score}</span>
-                  </div>
-                </td>
-                <td className="py-2 pl-2 text-right text-white/50 font-mono whitespace-nowrap">
-                  {t.w != null ? `${t.w}-${t.l}` : '-'}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  </div>
-);
 
 // 막대형 확률 행
 const ProbRow = ({ label, value, color, sub }) => (
@@ -290,7 +224,7 @@ const PredictionPage = () => {
                   <p className="text-xs text-white/40">Global Power Rankings · {gprTeams.teams.length}팀 · 갱신 {gprTeams.updatedAt}</p>
                 </div>
               </div>
-              <GprView />
+              <GprTable />
             </>
           ) : (
             <>
