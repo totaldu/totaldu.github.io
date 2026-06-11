@@ -75,9 +75,10 @@ const fmtUpdated = (v) => {
 };
 
 // 시뮬레이션 결과(예측) 렌더
-const SimulationView = ({ comp }) => {
-  // 현재 순위 — 공식 순위표가 있으면 우선, 없으면 GPR 전적으로 산출
-  const official = officialStandings.standings[comp.key];
+const SimulationView = ({ comp, sub }) => {
+  // 현재 순위 — 해당 세부대회 공식 순위표가 있으면 우선, 없으면 GPR 전적으로 산출
+  const leagueStd = officialStandings.standings[comp.key];
+  const official = leagueStd ? leagueStd[sub] : null;
   const setDiff = (gw, gl) => (gw != null && gl != null ? gw - gl : null);
   const current = official
     ? official.rows.map((r) => {
@@ -207,13 +208,28 @@ const NotReady = ({ comp }) => (
 
 const GPR_TAB = { key: 'gpr', name: 'GPR 순위', scope: 'data', color: '#E8C77E' };
 
+// 지역 리그별 세부 대회 (2026 기준)
+const SUBTABS = {
+  lck: ['LCK CUP', 'LCK'],
+  lpl: ['Split 1', 'Split 2', 'Split 3'],
+  lec: ['Versus', 'Spring', 'Summer'],
+  lcp: ['Split 1', 'Split 2', 'Split 3'],
+  lcs: ['Lock-In', 'Spring', 'Summer'],
+  cblol: ['Copa', 'Split 1', 'Split 2'],
+};
+// 세부 대회 기본 선택(현재 진행 중)
+const SUBTAB_DEFAULT = { lck: 'LCK', lpl: 'Split 2', lec: 'Summer', lcp: 'Split 2', lcs: 'Summer', cblol: 'Split 2' };
+
 const PredictionPage = () => {
   const comps = sim.competitions;
   const tabs = [GPR_TAB, ...comps];
   const [activeKey, setActiveKey] = useState('gpr');
+  const [subByLeague, setSubByLeague] = useState({});
   const isGpr = activeKey === 'gpr';
   const comp = useMemo(() => comps.find((c) => c.key === activeKey), [comps, activeKey]);
   const st = comp ? (statusMeta[comp.status] || statusMeta.upcoming) : null;
+  const subTabs = comp ? SUBTABS[comp.key] : null;
+  const activeSub = subTabs ? (subByLeague[comp.key] || SUBTAB_DEFAULT[comp.key] || subTabs[0]) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1428] via-[#1e2328] to-[#0a1428] p-6 md:p-12 text-white">
@@ -268,7 +284,7 @@ const PredictionPage = () => {
                     <ScopeIcon scope={comp.scope} size={18} color={textOn(comp.color)} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-white">{comp.name}</h2>
+                    <h2 className="text-xl font-black text-white">{comp.name}{subTabs ? ` · ${activeSub}` : ''}</h2>
                     <p className="text-xs text-white/40">{comp.scope === 'intl' ? '국제 대회' : '지역 리그'}</p>
                   </div>
                 </div>
@@ -277,12 +293,32 @@ const PredictionPage = () => {
                 </span>
               </div>
 
+              {/* 세부 대회 선택 */}
+              {subTabs && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {subTabs.map((s) => {
+                    const on = s === activeSub;
+                    return (
+                      <button
+                        key={s}
+                        onClick={() => setSubByLeague((p) => ({ ...p, [comp.key]: s }))}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                          on ? 'bg-white/15 text-white border-white/30' : 'text-white/45 border-white/10 hover:border-white/30 hover:text-white/70'
+                        }`}
+                      >
+                        {s}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
               {!comp.ready ? (
                 <NotReady comp={comp} />
               ) : comp.status === 'finished' ? (
                 <ResultView comp={comp} />
               ) : (
-                <SimulationView comp={comp} />
+                <SimulationView comp={comp} sub={activeSub} />
               )}
             </>
           )}
