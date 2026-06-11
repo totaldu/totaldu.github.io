@@ -1,8 +1,7 @@
 // client/src/App.jsx
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
-import { Search, Menu, User, LogIn, ChevronRight, ChevronDown, Info, BookOpen, Globe, FileText, Sparkles, Zap, Timer, Gamepad2, Swords, Check, Target, BarChart3 } from 'lucide-react';
-import GprTable from './components/GprTable';
+import { BrowserRouter, Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom';
+import { Search, Menu, User, LogIn, ChevronRight, ChevronDown, Info, BookOpen, Globe, FileText, Sparkles, Zap, Timer, Gamepad2, Swords, Check } from 'lucide-react';
 import TypeChartPage from './pages/TypeChartPage';
 import BattleLayout from './pages/BattleLayout';
 import PokedexLayout from './pages/PokedexLayout';
@@ -456,44 +455,6 @@ const SportSwitcher = ({ sport, setSport }) => {
   );
 };
 
-const LolHome = () => (
-  <section className="relative w-full bg-gradient-to-br from-[#1e2328] via-[#3c2a14] to-[#0a1428] min-h-[calc(100vh-80px)] px-4 py-12 md:py-16 overflow-hidden">
-    <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-[#C8963E] rounded-full blur-3xl"></div>
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#0AC8B9] rounded-full blur-3xl"></div>
-    </div>
-    <div className="relative max-w-5xl mx-auto w-full">
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-6 rounded-full bg-[#C8963E]/20 border border-[#C8963E]/40 text-[#E8C77E] text-sm font-bold">
-          <Gamepad2 size={16} /> LoL Esports
-        </div>
-        <h2 className="text-4xl md:text-5xl font-black text-white mb-4 drop-shadow-md">League of Legends 통계</h2>
-        <p className="text-white/60 text-lg font-medium mb-8">GPR 데이터를 기반으로 직접 승부를 예측해보세요.</p>
-        <Link
-          to="/lol/prediction"
-          className="inline-flex items-center gap-2 px-7 py-3.5 rounded-2xl bg-[#C8963E] text-[#1e2328] font-black hover:bg-[#E8C77E] transition-all shadow-lg active:scale-95"
-        >
-          <Target size={18} /> 승부예측 시작하기
-        </Link>
-      </div>
-
-      {/* GPR 팀 랭킹 */}
-      <div className="rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8 text-white">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[#C8963E]">
-            <BarChart3 size={18} color="#1e2328" />
-          </div>
-          <div>
-            <h3 className="text-xl font-black text-white">GPR 팀 랭킹</h3>
-            <p className="text-xs text-white/40">Global Power Rankings · 시뮬레이션 레이팅 기준</p>
-          </div>
-        </div>
-        <GprTable />
-      </div>
-    </div>
-  </section>
-);
-
 const App = () => {
   const [articles, setArticles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -546,7 +507,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={sport === 'pokemon'
             ? <MainHome articles={articles} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
-            : <LolHome />} />
+            : <Navigate to="/lol/prediction" replace />} />
 
           {/* ✅ PokedexLayout 중첩 라우트 */}
           <Route path="/pokedex" element={<PokedexLayout />}>
