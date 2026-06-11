@@ -1,0 +1,42 @@
+name: Refresh GPR & Simulate
+
+# GPR 팀별 점수를 받아 시뮬레이션을 다시 돌리고, 변경 시 커밋한다.
+# main 에 커밋되면 deploy.yml 이 자동으로 사이트를 재배포한다.
+on:
+  schedule:
+    - cron: '0 21 * * *' # 매일 06:00 KST (21:00 UTC)
+  workflow_dispatch: {}   # 수동 실행 버튼
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Fetch GPR scores
+        run: node scripts/fetchGpr.mjs
+
+      - name: Run Monte Carlo simulation
+        run: node scripts/simulateLol.mjs
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain client/src/data)" ]; then
+            git add client/src/data/gprTeams.json client/src/data/lolSim.json
+            git commit -m "chore: GPR 자동 갱신 및 시뮬레이션 재계산"
+            git push
+            echo "변경 사항 커밋·푸시 완료"
+          else
+            echo "변경 없음 — 커밋 생략"
+          fi

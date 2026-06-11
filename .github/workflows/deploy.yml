@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+  # GPR 자동 갱신 워크플로가 끝나면(봇 푸시는 push 이벤트를 안 띄우므로) 이어서 배포
+  workflow_run:
+    workflows: ["Refresh GPR & Simulate"]
+    types:
+      - completed
 
 permissions:
   contents: read

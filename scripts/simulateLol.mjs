@@ -16,7 +16,16 @@ const sim = JSON.parse(fs.readFileSync(path.join(dataDir, 'lolSim.json'), 'utf8'
 const ITER = 20000;
 const ELO_SCALE = 400;          // 점수차 400 = 약 10배 우세
 const PLAYOFF_TEAMS = 6;        // 단순화: 상위 6팀 플레이오프
-const GENERATED_AT = '2026-06-11';
+const GENERATED_AT = new Date().toISOString().slice(0, 10);
+
+// 시드 고정 PRNG (mulberry32) — 같은 입력이면 같은 결과 → 불필요한 커밋 방지
+let _seed = 0x9e3779b9;
+const rng = () => {
+  _seed |= 0; _seed = (_seed + 0x6D2B79F5) | 0;
+  let t = Math.imul(_seed ^ (_seed >>> 15), 1 | _seed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+};
 
 // 단판 승률
 const gameProb = (ra, rb) => 1 / (1 + Math.pow(10, (rb - ra) / ELO_SCALE));
@@ -25,7 +34,7 @@ const gameProb = (ra, rb) => 1 / (1 + Math.pow(10, (rb - ra) / ELO_SCALE));
 const simSeries = (a, b, need) => {
   let wa = 0, wb = 0;
   const p = gameProb(a.score, b.score);
-  while (wa < need && wb < need) (Math.random() < p ? wa++ : wb++);
+  while (wa < need && wb < need) (rng() < p ? wa++ : wb++);
   return wa === need ? a : b;
 };
 
@@ -54,7 +63,7 @@ function simulateLeague(teams) {
       }
     }
     // 순위 (승수 desc, 동률은 무작위)
-    const order = idx.slice().sort((a, b) => (wins[b] - wins[a]) || (Math.random() - 0.5));
+    const order = idx.slice().sort((a, b) => (wins[b] - wins[a]) || (rng() - 0.5));
     order.forEach((teamIdx, rank) => {
       stat[teamIdx].sumRank += rank + 1;
       if (rank === 0) stat[teamIdx].rank1++;
