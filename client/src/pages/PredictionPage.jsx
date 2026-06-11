@@ -1,9 +1,16 @@
 // client/src/pages/PredictionPage.jsx
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Target, Trophy, ExternalLink, Globe, Flag, Crown, Hourglass } from 'lucide-react';
+import { Target, Trophy, ExternalLink, Globe, Flag, Crown, Hourglass, BarChart3 } from 'lucide-react';
 import sim from '../data/lolSim.json';
 import gpr from '../data/lolGpr.json';
+import gprTeams from '../data/gprTeams.json';
+
+// 리그 → 색 (지역 GPR 색 재사용)
+const leagueColor = Object.fromEntries(gpr.regions.map((r) => [r.key, r.color]));
+// GPR 점수 내림차순 전체 랭킹
+const gprRanked = [...gprTeams.teams].sort((a, b) => b.score - a.score);
+const gprMaxScore = Math.max(...gprRanked.map((t) => t.score));
 
 const statusMeta = {
   finished: { label: '종료', color: '#34D399', bg: 'rgba(52,211,153,0.15)' },
@@ -22,6 +29,58 @@ const lighten = (hex, amt = 0.45) => {
   const [r, g, b] = _rgb(hex).map((c) => Math.round(c + (255 - c) * amt));
   return `rgb(${r}, ${g}, ${b})`;
 };
+
+// GPR 팀별 데이터 전체 랭킹
+const GprView = () => (
+  <div className="flex flex-col gap-5">
+    <p className="text-sm text-white/50">
+      lolesports GPR 팀별 점수(레이팅) 전체 랭킹입니다. 이 점수가 시뮬레이션 승률 산출의 기준입니다.
+    </p>
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm border-collapse">
+        <thead>
+          <tr className="text-white/40 text-xs border-b border-white/10">
+            <th className="text-left font-bold py-2 pr-2">#</th>
+            <th className="text-left font-bold py-2 pr-2">팀</th>
+            <th className="text-left font-bold py-2 px-2">리그</th>
+            <th className="text-left font-bold py-2 px-3 w-1/3">GPR 점수</th>
+            <th className="text-right font-bold py-2 pl-2">전적</th>
+          </tr>
+        </thead>
+        <tbody>
+          {gprRanked.map((t, i) => {
+            const col = leagueColor[t.league] || '#888';
+            return (
+              <tr key={t.short} className="border-b border-white/5">
+                <td className="py-2 pr-2 text-white/40 font-mono">{i + 1}</td>
+                <td className="py-2 pr-2">
+                  <span className="font-bold text-white/90">{t.name}</span>
+                  <span className="text-white/40 text-xs ml-1.5">{t.short}</span>
+                </td>
+                <td className="py-2 px-2">
+                  <span className="text-xs font-black px-2 py-0.5 rounded" style={{ color: textOn(col), backgroundColor: col }}>
+                    {t.league}
+                  </span>
+                </td>
+                <td className="py-2 px-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-3.5 bg-white/5 rounded-full overflow-hidden min-w-[60px]">
+                      <div className="h-full rounded-full" style={{ width: `${(t.score / gprMaxScore) * 100}%`, backgroundColor: col }} />
+                    </div>
+                    <span className="font-mono font-black tabular-nums" style={{ color: lighten(col) }}>{t.score}</span>
+                  </div>
+                </td>
+                <td className="py-2 pl-2 text-right text-white/50 font-mono whitespace-nowrap">
+                  {t.w != null ? `${t.w}-${t.l}` : '-'}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
 
 // 막대형 확률 행
 const ProbRow = ({ label, value, color, sub }) => (
@@ -163,11 +222,15 @@ const NotReady = ({ comp }) => (
   </div>
 );
 
+const GPR_TAB = { key: 'gpr', name: 'GPR 순위', scope: 'data', color: '#E8C77E' };
+
 const PredictionPage = () => {
   const comps = sim.competitions;
-  const [activeKey, setActiveKey] = useState(comps[0].key);
+  const tabs = [GPR_TAB, ...comps];
+  const [activeKey, setActiveKey] = useState('gpr');
+  const isGpr = activeKey === 'gpr';
   const comp = useMemo(() => comps.find((c) => c.key === activeKey), [comps, activeKey]);
-  const st = statusMeta[comp.status] || statusMeta.upcoming;
+  const st = comp ? (statusMeta[comp.status] || statusMeta.upcoming) : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1428] via-[#1e2328] to-[#0a1428] p-6 md:p-12 text-white">
@@ -194,9 +257,9 @@ const PredictionPage = () => {
           레이팅 출처: lolesports.com Global Power Rankings <ExternalLink size={11} /> · 갱신 {sim.updatedAt}
         </a>
 
-        {/* 대회 선택 */}
+        {/* 탭 선택 (GPR 순위 + 9개 대회) */}
         <div className="flex flex-wrap gap-2 mb-8">
-          {comps.map((c) => {
+          {tabs.map((c) => {
             const active = c.key === activeKey;
             return (
               <button
@@ -207,36 +270,53 @@ const PredictionPage = () => {
                 }`}
                 style={active ? { backgroundColor: c.color, borderColor: c.color, color: textOn(c.color) } : {}}
               >
-                <ScopeIcon scope={c.scope} size={14} />
+                {c.scope === 'data' ? <BarChart3 size={14} /> : <ScopeIcon scope={c.scope} size={14} />}
                 {c.name.replace('2026 ', '')}
               </button>
             );
           })}
         </div>
 
-        {/* 선택된 대회 카드 */}
+        {/* 선택된 탭 카드 */}
         <div className="rounded-3xl bg-white/5 border border-white/10 p-6 md:p-8">
-          <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: comp.color }}>
-                <ScopeIcon scope={comp.scope} size={18} color={textOn(comp.color)} />
+          {isGpr ? (
+            <>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[#C8963E]">
+                  <BarChart3 size={18} color="#1e2328" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-black">GPR 팀 랭킹</h2>
+                  <p className="text-xs text-white/40">Global Power Rankings · {gprTeams.teams.length}팀 · 갱신 {gprTeams.updatedAt}</p>
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl font-black">{comp.name}</h2>
-                <p className="text-xs text-white/40">{comp.scope === 'intl' ? '국제 대회' : '지역 리그'}</p>
-              </div>
-            </div>
-            <span className="px-3 py-1 rounded-lg text-xs font-black" style={{ color: st.color, backgroundColor: st.bg }}>
-              {st.label}
-            </span>
-          </div>
-
-          {!comp.ready ? (
-            <NotReady comp={comp} />
-          ) : comp.status === 'finished' ? (
-            <ResultView comp={comp} />
+              <GprView />
+            </>
           ) : (
-            <SimulationView comp={comp} />
+            <>
+              <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: comp.color }}>
+                    <ScopeIcon scope={comp.scope} size={18} color={textOn(comp.color)} />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-black">{comp.name}</h2>
+                    <p className="text-xs text-white/40">{comp.scope === 'intl' ? '국제 대회' : '지역 리그'}</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 rounded-lg text-xs font-black" style={{ color: st.color, backgroundColor: st.bg }}>
+                  {st.label}
+                </span>
+              </div>
+
+              {!comp.ready ? (
+                <NotReady comp={comp} />
+              ) : comp.status === 'finished' ? (
+                <ResultView comp={comp} />
+              ) : (
+                <SimulationView comp={comp} />
+              )}
+            </>
           )}
         </div>
 
