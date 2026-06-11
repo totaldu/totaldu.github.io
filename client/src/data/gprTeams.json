@@ -10,7 +10,9 @@
       "score": 1524,
       "w": 29,
       "l": 7,
-      "fst": 1
+      "fst": 1,
+      "gw": 73,
+      "gl": 28
     },
     {
       "name": "Gen.G Esports",
@@ -19,7 +21,9 @@
       "score": 1522,
       "w": 24,
       "l": 5,
-      "fst": 3
+      "fst": 3,
+      "gw": 56,
+      "gl": 16
     },
     {
       "name": "T1",
@@ -27,7 +31,9 @@
       "league": "LCK",
       "score": 1487,
       "w": 19,
-      "l": 6
+      "l": 6,
+      "gw": 44,
+      "gl": 19
     },
     {
       "name": "G2 Esports",
@@ -36,7 +42,9 @@
       "score": 1472,
       "w": 22,
       "l": 10,
-      "fst": 2
+      "fst": 2,
+      "gw": 50,
+      "gl": 24
     },
     {
       "name": "Hanwha Life Esports",
@@ -44,7 +52,9 @@
       "league": "LCK",
       "score": 1454,
       "w": 17,
-      "l": 6
+      "l": 6,
+      "gw": 37,
+      "gl": 20
     },
     {
       "name": "Top Esports",
@@ -52,7 +62,9 @@
       "league": "LPL",
       "score": 1432,
       "w": 17,
-      "l": 14
+      "l": 14,
+      "gw": 48,
+      "gl": 35
     },
     {
       "name": "kt Rolster",
@@ -60,7 +72,9 @@
       "league": "LCK",
       "score": 1392,
       "w": 16,
-      "l": 9
+      "l": 9,
+      "gw": 35,
+      "gl": 28
     },
     {
       "name": "Beijing JDG Esports",
@@ -69,7 +83,9 @@
       "score": 1385,
       "w": 20,
       "l": 16,
-      "fst": 4
+      "fst": 4,
+      "gw": 56,
+      "gl": 52
     },
     {
       "name": "Anyone's Legend",
@@ -77,7 +93,9 @@
       "league": "LPL",
       "score": 1383,
       "w": 20,
-      "l": 12
+      "l": 12,
+      "gw": 50,
+      "gl": 36
     },
     {
       "name": "Karmine Corp",
@@ -85,7 +103,9 @@
       "league": "LEC",
       "score": 1379,
       "w": 22,
-      "l": 9
+      "l": 9,
+      "gw": 47,
+      "gl": 26
     },
     {
       "name": "Weibo Gaming",
@@ -93,7 +113,9 @@
       "league": "LPL",
       "score": 1355,
       "w": 14,
-      "l": 16
+      "l": 16,
+      "gw": 40,
+      "gl": 44
     },
     {
       "name": "Dplus KIA",
@@ -101,7 +123,9 @@
       "league": "LCK",
       "score": 1347,
       "w": 19,
-      "l": 12
+      "l": 12,
+      "gw": 47,
+      "gl": 38
     },
     {
       "name": "CTBC Flying Oyster",
@@ -109,7 +133,9 @@
       "league": "LCP",
       "score": 1329,
       "w": 5,
-      "l": 11
+      "l": 11,
+      "gw": 18,
+      "gl": 26
     },
     {
       "name": "FlyQuest",
@@ -117,7 +143,9 @@
       "league": "LCS",
       "score": 1328,
       "w": 7,
-      "l": 8
+      "l": 8,
+      "gw": 22,
+      "gl": 23
     },
     {
       "name": "Movistar KOI",
@@ -125,7 +153,9 @@
       "league": "LEC",
       "score": 1324,
       "w": 15,
-      "l": 12
+      "l": 12,
+      "gw": 32,
+      "gl": 25
     },
     {
       "name": "Team Secret Whales",
@@ -134,7 +164,9 @@
       "score": 1321,
       "w": 19,
       "l": 3,
-      "fst": 7
+      "fst": 7,
+      "gw": 45,
+      "gl": 18
     },
     {
       "name": "Ninjas in Pyjamas",
@@ -142,7 +174,9 @@
       "league": "LPL",
       "score": 1309,
       "w": 13,
-      "l": 12
+      "l": 12,
+      "gw": 34,
+      "gl": 33
     },
     {
       "name": "Invictus Gaming",
@@ -150,7 +184,9 @@
       "league": "LPL",
       "score": 1297,
       "w": 9,
-      "l": 21
+      "l": 21,
+      "gw": 30,
+      "gl": 51
     },
     {
       "name": "Cloud9 Kia",
@@ -158,7 +194,9 @@
       "league": "LCS",
       "score": 1297,
       "w": 13,
-      "l": 2
+      "l": 2,
+      "gw": 30,
+      "gl": 13
     },
     {
       "name": "Relove Deep Cross Gaming",
@@ -166,7 +204,9 @@
       "league": "LCP",
       "score": 1282,
       "w": 14,
-      "l": 9
+      "l": 9,
+      "gw": 41,
+      "gl": 34
     },
     {
       "name": "GAM Esports",
@@ -174,7 +214,9 @@
       "league": "LCP",
       "score": 1279,
       "w": 11,
-      "l": 7
+      "l": 7,
+      "gw": 28,
+      "gl": 22
     },
     {
       "name": "Xi'an Team WE",
@@ -182,7 +224,9 @@
       "league": "LPL",
       "score": 1277,
       "w": 9,
-      "l": 20
+      "l": 20,
+      "gw": 29,
+      "gl": 50
     },
     {
       "name": "BNK FEARX",
@@ -191,7 +235,9 @@
       "score": 1275,
       "w": 13,
       "l": 18,
-      "fst": 5
+      "fst": 5,
+      "gw": 37,
+      "gl": 46
     },
     {
       "name": "Team Liquid Alienware",
@@ -199,7 +245,9 @@
       "league": "LCS",
       "score": 1275,
       "w": 10,
-      "l": 6
+      "l": 6,
+      "gw": 27,
+      "gl": 18
     },
     {
       "name": "Suzhou LNG Esports",
@@ -207,7 +255,9 @@
       "league": "LPL",
       "score": 1267,
       "w": 11,
-      "l": 3
+      "l": 3,
+      "gw": 27,
+      "gl": 12
     },
     {
       "name": "LYON",
@@ -216,7 +266,9 @@
       "score": 1264,
       "w": 13,
       "l": 6,
-      "fst": 6
+      "fst": 6,
+      "gw": 37,
+      "gl": 23
     },
     {
       "name": "MVK Esports",
@@ -224,7 +276,9 @@
       "league": "LCP",
       "score": 1246,
       "w": 8,
-      "l": 9
+      "l": 9,
+      "gw": 22,
+      "gl": 25
     },
     {
       "name": "Team Vitality",
@@ -232,7 +286,9 @@
       "league": "LEC",
       "score": 1245,
       "w": 16,
-      "l": 9
+      "l": 9,
+      "gw": 27,
+      "gl": 21
     },
     {
       "name": "Fnatic",
@@ -240,7 +296,9 @@
       "league": "LEC",
       "score": 1225,
       "w": 8,
-      "l": 14
+      "l": 14,
+      "gw": 15,
+      "gl": 23
     },
     {
       "name": "KIWOOM DRX",
@@ -248,7 +306,9 @@
       "league": "LCK",
       "score": 1219,
       "w": 9,
-      "l": 19
+      "l": 19,
+      "gw": 31,
+      "gl": 46
     },
     {
       "name": "GIANTX",
@@ -256,7 +316,9 @@
       "league": "LEC",
       "score": 1219,
       "w": 14,
-      "l": 12
+      "l": 12,
+      "gw": 24,
+      "gl": 26
     },
     {
       "name": "FURIA",
@@ -264,7 +326,9 @@
       "league": "CBLOL",
       "score": 1215,
       "w": 16,
-      "l": 6
+      "l": 6,
+      "gw": 34,
+      "gl": 16
     },
     {
       "name": "Hanjin BRION",
@@ -272,7 +336,9 @@
       "league": "LCK",
       "score": 1205,
       "w": 6,
-      "l": 19
+      "l": 19,
+      "gw": 22,
+      "gl": 40
     },
     {
       "name": "Nongshim RedForce",
@@ -280,7 +346,9 @@
       "league": "LCK",
       "score": 1203,
       "w": 7,
-      "l": 18
+      "l": 18,
+      "gw": 21,
+      "gl": 41
     },
     {
       "name": "Edward Gaming",
@@ -288,7 +356,9 @@
       "league": "LPL",
       "score": 1203,
       "w": 8,
-      "l": 7
+      "l": 7,
+      "gw": 20,
+      "gl": 24
     },
     {
       "name": "Fukuoka SoftBank HAWKS",
@@ -296,7 +366,9 @@
       "league": "LCP",
       "score": 1191,
       "w": 9,
-      "l": 10
+      "l": 10,
+      "gw": 25,
+      "gl": 27
     },
     {
       "name": "LGD Gaming",
@@ -304,7 +376,9 @@
       "league": "LPL",
       "score": 1185,
       "w": 7,
-      "l": 8
+      "l": 8,
+      "gw": 20,
+      "gl": 25
     },
     {
       "name": "ThunderTalk Gaming",
@@ -312,7 +386,9 @@
       "league": "LPL",
       "score": 1185,
       "w": 4,
-      "l": 11
+      "l": 11,
+      "gw": 15,
+      "gl": 27
     },
     {
       "name": "RED Canids Kalunga",
@@ -320,7 +396,9 @@
       "league": "CBLOL",
       "score": 1184,
       "w": 14,
-      "l": 7
+      "l": 7,
+      "gw": 27,
+      "gl": 19
     },
     {
       "name": "Natus Vincere",
@@ -328,7 +406,9 @@
       "league": "LEC",
       "score": 1182,
       "w": 14,
-      "l": 10
+      "l": 10,
+      "gw": 23,
+      "gl": 22
     },
     {
       "name": "Sentinels",
@@ -336,7 +416,9 @@
       "league": "LCS",
       "score": 1172,
       "w": 6,
-      "l": 8
+      "l": 8,
+      "gw": 18,
+      "gl": 23
     },
     {
       "name": "Shifters",
@@ -344,7 +426,9 @@
       "league": "LEC",
       "score": 1171,
       "w": 6,
-      "l": 14
+      "l": 14,
+      "gw": 11,
+      "gl": 22
     },
     {
       "name": "Vivo Keyd Stars",
@@ -352,7 +436,9 @@
       "league": "CBLOL",
       "score": 1170,
       "w": 8,
-      "l": 11
+      "l": 11,
+      "gw": 16,
+      "gl": 23
     },
     {
       "name": "LOUD",
@@ -361,7 +447,9 @@
       "score": 1157,
       "w": 11,
       "l": 12,
-      "fst": 8
+      "fst": 8,
+      "gw": 29,
+      "gl": 27
     },
     {
       "name": "Shopify Rebellion",
@@ -369,7 +457,9 @@
       "league": "LCS",
       "score": 1148,
       "w": 2,
-      "l": 9
+      "l": 9,
+      "gw": 5,
+      "gl": 19
     },
     {
       "name": "Oh My God",
@@ -377,7 +467,9 @@
       "league": "LPL",
       "score": 1145,
       "w": 4,
-      "l": 9
+      "l": 9,
+      "gw": 12,
+      "gl": 22
     },
     {
       "name": "Disguised",
@@ -385,7 +477,9 @@
       "league": "LCS",
       "score": 1144,
       "w": 4,
-      "l": 8
+      "l": 8,
+      "gw": 11,
+      "gl": 21
     },
     {
       "name": "LOS",
@@ -393,7 +487,9 @@
       "league": "CBLOL",
       "score": 1140,
       "w": 14,
-      "l": 8
+      "l": 8,
+      "gw": 32,
+      "gl": 25
     },
     {
       "name": "Ground Zero Gaming",
@@ -401,7 +497,9 @@
       "league": "LCP",
       "score": 1138,
       "w": 6,
-      "l": 11
+      "l": 11,
+      "gw": 19,
+      "gl": 29
     },
     {
       "name": "paiN Gaming",
@@ -409,7 +507,9 @@
       "league": "CBLOL",
       "score": 1137,
       "w": 3,
-      "l": 13
+      "l": 13,
+      "gw": 8,
+      "gl": 22
     },
     {
       "name": "Ultra Prime",
@@ -417,7 +517,9 @@
       "league": "LPL",
       "score": 1135,
       "w": 3,
-      "l": 8
+      "l": 8,
+      "gw": 9,
+      "gl": 16
     },
     {
       "name": "SK Gaming",
@@ -425,7 +527,9 @@
       "league": "LEC",
       "score": 1124,
       "w": 5,
-      "l": 15
+      "l": 15,
+      "gw": 10,
+      "gl": 22
     },
     {
       "name": "Team Heretics",
@@ -433,7 +537,9 @@
       "league": "LEC",
       "score": 1114,
       "w": 7,
-      "l": 15
+      "l": 15,
+      "gw": 10,
+      "gl": 26
     },
     {
       "name": "DetonatioN FocusMe",
@@ -441,7 +547,9 @@
       "league": "LCP",
       "score": 1101,
       "w": 0,
-      "l": 14
+      "l": 14,
+      "gw": 5,
+      "gl": 28
     },
     {
       "name": "Dignitas",
@@ -449,7 +557,9 @@
       "league": "LCS",
       "score": 1100,
       "w": 1,
-      "l": 10
+      "l": 10,
+      "gw": 5,
+      "gl": 19
     },
     {
       "name": "DN SOOPers",
@@ -457,7 +567,9 @@
       "league": "LCK",
       "score": 1096,
       "w": 5,
-      "l": 23
+      "l": 23,
+      "gw": 18,
+      "gl": 52
     },
     {
       "name": "Fluxo",
@@ -465,7 +577,9 @@
       "league": "CBLOL",
       "score": 1082,
       "w": 7,
-      "l": 11
+      "l": 11,
+      "gw": 17,
+      "gl": 22
     },
     {
       "name": "Leviatán",
@@ -473,7 +587,9 @@
       "league": "CBLOL",
       "score": 1073,
       "w": 6,
-      "l": 13
+      "l": 13,
+      "gw": 12,
+      "gl": 25
     }
   ]
 }

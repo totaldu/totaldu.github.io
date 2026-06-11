@@ -16,8 +16,10 @@ const statusMeta = {
 
 const ScopeIcon = ({ scope, ...rest }) => (scope === 'intl' ? <Globe {...rest} /> : <Flag {...rest} />);
 
-// 팀 short → 실제 전적(GPR 기준)
-const recordByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, { w: t.w ?? 0, l: t.l ?? 0 }]));
+// 팀 short → 실제 전적(GPR 기준). gw/gl = 세트(게임) 승-패
+const recordByShort = Object.fromEntries(
+  gprTeams.teams.map((t) => [t.short, { w: t.w ?? 0, l: t.l ?? 0, gw: t.gw, gl: t.gl }])
+);
 
 // 갱신 시각을 KST(시:분까지)로 표시. 날짜만 들어와도 그대로 출력
 const fmtUpdated = (v) => {
@@ -34,19 +36,21 @@ const fmtUpdated = (v) => {
 const SimulationView = ({ comp }) => {
   // 현재 순위 — 공식 순위표가 있으면 우선, 없으면 GPR 전적으로 산출
   const official = officialStandings.standings[comp.key];
+  const setDiff = (gw, gl) => (gw != null && gl != null ? gw - gl : null);
   const current = official
     ? official.rows.map((r) => {
         const g = r.w + r.l;
-        return { short: r.team, w: r.w, l: r.l, group: r.group, games: g, winRate: g ? r.w / g : 0 };
+        return { short: r.team, w: r.w, l: r.l, group: r.group, games: g, winRate: g ? r.w / g : 0, gd: setDiff(r.gw, r.gl) };
       })
     : (comp.teams || [])
         .map((t) => {
-          const { w, l } = recordByShort[t.short] || { w: 0, l: 0 };
+          const { w, l, gw, gl } = recordByShort[t.short] || { w: 0, l: 0 };
           const g = w + l;
-          return { ...t, w, l, games: g, winRate: g ? w / g : 0 };
+          return { ...t, w, l, games: g, winRate: g ? w / g : 0, gd: setDiff(gw, gl) };
         })
-        .sort((a, b) => b.winRate - a.winRate || b.w - a.w || b.rating - a.rating);
+        .sort((a, b) => b.winRate - a.winRate || b.w - a.w || (b.gd ?? -99) - (a.gd ?? -99) || b.rating - a.rating);
   const hasGroup = current.some((t) => t.group);
+  const hasDiff = current.some((t) => t.gd != null);
 
   return (
     <div className="flex flex-col gap-8">
@@ -73,6 +77,7 @@ const SimulationView = ({ comp }) => {
                   <th className="text-left font-bold py-2 pr-2">팀</th>
                   {hasGroup && <th className="text-left font-bold py-2 px-2">그룹</th>}
                   <th className="text-right font-bold py-2 px-2">승-패</th>
+                  {hasDiff && <th className="text-right font-bold py-2 px-2">득실차</th>}
                   <th className="text-right font-bold py-2 pl-2">승률</th>
                 </tr>
               </thead>
@@ -96,6 +101,12 @@ const SimulationView = ({ comp }) => {
                       </td>
                     )}
                     <td className="py-2 px-2 text-right text-white/70 font-mono">{t.games ? `${t.w}-${t.l}` : '-'}</td>
+                    {hasDiff && (
+                      <td className="py-2 px-2 text-right font-mono"
+                        style={{ color: t.gd > 0 ? '#34D399' : t.gd < 0 ? '#F87171' : '#9CA3AF' }}>
+                        {t.gd != null ? `${t.gd > 0 ? '+' : ''}${t.gd}` : '-'}
+                      </td>
+                    )}
                     <td className="py-2 pl-2 text-right font-black font-mono" style={{ color: lighten(comp.color) }}>
                       {t.games ? `${(t.winRate * 100).toFixed(1)}%` : '-'}
                     </td>
