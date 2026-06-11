@@ -3,14 +3,36 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart3, Trophy } from 'lucide-react';
 import statsData from '../data/championsStats.json';
+import { getChampionsSpriteUrl } from '../utils/championsSprite';
 
 const RULES = [
   { key: 'single', label: '싱글배틀' },
   { key: 'double', label: '더블배틀' },
 ];
 
-const spriteUrl = (id) =>
+const pokeApiUrl = (id) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+
+// Champions sprite 우선, 실패 시 PokeAPI 스프라이트로 폴백
+const PokemonSprite = ({ p }) => {
+  const champUrl = getChampionsSpriteUrl(p.en);
+  const [src, setSrc] = useState(champUrl || pokeApiUrl(p.id));
+  return (
+    <img
+      src={src}
+      alt={p.ko}
+      loading="lazy"
+      className="w-12 h-12 object-contain shrink-0"
+      onError={(e) => {
+        if (src !== pokeApiUrl(p.id)) {
+          setSrc(pokeApiUrl(p.id));
+        } else {
+          e.currentTarget.style.visibility = 'hidden';
+        }
+      }}
+    />
+  );
+};
 
 const rankBadge = (rank) => {
   if (rank === 1) return { bg: '#FEF3C7', color: '#B45309', ring: '#F59E0B' };
@@ -84,15 +106,7 @@ const StatsPage = () => {
                 >
                   {p.rank}
                 </span>
-                <img
-                  src={spriteUrl(p.id)}
-                  alt={p.ko}
-                  loading="lazy"
-                  className="w-12 h-12 object-contain shrink-0"
-                  onError={(e) => {
-                    e.currentTarget.style.visibility = 'hidden';
-                  }}
-                />
+                <PokemonSprite p={p} />
                 <div className="min-w-0">
                   <p className="font-bold text-gray-900 truncate">{p.ko}</p>
                   <p className="text-xs text-gray-400 truncate">
