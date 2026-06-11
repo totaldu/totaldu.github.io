@@ -20,8 +20,9 @@ const ScopeIcon = ({ scope, ...rest }) => (scope === 'intl' ? <Globe {...rest} /
 const recordByShort = Object.fromEntries(
   gprTeams.teams.map((t) => [t.short, { w: t.w ?? 0, l: t.l ?? 0, gw: t.gw, gl: t.gl }])
 );
-// 팀 short → 로고
+// 팀 short → 로고 / 풀네임
 const logoByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.logo]));
+const nameByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.name]));
 
 // 현재 순위 표 (그룹 단위로 재사용)
 const StandingsTable = ({ rows, color, hasDiff }) => (
@@ -43,7 +44,7 @@ const StandingsTable = ({ rows, color, hasDiff }) => (
             <td className="py-2 pr-2">
               <div className="flex items-center gap-2 min-w-0">
                 <TeamLogo src={logoByShort[t.short]} />
-                <span className="font-bold text-white/90 truncate">{t.short}</span>
+                <span className="font-bold text-white/90 truncate">{nameByShort[t.short] || t.short}</span>
               </div>
             </td>
             <td className="py-2 px-2 text-center text-white/70 font-mono">{t.games ? `${t.w}-${t.l}` : '-'}</td>
@@ -142,12 +143,16 @@ const SimulationView = ({ comp, sub }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
           {comp.matches.map((m, i) => (
             <div key={i} className="flex items-center gap-2 p-3 rounded-xl bg-white/5 border border-white/10 text-sm">
-              <span className={`flex-1 text-right font-bold truncate ${m.winner === m.a ? 'text-[#E8C77E]' : 'text-white/60'}`}>
-                {m.winner === m.a && <Trophy size={12} className="inline mr-1 -mt-0.5" />}{m.a}
+              <span className={`flex-1 flex items-center justify-end gap-1.5 font-bold truncate ${m.winner === m.a ? 'text-[#E8C77E]' : 'text-white/60'}`}>
+                {m.winner === m.a && <Trophy size={12} className="shrink-0" />}
+                <span className="truncate">{nameByShort[m.a] || m.a}</span>
+                <TeamLogo src={logoByShort[m.a]} size={18} />
               </span>
               <span className="px-2 py-0.5 rounded bg-white/10 text-[11px] font-black text-white/70 shrink-0">{m.pA}%</span>
-              <span className={`flex-1 text-left font-bold truncate ${m.winner === m.b ? 'text-[#E8C77E]' : 'text-white/60'}`}>
-                {m.b}{m.winner === m.b && <Trophy size={12} className="inline ml-1 -mt-0.5" />}
+              <span className={`flex-1 flex items-center justify-start gap-1.5 font-bold truncate ${m.winner === m.b ? 'text-[#E8C77E]' : 'text-white/60'}`}>
+                <TeamLogo src={logoByShort[m.b]} size={18} />
+                <span className="truncate">{nameByShort[m.b] || m.b}</span>
+                {m.winner === m.b && <Trophy size={12} className="shrink-0" />}
               </span>
             </div>
           ))}
