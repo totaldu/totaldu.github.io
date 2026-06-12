@@ -106,7 +106,7 @@ const fmtUpdated = (v) => {
 
 // 단계별 뷰 설정 (LCK→LCK 에서 정규시즌/플레이-인/플레이오프 선택 시)
 const STAGE_CFG = {
-  '정규시즌': { cols: { diff: true }, matches: false, heading: '정규시즌 순위', desc: '현재까지 확정된 정규시즌 순위입니다.' },
+  '정규시즌': { cols: { diff: true, piPlus: true, advance: true, worlds: true, champ: true }, matches: false, heading: '정규시즌 순위', desc: '현재 순위 + 예상 진출·우승 확률.' },
   '플레이-인': { cols: { piPlus: true, advance: true }, matches: false, heading: '플레이-인 예측', desc: '레전드 5위 + 라이즈 1~3위가 겨루는 플레이-인 단계. PI+/플레이오프 진출 확률.' },
   '플레이오프': { cols: { advance: true, worlds: true, champ: true }, matches: true, heading: '플레이오프 예측', desc: '플레이오프 진출·우승·Worlds 진출 확률과 예상 대진.' },
 };
