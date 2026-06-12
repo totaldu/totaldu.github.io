@@ -301,8 +301,9 @@ const SimulationView = ({ comp, sub, stage }) => {
     <div className="flex flex-col gap-8">
       {/* 메타 */}
       <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-        {comp.stage && <span className="text-white/50">단계: <strong className="text-white/80">{comp.stage}</strong></span>}
-        {comp.format && <span className="text-white/50">형식: <strong className="text-white/80">{comp.format}</strong></span>}
+        {(comp.stage || comp.format) && (
+          <span className="text-white/50">형식: <strong className="text-white/80">{[comp.stage, comp.format].filter(Boolean).join(' · ')}</strong></span>
+        )}
         {comp.iterations > 0 && <span className="text-white/50">반복: <strong className="text-white/80">{comp.iterations.toLocaleString()}회</strong></span>}
         {comp.generatedAt && <span className="text-white/50">생성: <strong className="text-white/80">{fmtUpdated(comp.generatedAt)}</strong></span>}
       </div>
