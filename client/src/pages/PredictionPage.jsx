@@ -161,6 +161,8 @@ const SimulationView = ({ comp, sub, stage }) => {
         })
         .sort((a, b) => b.winRate - a.winRate || b.w - a.w || (b.gd ?? -99) - (a.gd ?? -99) || b.rating - a.rating);
   const hasDiff = current.some((t) => t.gd != null);
+  // Road to MSI(MSI 선발전): 정규 2R 기준 진출 6팀 명단만 표기, 시즌 예측 확률 컬럼은 생략
+  const roadToMsi = comp.key === 'lck' && sub === 'Road to MSI';
   // 팀 약칭 → 시뮬 예측 확률 (현재 순위표에 합쳐 표기)
   const probByShort = Object.fromEntries((comp.standings || []).map((s) => [s.team, s]));
   // 그룹이 있으면 그룹별로 분리하고 각 그룹 내 1위부터 재번호
@@ -180,6 +182,8 @@ const SimulationView = ({ comp, sub, stage }) => {
   let bracket = null;
   let groups;
   const lckBracketStage = comp.key === 'lck' && grouped && (stage === '플레이-인' || stage === '플레이오프');
+  // 정규시즌 종료 전이면 진출팀 미정 → 참가팀 표는 비워둠
+  const seedsPending = lckBracketStage && !official?.seedsLocked;
   if (lckBracketStage) {
     const legend = current.filter((t) => t.group === 'Legend'); // L1~L5 (순위순)
     const rise = current.filter((t) => t.group === 'Rise'); // R1~R5
@@ -189,7 +193,7 @@ const SimulationView = ({ comp, sub, stage }) => {
     // 시드 슬롯: 확정(locked)일 때만 팀 표기, 아니면 라벨만(미정)
     const slot = (seed, team) => ({ seed, short: locked && team ? team.short : null });
     if (stage === '플레이-인') {
-      groups = [{ name: null, rows: playin.map((t, i) => withProb(t, i + 1)) }];
+      groups = locked ? [{ name: null, rows: playin.map((t, i) => withProb(t, i + 1)) }] : [];
       bracket = {
         desc: '레전드 5위 + 라이즈 1~3위 · 승자 2팀 플레이오프 진출 · 전 경기 Bo5',
         sections: [{
@@ -206,7 +210,7 @@ const SimulationView = ({ comp, sub, stage }) => {
         }],
       };
     } else {
-      groups = [{ name: null, rows: direct.map((t, i) => withProb(t, i + 1)) }];
+      groups = locked ? [{ name: null, rows: direct.map((t, i) => withProb(t, i + 1)) }] : [];
       // 6팀 더블 엘리미네이션 — 1~4시드 레전드 직행, 5·6시드 플레이인 통과(미정)
       bracket = {
         desc: '레전드 1~4위 직행 + 플레이-인 통과 2팀 · 6팀 더블 엘리미네이션 · 전 경기 Bo5',
@@ -251,7 +255,7 @@ const SimulationView = ({ comp, sub, stage }) => {
           badge: GROUP_META[name]?.badge ?? FALLBACK_BADGES[gi % FALLBACK_BADGES.length],
           rows: current.filter((t) => t.group === name).map((t, i) => withProb(t, i + 1)),
         }))
-      : [{ name: null, rows: current.map((t, i) => withProb(t, t.rank ?? i + 1)) }];
+      : [{ name: null, rows: current.map((t, i) => (roadToMsi ? { ...t, rank: t.rank ?? i + 1 } : withProb(t, t.rank ?? i + 1))) }];
   }
 
   return (
@@ -268,9 +272,14 @@ const SimulationView = ({ comp, sub, stage }) => {
       {current.length > 0 && (
         <section className="flex flex-col gap-5">
           <div className="flex items-baseline gap-2 flex-wrap">
-            <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">{cfg?.heading || '현재 순위'}</h3>
+            <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">{cfg?.heading || (roadToMsi ? '진출 팀' : '현재 순위')}</h3>
             {(cfg?.desc || official?.stage) && <span className="text-xs text-white/40">{cfg?.desc || official?.stage}</span>}
           </div>
+          {seedsPending && (
+            <p className="text-sm text-white/40 py-3 px-4 rounded-xl bg-white/5 border border-white/10">
+              진출팀은 정규시즌 종료 후 확정됩니다. (현재 미정)
+            </p>
+          )}
           {groups.map((grp) => (
             <div key={grp.name || 'all'}>
               {grp.name && (
@@ -306,7 +315,7 @@ const SimulationView = ({ comp, sub, stage }) => {
       )}
 
       {/* 대진별 예측 — 진행중인 리그에서만 (단계별 대진표가 있으면 생략) */}
-    {comp.status === 'ongoing' && (!cfg || cfg.matches) && !bracket && comp.matches?.length > 0 && (
+    {comp.status === 'ongoing' && (!cfg || cfg.matches) && !bracket && !roadToMsi && comp.matches?.length > 0 && (
       <section>
         <h3 className="text-sm font-black text-[#E8C77E] mb-4 uppercase tracking-wider">대진별 예측</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
@@ -399,15 +408,23 @@ const tabLogo = (key) => (key === 'gpr' ? LOLESPORTS_LOGO : COMP_LOGO[key]);
 
 // 지역 리그별 세부 대회 (2026 기준)
 const SUBTABS = {
-  lck: ['LCK CUP', 'LCK'],
+  lck: ['LCK CUP', 'LCK', 'Road to MSI'],
   lpl: ['Split 1', 'Split 2', 'Split 3'],
   lec: ['Versus', 'Spring', 'Summer'],
   lcp: ['Split 1', 'Split 2', 'Split 3'],
   lcs: ['Lock-In', 'Spring', 'Summer'],
   cblol: ['Copa', 'Split 1', 'Split 2'],
 };
-// 세부 대회 기본 선택(현재 진행 중)
-const SUBTAB_DEFAULT = { lck: 'LCK', lpl: 'Split 2', lec: 'Summer', lcp: 'Split 2', lcs: 'Summer', cblol: 'Split 2' };
+// 세부 대회 기본 선택(현재 진행/직전 완료된 대회)
+const SUBTAB_DEFAULT = { lck: 'Road to MSI', lpl: 'Split 2', lec: 'Spring', lcp: 'Split 2', lcs: 'Spring', cblol: 'Split 1' };
+// 아직 시작하지 않은 세부 대회 → "예정" 표시
+const SUB_UPCOMING = {
+  lpl: ['Split 3'],
+  lec: ['Summer'],
+  lcp: ['Split 3'],
+  lcs: ['Summer'],
+  cblol: ['Split 2'],
+};
 
 const PredictionPage = () => {
   const comps = sim.competitions;
@@ -436,6 +453,7 @@ const PredictionPage = () => {
     ? (subParam && subTabs.includes(subParam) ? subParam : (SUBTAB_DEFAULT[comp.key] || subTabs[0]))
     : null;
   const setActiveSub = (s) => setSearchParams({ sub: s }, { replace: true });
+  const subUpcoming = !!(comp && activeSub && SUB_UPCOMING[comp.key]?.includes(activeSub));
   // 제목 접미사: 점(·) 없이 공백으로 이어붙이되, 리그명이 sub에 중복되면 제거
   // 예) LPL+'Split 2' → "Split 2", LCK+'LCK' → "", LCK+'LCK CUP' → "CUP"
   const subSuffix = (() => {
@@ -566,7 +584,13 @@ const PredictionPage = () => {
                 </div>
               )}
 
-              {!comp.ready ? (
+              {subUpcoming ? (
+                <div className="py-16 text-center border-2 border-dashed border-white/10 rounded-3xl">
+                  <Hourglass size={28} className="mx-auto text-white/30 mb-3" />
+                  <p className="text-white/50 font-bold mb-1">아직 시작하지 않은 대회입니다</p>
+                  <p className="text-white/30 text-sm">{activeSub}가 시작되면 순위·예측을 게재합니다.</p>
+                </div>
+              ) : !comp.ready ? (
                 <NotReady comp={comp} />
               ) : comp.status === 'finished' ? (
                 <ResultView comp={comp} />

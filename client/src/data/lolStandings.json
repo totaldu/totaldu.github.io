@@ -11,6 +11,17 @@
   },
   "standings": {
     "lck": {
+      "Road to MSI": {
+        "stage": "MSI 선발전 · 정규 2R 종료 기준 상위 6팀 진출",
+        "rows": [
+          { "rank": 1, "team": "HLE", "w": 15, "l": 3, "gw": 32, "gl": 11 },
+          { "rank": 2, "team": "T1", "w": 14, "l": 4, "gw": 30, "gl": 10 },
+          { "rank": 3, "team": "GEN", "w": 14, "l": 4, "gw": 30, "gl": 11 },
+          { "rank": 4, "team": "KT", "w": 13, "l": 5, "gw": 26, "gl": 15 },
+          { "rank": 5, "team": "DK", "w": 11, "l": 7, "gw": 24, "gl": 18 },
+          { "rank": 6, "team": "BRO", "w": 6, "l": 12, "gw": 16, "gl": 24 }
+        ]
+      },
       "LCK": {
         "stage": "2026 스플릿 2 · 정규 1·2R (MSI 선발전 후 3·4R 진행)",
         "seedsLocked": false,
@@ -242,7 +253,7 @@
       }
     },
     "lec": {
-      "Summer": {
+      "Spring": {
         "stage": "2026 스프링 정규시즌",
         "rows": [
           {
@@ -400,8 +411,8 @@
       }
     },
     "lcs": {
-      "Summer": {
-        "stage": "2026 스플릿 2 정규시즌",
+      "Spring": {
+        "stage": "2026 스프링 정규시즌",
         "rows": [
           {
             "rank": 1,
@@ -471,7 +482,7 @@
       }
     },
     "cblol": {
-      "Split 2": {
+      "Split 1": {
         "stage": "2026 스플릿 1 정규시즌",
         "rows": [
           {
