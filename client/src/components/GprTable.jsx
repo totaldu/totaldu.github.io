@@ -6,8 +6,6 @@ import gprTeams from '../data/gprTeams.json';
 import { textOn, lighten } from '../utils/colorContrast';
 
 const leagueColor = Object.fromEntries(gpr.regions.map((r) => [r.key, r.color]));
-// 일부 리그는 GPR 바 색을 로고 색으로 사용 (LEC 민트, LCP 골드오렌지)
-const BAR_LOGO_COLOR = { LEC: '#00E0B0', LCP: '#F08040' };
 const gprRanked = [...gprTeams.teams].sort((a, b) => b.score - a.score);
 const gprMaxScore = Math.max(...gprRanked.map((t) => t.score));
 
@@ -48,7 +46,7 @@ const GprTable = ({ showIntro = true }) => (
         <tbody>
           {gprRanked.map((t, i) => {
             const col = leagueColor[t.league] || '#888';
-            const barCol = BAR_LOGO_COLOR[t.league] || col; // LEC·LCP는 로고 색 바
+            const barCol = col;
             return (
               <tr key={t.short} className="border-b border-white/5">
                 <td className="py-2 px-2 text-center text-white/40 font-mono">{i + 1}</td>
