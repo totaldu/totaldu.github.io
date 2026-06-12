@@ -305,6 +305,15 @@ const PredictionPage = () => {
     ? (subParam && subTabs.includes(subParam) ? subParam : (SUBTAB_DEFAULT[comp.key] || subTabs[0]))
     : null;
   const setActiveSub = (s) => setSearchParams({ sub: s }, { replace: true });
+  // 제목 접미사: 점(·) 없이 공백으로 이어붙이되, 리그명이 sub에 중복되면 제거
+  // 예) LPL+'Split 2' → "Split 2", LCK+'LCK' → "", LCK+'LCK CUP' → "CUP"
+  const subSuffix = (() => {
+    if (!subTabs || !activeSub) return '';
+    const lg = comp.name.replace('2026 ', '');
+    if (activeSub === lg) return '';
+    const t = activeSub.startsWith(lg + ' ') ? activeSub.slice(lg.length + 1) : activeSub;
+    return ` ${t}`;
+  })();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1428] via-[#1e2328] to-[#0a1428] p-6 md:p-12 text-white">
@@ -359,7 +368,7 @@ const PredictionPage = () => {
                     <ScopeIcon scope={comp.scope} size={18} color={textOn(comp.color)} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-white">{comp.name}{subTabs ? ` · ${activeSub}` : ''}</h2>
+                    <h2 className="text-xl font-black text-white">{comp.name}{subSuffix}</h2>
                     <p className="text-xs text-white/40">{comp.scope === 'intl' ? '국제 대회' : '지역 리그'}</p>
                   </div>
                 </div>
