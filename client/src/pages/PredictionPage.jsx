@@ -25,55 +25,29 @@ const recordByShort = Object.fromEntries(
 const logoByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.logo]));
 const nameByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.name]));
 
-// 대진표 슬롯 — 시드가 확정된 팀이면 로고+이름, 아니면 시드/출처 라벨(미정)
-const BracketSlot = ({ slot }) => (
-  <div className="flex items-center gap-1.5 px-2 py-1.5 min-h-[30px]">
-    {slot.short ? (
-      <>
-        <TeamLogo src={logoByShort[slot.short]} size={16} />
-        <span className="truncate text-xs font-bold text-white/90">{nameByShort[slot.short] || slot.short}</span>
-      </>
-    ) : (
-      <span className="truncate text-xs text-white/40">{slot.seed}</span>
-    )}
-  </div>
-);
-const Bracket = ({ rounds }) => (
-  <div className="flex gap-4 overflow-x-auto pb-1">
-    {rounds.map((r, ri) => (
-      <div key={ri} className="flex flex-col justify-around gap-5 min-w-[170px]">
-        <p className="text-[11px] font-black text-white/40 uppercase tracking-wider">{r.title}</p>
-        {r.matches.map((m, mi) => (
-          <div key={mi} className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
-            <BracketSlot slot={m.a} />
-            <div className="h-px bg-white/10" />
-            <BracketSlot slot={m.b} />
-          </div>
-        ))}
-      </div>
-    ))}
-  </div>
-);
 
 // Road to MSI(선발전) 사다리식 대진표 — 실제 점수·진출/MSI 결과 표기
 const MsiSlot = ({ s }) => {
   // MSI(토너먼트) 진출 = 금색, 하위 라운드 승자 = 파랑, 탈락 = 빨강 배경
   const accent = s?.msi ? '#E8C77E' : s?.win ? '#60A5FA' : null;
   const bg = s?.msi ? 'rgba(232,199,126,0.16)' : s?.win ? 'rgba(96,165,250,0.14)' : s?.elim ? 'rgba(248,113,113,0.18)' : 'transparent';
+  const label = s?.seed || s?.label || '';
   return (
     <div className="flex items-center gap-2 px-2.5 py-2 min-h-[36px]" style={{ backgroundColor: bg }}>
-      <span className="text-[10px] text-white/40 w-9 shrink-0 truncate">{s?.seed || s?.label || ''}</span>
       {s?.short ? (
         <>
+          {label && <span className="text-[10px] text-white/40 shrink-0 max-w-[80px] truncate">{label}</span>}
           <TeamLogo src={logoByShort[s.short]} size={16} />
           <span className="text-xs font-bold truncate" style={{ color: accent || 'rgba(255,255,255,0.88)' }}>{s.short}</span>
         </>
       ) : (
-        <span className="text-xs text-white/30">미정</span>
+        <span className="text-xs text-white/35 truncate">{label || '미정'}</span>
       )}
-      <span className="ml-auto text-sm font-black font-mono shrink-0" style={{ color: accent || 'rgba(255,255,255,0.45)' }}>
-        {s?.score != null ? s.score : ''}
-      </span>
+      {s?.score != null && (
+        <span className="ml-auto text-sm font-black font-mono shrink-0" style={{ color: accent || 'rgba(255,255,255,0.45)' }}>
+          {s.score}
+        </span>
+      )}
     </div>
   );
 };
@@ -84,7 +58,7 @@ const MsiBracket = ({ rounds }) => (
         <p className="text-[11px] font-black text-white/40 uppercase tracking-wider">{r.title}</p>
         {r.matches.map((m, mi) => (
           <div key={mi} className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
-            <div className="px-2.5 py-1.5 bg-white/10 text-[11px] font-black text-white/70">{m.title}</div>
+            {m.title && <div className="px-2.5 py-1.5 bg-white/10 text-[11px] font-black text-white/70">{m.title}</div>}
             <MsiSlot s={m.a} />
             <div className="h-px bg-white/10" />
             <MsiSlot s={m.b} />
@@ -348,7 +322,7 @@ const SimulationView = ({ comp, sub, stage }) => {
                 {sec.name && (
                   <p className="text-xs font-black text-white/55 mb-3">{sec.name}</p>
                 )}
-                <Bracket rounds={sec.rounds} />
+                <MsiBracket rounds={sec.rounds} />
               </div>
             ))}
           </div>
