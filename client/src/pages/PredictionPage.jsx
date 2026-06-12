@@ -57,8 +57,9 @@ const Bracket = ({ rounds }) => (
 
 // Road to MSI(선발전) 사다리식 대진표 — 실제 점수·진출/MSI 결과 표기
 const MsiSlot = ({ s }) => {
-  const accent = s?.msi ? '#60A5FA' : null;
-  const bg = s?.msi ? 'rgba(96,165,250,0.16)' : 'transparent';
+  // MSI(토너먼트) 진출 = 금색, 하위 라운드 승자 = 파랑
+  const accent = s?.msi ? '#E8C77E' : s?.win ? '#60A5FA' : null;
+  const bg = s?.msi ? 'rgba(232,199,126,0.16)' : s?.win ? 'rgba(96,165,250,0.14)' : 'transparent';
   return (
     <div className="flex items-center gap-2 px-2.5 py-2 min-h-[36px]" style={{ backgroundColor: bg }}>
       <span className="text-[10px] text-white/40 w-9 shrink-0 truncate">{s?.seed || s?.label || ''}</span>
