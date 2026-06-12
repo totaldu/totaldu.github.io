@@ -15,6 +15,11 @@ const API_BASE = import.meta.env.DEV
   ? "http://localhost:4000"
   : "https://totaldu-github-io.vercel.app";
 
+// 포켓몬은 아직 beta 단계 → 로컬·downup17(beta)에서만 노출하고
+// totaldu(공개)에서는 숨긴다. 정식 공개 시 이 플래그만 풀면 된다.
+const IS_BETA = import.meta.env.DEV
+  || (typeof window !== 'undefined' && /downup17/i.test(window.location.hostname));
+
 const PartyPage = () => (
   <div className="min-h-screen bg-white p-10 md:p-20">
     <div className="max-w-4xl mx-auto">
@@ -397,10 +402,12 @@ const MainHome = ({ articles, searchQuery, setSearchQuery }) => (
   </>
 );
 
-const SPORTS = [
-  { key: 'pokemon', label: '포켓몬', icon: Swords, color: '#005596' },
+const ALL_SPORTS = [
+  { key: 'pokemon', label: '포켓몬', icon: Swords, color: '#005596', beta: true },
   { key: 'lol', label: 'LoL Esports', icon: Gamepad2, color: '#C8963E' },
 ];
+// beta 환경이 아니면 beta 종목(포켓몬)을 제외한다.
+const SPORTS = ALL_SPORTS.filter(s => IS_BETA || !s.beta);
 
 // 종목 전환 시 이동할 기본 페이지
 const SPORT_HOME = { pokemon: '/', lol: '/lol/prediction' };
@@ -458,7 +465,10 @@ const SportSwitcher = ({ sport, setSport }) => {
 const App = () => {
   const [articles, setArticles] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sport, setSport] = useState(() => localStorage.getItem('sport') || 'pokemon');
+  const [sport, setSport] = useState(() => {
+    if (!IS_BETA) return 'lol';                       // 공개 환경은 LoL 고정
+    return localStorage.getItem('sport') || 'pokemon';
+  });
 
   useEffect(() => {
     localStorage.setItem('sport', sport);
@@ -481,7 +491,7 @@ const App = () => {
                 <span className="bg-[#005596] text-white px-3 py-1 rounded-xl text-sm tracking-widest uppercase">Total</span>
                 <span>DU</span>
               </Link>
-              <SportSwitcher sport={sport} setSport={setSport} />
+              {SPORTS.length > 1 && <SportSwitcher sport={sport} setSport={setSport} />}
             </div>
             <nav className="hidden lg:flex items-center space-x-10 font-bold text-gray-600">
               {sport === 'pokemon' ? (
@@ -509,23 +519,29 @@ const App = () => {
             ? <MainHome articles={articles} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
             : <Navigate to="/lol/prediction" replace />} />
 
-          {/* ✅ PokedexLayout 중첩 라우트 */}
-          <Route path="/pokedex" element={<PokedexLayout />}>
-            <Route index element={<PokedexPage />} />
-            <Route path="abilities" element={<AbilityListPage />} />
-            <Route path="ability/:name" element={<AbilityDetailPage />} />
-            <Route path=":id" element={<PokemonDetailPage />} />
-          </Route>
+          {/* 포켓몬 라우트는 beta 환경에서만 등록 (totaldu에서는 비노출) */}
+          {IS_BETA && (
+            <>
+              {/* ✅ PokedexLayout 중첩 라우트 */}
+              <Route path="/pokedex" element={<PokedexLayout />}>
+                <Route index element={<PokedexPage />} />
+                <Route path="abilities" element={<AbilityListPage />} />
+                <Route path="ability/:name" element={<AbilityDetailPage />} />
+                <Route path=":id" element={<PokemonDetailPage />} />
+              </Route>
 
-          <Route path="/party" element={<PartyPage />} />
+              <Route path="/party" element={<PartyPage />} />
 
-          <Route path="/battle" element={<BattleLayout />}>
-            <Route index element={<BattlePage />} />
-            <Route path="type-chart" element={<TypeChartPage />} />
-            <Route path="attack-order" element={<AttackOrderPage />} />
-          </Route>
+              <Route path="/battle" element={<BattleLayout />}>
+                <Route index element={<BattlePage />} />
+                <Route path="type-chart" element={<TypeChartPage />} />
+                <Route path="attack-order" element={<AttackOrderPage />} />
+              </Route>
 
-          <Route path="/community" element={<CommunityPage />} />
+              <Route path="/community" element={<CommunityPage />} />
+            </>
+          )}
+
           <Route path="/lol/prediction" element={<PredictionPage />} />
           <Route path="/lol/prediction/:tab" element={<PredictionPage />} />
         </Routes>
