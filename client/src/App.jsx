@@ -13,7 +13,7 @@ import PredictionPage from './pages/PredictionPage';
 
 const API_BASE = import.meta.env.DEV
   ? "http://localhost:4000"
-  : "https://down-up17-github-io.vercel.app";
+  : "https://totaldu-github-io.vercel.app";
 
 const PartyPage = () => (
   <div className="min-h-screen bg-white p-10 md:p-20">
