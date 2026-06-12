@@ -269,7 +269,11 @@ function simulateLCK(teams, fixed) {
 }
 
 // ---- 6개 리그 시뮬레이션 ----
-const leagues = ['LCK', 'LPL', 'LEC', 'LCP', 'LCS', 'CBLOL'];
+// 인자로 리그를 지정하면 그 리그만 재계산하고 나머지는 기존 lolSim.json 값을 유지한다.
+//   예: node scripts/simulateLol.mjs LCK LPL  → LCK·LPL만 시뮬. 인자 없으면 전체.
+const ALL_LEAGUES = ['LCK', 'LPL', 'LEC', 'LCP', 'LCS', 'CBLOL'];
+const argLeagues = process.argv.slice(2).map((s) => s.toUpperCase());
+const leagues = argLeagues.length ? ALL_LEAGUES.filter((l) => argLeagues.includes(l)) : ALL_LEAGUES;
 // LCK 현재 순위표(정규 1·2R 완료)를 고정 입력으로 사용 → 잔여 경기만 시뮬
 const lckRows = standingsData.standings?.lck?.LCK?.rows;
 const lckFixed = lckRows && Object.fromEntries(

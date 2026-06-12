@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-12T04:23:49.358Z",
+  "updatedAt": "2026-06-12T10:43:43.121Z",
   "source": "https://lolesports.com/ko-KR/gpr/2026/current",
   "iterationsDefault": 20000,
   "competitions": [
@@ -13,7 +13,7 @@
       "stage": "정규 3·4라운드 → 플레이인 → 플레이오프 (1·2R 결과 고정)",
       "format": "정규 4R Bo3(2R 후 레전드/라이즈 분할) → 플레이인·플레이오프 6팀 더블 엘리미네이션 Bo5",
       "iterations": 100000,
-      "generatedAt": "2026-06-12T04:23:46.846Z",
+      "generatedAt": "2026-06-12T10:43:41.501Z",
       "teams": [
         {
           "name": "Gen.G Esports",
@@ -228,7 +228,7 @@
       "stage": "정규시즌 + 플레이오프 (시즌 전체)",
       "format": "싱글 라운드로빈 Bo3 → 상위 6팀 Bo5 플레이오프",
       "iterations": 100000,
-      "generatedAt": "2026-06-12T04:23:46.846Z",
+      "generatedAt": "2026-06-12T10:43:41.501Z",
       "teams": [
         {
           "name": "Bilibili Gaming",
@@ -479,7 +479,7 @@
       "stage": "정규시즌 + 플레이오프 (시즌 전체)",
       "format": "싱글 라운드로빈 Bo3 → 상위 6팀 Bo5 플레이오프",
       "iterations": 100000,
-      "generatedAt": "2026-06-12T04:23:46.846Z",
+      "generatedAt": "2026-06-12T10:43:41.501Z",
       "teams": [
         {
           "name": "G2 Esports",
@@ -674,7 +674,7 @@
       "stage": "정규시즌 + 플레이오프 (시즌 전체)",
       "format": "싱글 라운드로빈 Bo3 → 상위 6팀 Bo5 플레이오프",
       "iterations": 100000,
-      "generatedAt": "2026-06-12T04:23:46.846Z",
+      "generatedAt": "2026-06-12T10:43:41.501Z",
       "teams": [
         {
           "name": "CTBC Flying Oyster",
@@ -841,7 +841,7 @@
       "stage": "정규시즌 + 플레이오프 (시즌 전체)",
       "format": "싱글 라운드로빈 Bo3 → 상위 6팀 Bo5 플레이오프",
       "iterations": 100000,
-      "generatedAt": "2026-06-12T04:23:46.846Z",
+      "generatedAt": "2026-06-12T10:43:41.501Z",
       "teams": [
         {
           "name": "FlyQuest",
@@ -1008,7 +1008,7 @@
       "stage": "정규시즌 + 플레이오프 (시즌 전체)",
       "format": "싱글 라운드로빈 Bo3 → 상위 6팀 Bo5 플레이오프",
       "iterations": 100000,
-      "generatedAt": "2026-06-12T04:23:46.846Z",
+      "generatedAt": "2026-06-12T10:43:41.501Z",
       "teams": [
         {
           "name": "FURIA",
