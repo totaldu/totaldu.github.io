@@ -27,12 +27,12 @@
             { "title": "1라운드", "matches": [
               { "title": "Round 1 (6/6)",
                 "a": { "seed": "5위", "short": "DK", "score": 3, "win": true },
-                "b": { "seed": "6위", "short": "BRO", "score": 0 } }
+                "b": { "seed": "6위", "short": "BRO", "score": 0, "elim": true } }
             ] },
             { "title": "2라운드", "matches": [
               { "title": "Round 2 (6/7)",
                 "a": { "seed": "4위", "short": "KT", "score": 3, "win": true },
-                "b": { "label": "R1 승자", "short": "DK", "score": 2 } }
+                "b": { "label": "R1 승자", "short": "DK", "score": 2, "elim": true } }
             ] },
             { "title": "3-4라운드", "matches": [
               { "title": "Round 3 (6/12)",
