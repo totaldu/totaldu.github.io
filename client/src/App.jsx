@@ -11,14 +11,19 @@ import AbilityListPage from './pages/AbilityListPage';
 import AbilityDetailPage from './pages/AbilityDetailPage';
 import PredictionPage from './pages/PredictionPage';
 
-const API_BASE = import.meta.env.DEV
-  ? "http://localhost:4000"
-  : "https://totaldu-github-io.vercel.app";
+const HOST = typeof window !== 'undefined' ? window.location.hostname : '';
 
 // 포켓몬은 아직 beta 단계 → 로컬·downup17(beta)에서만 노출하고
 // totaldu(공개)에서는 숨긴다. 정식 공개 시 이 플래그만 풀면 된다.
-const IS_BETA = import.meta.env.DEV
-  || (typeof window !== 'undefined' && /downup17/i.test(window.location.hostname));
+const IS_BETA = import.meta.env.DEV || /downup17/i.test(HOST);
+
+// 각 환경이 자기 백엔드를 호출하도록 분기한다.
+// 로컬 → localhost, downup17(beta) → beta 백엔드, totaldu(공개) → 공개 백엔드
+const API_BASE = import.meta.env.DEV
+  ? "http://localhost:4000"
+  : (/downup17/i.test(HOST)
+      ? "https://down-up17-github-io.vercel.app"   // beta 백엔드
+      : "https://totaldu-github-io.vercel.app");    // 공개 백엔드
 
 const PartyPage = () => (
   <div className="min-h-screen bg-white p-10 md:p-20">
