@@ -325,6 +325,16 @@ const PredictionPage = () => {
     const t = activeSub.startsWith(lg + ' ') ? activeSub.slice(lg.length + 1) : activeSub;
     return ` ${t}`;
   })();
+  // CBLOL 예외 표기: "CBLOL 2026" 기준, Copa는 앞에 → "Copa CBLOL 2026", 그 외 세부는 뒤에
+  const title = (() => {
+    if (comp?.key === 'cblol') {
+      const base = 'CBLOL 2026';
+      if (activeSub === 'Copa') return `Copa ${base}`;
+      if (activeSub && activeSub !== 'CBLOL') return `${base} ${activeSub}`;
+      return base;
+    }
+    return `${comp?.name ?? ''}${subSuffix}`;
+  })();
   // LCK→LCK 일 때만 단계(정규시즌/플레이-인/플레이오프) 선택
   const LCK_STAGES = ['정규시즌', '플레이-인', '플레이오프'];
   const showStages = comp?.key === 'lck' && activeSub === 'LCK';
@@ -387,7 +397,7 @@ const PredictionPage = () => {
                     <ScopeIcon scope={comp.scope} size={18} color={textOn(comp.color)} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-white">{comp.name}{subSuffix}</h2>
+                    <h2 className="text-xl font-black text-white">{title}</h2>
                     <p className="text-xs text-white/40">{comp.scope === 'intl' ? '국제 대회' : '지역 리그'}</p>
                   </div>
                 </div>
