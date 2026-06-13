@@ -652,7 +652,7 @@ const PredictionPage = () => {
             <>
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[#C8963E]">
-                  <img src={LOLESPORTS_LOGO} alt="GPR" width={24} height={24} className="object-contain" />
+                  <img src={LOLESPORTS_LOGO} alt="GPR" width={24} height={24} className="object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
                 </div>
                 <div>
                   <h2 className="text-xl font-black text-white">GPR 팀 랭킹</h2>
@@ -667,6 +667,7 @@ const PredictionPage = () => {
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: comp.color }}>
                     <img src={COMP_LOGO[comp.key]} alt={comp.name} width={24} height={24} className="object-contain"
+                      style={{ filter: 'brightness(0) invert(1)' }}
                       onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
                   </div>
                   <div>
