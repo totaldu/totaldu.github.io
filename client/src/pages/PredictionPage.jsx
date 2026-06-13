@@ -445,6 +445,31 @@ const SimulationView = ({ comp, sub, stage }) => {
         </section>
       )}
 
+      {/* MSI 스테이지 대진표 (플레이-인 / 브래킷) — 상위권/하위권 섹션 구조 */}
+      {official?.bracket?.sections && (
+        <section>
+          <div className="flex items-baseline gap-2 flex-wrap mb-4">
+            <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">대진표</h3>
+            {official.bracket.desc && <span className="text-xs text-white/40">{official.bracket.desc}</span>}
+          </div>
+          <div className="flex flex-col gap-8">
+            {official.bracket.sections.map((sec, si) => (
+              <div key={si}>
+                {sec.name && <p className="text-xs font-black text-white/55 mb-3 pb-2 border-b border-white/10">{sec.name}</p>}
+                <MsiBracket rounds={sec.rounds} />
+              </div>
+            ))}
+          </div>
+          {official.bracket.legend?.length > 0 && (
+            <div className="flex flex-wrap gap-4 mt-4 text-[11px] text-white/50">
+              {official.bracket.legend.map((lg, i) => (
+                <span key={i} className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: lg.color }} /> {lg.label}</span>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       {/* 대진별 예측 — 진행중인 리그에서만 (단계별 대진표가 있으면 생략) */}
     {comp.status === 'ongoing' && (!cfg || cfg.matches) && !bracket && !roadToMsi && comp.matches?.length > 0 && (
       <section>
@@ -545,9 +570,10 @@ const SUBTABS = {
   lcp: ['Split 1', 'Split 2', 'Split 3'],
   lcs: ['Lock-In', 'Spring', 'Summer'],
   cblol: ['Copa', 'Split 1', 'Split 2'],
+  msi: ['플레이-인 스테이지', '브래킷 스테이지'],
 };
 // 세부 대회 기본 선택(현재 진행/직전 완료된 대회)
-const SUBTAB_DEFAULT = { lck: 'Road to MSI', lpl: 'Split 2', lec: 'Spring', lcp: 'Split 2', lcs: 'Spring', cblol: 'Split 1' };
+const SUBTAB_DEFAULT = { lck: 'Road to MSI', lpl: 'Split 2', lec: 'Spring', lcp: 'Split 2', lcs: 'Spring', cblol: 'Split 1', msi: '플레이-인 스테이지' };
 // 아직 시작하지 않은 세부 대회 → "예정" 표시
 const SUB_UPCOMING = {
   lpl: ['Split 3'],
@@ -638,7 +664,7 @@ const PredictionPage = () => {
               >
                 <img src={tabLogo(c.key)} alt="" width={18} height={18}
                   className="object-contain shrink-0"
-                  style={{ width: 18, height: 18, filter: 'brightness(0) invert(1)', opacity: active ? 0.9 : 0.6 }}
+                  style={{ width: 18, height: 18, filter: active ? 'brightness(0) invert(1)' : 'none', opacity: active ? 0.9 : 1 }}
                   onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
                 {c.name.replace('2026 ', '')}
               </button>
