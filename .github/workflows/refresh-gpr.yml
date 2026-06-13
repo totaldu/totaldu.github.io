@@ -4,7 +4,7 @@ name: Refresh GPR & Simulate
 # main 에 커밋되면 deploy.yml 이 자동으로 사이트를 재배포한다.
 on:
   schedule:
-    - cron: '0 21 * * *' # 매일 06:00 KST (21:00 UTC)
+    - cron: '0 3,9,15,21 * * *' # 6시간마다: 00:00·06:00·12:00·18:00 KST (15·21·03·09 UTC)
   workflow_dispatch: {}   # 수동 실행 버튼
 
 permissions:
