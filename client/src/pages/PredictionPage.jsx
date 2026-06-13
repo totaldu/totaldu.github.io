@@ -55,7 +55,7 @@ const MsiBracket = ({ rounds }) => (
   <div className="flex gap-4 overflow-x-auto pb-1">
     {rounds.map((r, ri) => (
       <div key={ri} className="flex flex-col justify-center gap-5 min-w-[200px]">
-        <p className="text-[11px] font-black text-white/40 uppercase tracking-wider">{r.title}</p>
+        {r.title && <p className="text-[11px] font-black text-white/40 uppercase tracking-wider">{r.title}</p>}
         {r.matches.map((m, mi) => (
           <div key={mi} className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
             {m.title && <div className="px-2.5 py-1.5 bg-white/10 text-[11px] font-black text-white/70">{m.title}</div>}
@@ -338,7 +338,9 @@ const SimulationView = ({ comp, sub, stage }) => {
           </div>
           <MsiBracket rounds={official.bracket.rounds} />
           <div className="flex flex-wrap gap-4 mt-4 text-[11px] text-white/50">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(96,165,250,0.6)' }} /> 2026 MSI 진출</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(232,199,126,0.7)' }} /> MSI 진출</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(96,165,250,0.6)' }} /> 라운드 승리</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(248,113,113,0.6)' }} /> 탈락</span>
           </div>
         </section>
       )}

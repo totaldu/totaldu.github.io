@@ -41,6 +41,55 @@ const isPostseason = (s) => {
   return POSTSEASON.some((k) => b.includes(k));
 };
 
+// 포스트시즌 스테이지의 columns(브래킷)를 대진표 데이터로 변환.
+// 그래프 기반 판정(포맷 무관): 매치 승자가 이후 매치에 안 쓰이면 '진출(msi=금)',
+//   쓰이면 '라운드 승리(win=파랑)'. 패자가 이후에 안 쓰이면 '탈락(elim=빨강)'.
+function bracketFromColumns(columns) {
+  const roundOf = {};            // structuralId → 라운드명
+  const referenced = new Set();  // `${structuralId}#${slot}` (1=승자, 2=패자)
+  const all = [];
+  for (const col of columns) for (const cell of col.cells || []) for (const m of cell.matches || []) {
+    roundOf[m.structuralId] = cell.name;
+    all.push(m);
+  }
+  for (const m of all) for (const t of m.teams || []) {
+    const o = t.origin;
+    if (o && o.type === 'match') referenced.add(`${o.structuralId}#${o.slot}`);
+  }
+  const adv = (sid, slot) => referenced.has(`${sid}#${slot}`);
+  const labelOf = (t) => {
+    const o = t.origin;
+    if (!o) return '';
+    if (o.type === 'seeding') return `${o.slot}위`;
+    if (o.type === 'match') return `${roundOf[o.structuralId] || ''} ${o.slot === 1 ? '승자' : '패자'}`.trim();
+    return '';
+  };
+  const slotOf = (m, t) => {
+    if (!t) return { seed: '' };
+    const done = m.state === 'completed';
+    const win = t.result?.outcome === 'win';
+    let flag = {};
+    if (done) {
+      if (win) flag = adv(m.structuralId, 1) ? { win: true } : { msi: true };
+      else flag = adv(m.structuralId, 2) ? {} : { elim: true };
+    }
+    const o = { seed: labelOf(t) };
+    if (t.code && t.code !== 'TBD') o.short = t.code; // 미정 슬롯(TBD)은 라벨만
+    if (done && t.result?.gameWins != null) o.score = t.result.gameWins;
+    return { ...o, ...flag };
+  };
+  const rounds = [];
+  for (const col of columns) {
+    const matches = [];
+    for (const cell of col.cells || []) for (const m of cell.matches || []) {
+      const [a, b] = m.teams || [];
+      matches.push({ title: cell.name, a: slotOf(m, a), b: slotOf(m, b) });
+    }
+    if (matches.length) rounds.push({ title: '', matches });
+  }
+  return rounds;
+}
+
 async function api(endpoint, params) {
   const url = `${API}/${endpoint}?` + new URLSearchParams({ hl: HL, ...params });
   const res = await fetch(url, { headers: { 'x-api-key': KEY } });
@@ -141,7 +190,26 @@ async function buildLeague(lg) {
       ? `${standing.name} · 정규 1·2R (MSI 선발전 후 3·4R 진행)`
       : `${standing.name} · 정규 3·4R`;
   }
-  return { tour, rows, mismatches, stage };
+
+  // 포스트시즌 브래킷(LCK Road to MSI 등) — columns 있는 비정규 스테이지를 대진표로 변환
+  let road = null;
+  if (lg.key === 'lck') {
+    const rs = standing.stages.find((s) => s.slug === 'road_to_msi');
+    const cols = rs?.sections?.[0]?.columns;
+    if (cols?.length) {
+      const top6 = [...rows].sort((a, b) => a.rank - b.rank).slice(0, 6)
+        .map(({ group, ...r }) => r); // 진출 6팀(그룹 라벨 제거)
+      road = {
+        stage: `${standing.name} · MSI 선발전 (상위 6팀)`,
+        rows: top6,
+        bracket: {
+          desc: '상위 6팀 사다리식 · 전 경기 Bo5 · 금색=MSI 진출, 파랑=라운드 승리, 빨강=탈락',
+          rounds: bracketFromColumns(cols),
+        },
+      };
+    }
+  }
+  return { tour, rows, mismatches, stage, road };
 }
 
 const data = JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -150,11 +218,15 @@ data.source = data.source || {};
 
 for (const lg of LEAGUES) {
   try {
-    const { tour, rows, mismatches, stage } = await buildLeague(lg);
-    data.standings[lg.key] = { [lg.sub]: { stage, rows } };
+    const { tour, rows, mismatches, stage, road } = await buildLeague(lg);
+    // 기존 수동 키(Road to MSI 등)를 보존하기 위해 통째로 덮어쓰지 않고 병합
+    const prev = data.standings[lg.key] || {};
+    data.standings[lg.key] = { ...prev, [lg.sub]: { stage, rows } };
+    if (road) data.standings[lg.key]['Road to MSI'] = road; // 대진표 자동 갱신
     data.source[lg.key] = `https://lolesports.com/ko-KR/leagues/${lg.key === 'cblol' ? 'cblol-brazil' : lg.key}`;
     const warn = mismatches ? ` ⚠️ 세트 불일치 ${mismatches}팀(gw/gl 생략)` : '';
-    console.log(`${lg.key.toUpperCase()}: ${tour.slug} · ${rows.length}팀 · 1위 ${rows[0].team} ${rows[0].w}-${rows[0].l}${warn}`);
+    const br = road ? ` · 대진표 ${road.bracket.rounds.length}R` : '';
+    console.log(`${lg.key.toUpperCase()}: ${tour.slug} · ${rows.length}팀 · 1위 ${rows[0].team} ${rows[0].w}-${rows[0].l}${warn}${br}`);
   } catch (e) {
     console.warn(`${lg.label} 실패 — 기존 값 유지: ${e.message}`);
   }

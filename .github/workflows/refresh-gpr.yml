@@ -22,8 +22,8 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Fetch league standings (regular season only)
-        run: node scripts/fetchStandings.mjs # lolStandings.json 갱신 (시뮬이 LCK 고정값으로 사용)
+      - name: Fetch league standings & brackets
+        run: node scripts/fetchStandings.mjs # 정규시즌 순위 + LCK Road to MSI 대진표 자동 갱신
 
       - name: Fetch GPR scores & re-simulate
         run: node scripts/fetchGpr.mjs # 끝에서 simulateLol.mjs 자동 실행
