@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-13T08:39:47.851Z",
+  "updatedAt": "2026-06-13T11:22:19.165Z",
   "source": "https://lolesports.com/ko-KR/gpr/2026/current",
   "iterationsDefault": 20000,
   "competitions": [
@@ -13,7 +13,7 @@
       "stage": "",
       "format": "정규시즌 1-2R (Bo3) → 그룹분할 → 정규시즌 3-4R (Bo3) → 플레이인 (Bo5) → 플레이오프 (Bo5)",
       "iterations": 100000,
-      "generatedAt": "2026-06-13T08:39:46.658Z",
+      "generatedAt": "2026-06-13T11:22:18.327Z",
       "teams": [
         {
           "name": "Gen.G Esports",
@@ -1170,16 +1170,62 @@
       "name": "2026 First Stand",
       "scope": "intl",
       "color": "#C8963E",
-      "status": "upcoming",
-      "ready": false,
-      "stage": "",
-      "format": "",
+      "status": "finished",
+      "ready": true,
+      "stage": "2026 First Stand (시즌 첫 국제전)",
+      "format": "8개 지역 대표 · 더블 엘리미네이션",
       "iterations": 0,
       "generatedAt": null,
       "teams": [],
       "matches": [],
       "standings": [],
-      "situations": []
+      "situations": [],
+      "finalResult": {
+        "champion": "Bilibili Gaming",
+        "runnerUp": "G2 Esports",
+        "standings": [
+          {
+            "rank": 1,
+            "team": "Bilibili Gaming",
+            "note": "LPL · 우승"
+          },
+          {
+            "rank": 2,
+            "team": "G2 Esports",
+            "note": "LEC · 준우승"
+          },
+          {
+            "rank": 3,
+            "team": "Gen.G Esports",
+            "note": "LCK"
+          },
+          {
+            "rank": 4,
+            "team": "Beijing JDG Esports",
+            "note": "LPL"
+          },
+          {
+            "rank": 5,
+            "team": "BNK FEARX",
+            "note": "LCK"
+          },
+          {
+            "rank": 6,
+            "team": "LYON",
+            "note": "LCS"
+          },
+          {
+            "rank": 7,
+            "team": "Team Secret Whales",
+            "note": "LCP"
+          },
+          {
+            "rank": 8,
+            "team": "LOUD",
+            "note": "CBLOL"
+          }
+        ]
+      }
     },
     {
       "key": "msi",

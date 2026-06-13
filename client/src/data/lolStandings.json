@@ -15,40 +15,173 @@
         "stage": "MSI 플레이-인 스테이지 · 4팀",
         "rows": [],
         "qualifiers": [
-          { "short": "KC" },
-          { "short": "DCG" },
-          { "label": "LCK · GEN vs T1 승자" },
-          { "label": "LCS · (C9·TLAW 승자) vs LYON 패자" }
+          {
+            "short": "KC"
+          },
+          {
+            "short": "DCG"
+          },
+          {
+            "label": "LCK · GEN vs T1 승자"
+          },
+          {
+            "label": "LCS · (C9·TLAW 승자) vs LYON 패자"
+          }
         ],
         "bracket": {
           "desc": "4팀 더블 엘리미네이션 · 1팀만 브래킷 스테이지 진출 · 전 경기 Bo5",
-          "legend": [{ "color": "rgba(232,199,126,0.7)", "label": "브래킷 스테이지 진출" }],
+          "legend": [
+            {
+              "color": "rgba(232,199,126,0.7)",
+              "label": "브래킷 스테이지 진출"
+            }
+          ],
           "sections": [
-            { "name": null, "connectors": [
-              [0, 0, "mid", 1, 0, "a"],
-              [0, 1, "mid", 1, 0, "b"],
-              [0, 0, "mid", 1, 1, "a"],
-              [0, 1, "mid", 1, 1, "b"],
-              [1, 0, "mid", 3, 0, "a"],
-              [1, 0, "mid", 2, 0, "a"],
-              [1, 1, "mid", 2, 0, "b"],
-              [2, 0, "mid", 3, 0, "b"]
-            ], "rounds": [
-              { "title": "1라운드", "matches": [
-                { "title": "Match 1 (6/28)", "a": { "seed": "??? #2" }, "b": { "seed": "??? #2" } },
-                { "title": "Match 2 (6/28)", "a": { "seed": "??? #2" }, "b": { "seed": "??? #2" } }
-              ] },
-              { "title": "2라운드", "matches": [
-                { "title": "Match 3 (6/29)", "a": { "label": "M1 승자" }, "b": { "label": "M2 승자" } },
-                { "title": "Match 4 (6/29)", "a": { "label": "M1 패자" }, "b": { "label": "M2 패자" } }
-              ] },
-              { "title": "3라운드", "matches": [
-                { "title": "Match 5 (6/30)", "a": { "label": "M3 패자" }, "b": { "label": "M4 승자" } }
-              ] },
-              { "title": "최종 진출전", "matches": [
-                { "title": "최종 진출전 (7/1)", "a": { "label": "M3 승자" }, "b": { "label": "M5 승자" } }
-              ] }
-            ] }
+            {
+              "name": null,
+              "connectors": [
+                [
+                  0,
+                  0,
+                  "mid",
+                  1,
+                  0,
+                  "a"
+                ],
+                [
+                  0,
+                  1,
+                  "mid",
+                  1,
+                  0,
+                  "b"
+                ],
+                [
+                  0,
+                  0,
+                  "mid",
+                  1,
+                  1,
+                  "a"
+                ],
+                [
+                  0,
+                  1,
+                  "mid",
+                  1,
+                  1,
+                  "b"
+                ],
+                [
+                  1,
+                  0,
+                  "mid",
+                  3,
+                  0,
+                  "a"
+                ],
+                [
+                  1,
+                  0,
+                  "mid",
+                  2,
+                  0,
+                  "a"
+                ],
+                [
+                  1,
+                  1,
+                  "mid",
+                  2,
+                  0,
+                  "b"
+                ],
+                [
+                  2,
+                  0,
+                  "mid",
+                  3,
+                  0,
+                  "b"
+                ]
+              ],
+              "rounds": [
+                {
+                  "title": "1라운드",
+                  "matches": [
+                    {
+                      "title": "Match 1 (6/28)",
+                      "a": {
+                        "seed": "??? #2"
+                      },
+                      "b": {
+                        "seed": "??? #2"
+                      }
+                    },
+                    {
+                      "title": "Match 2 (6/28)",
+                      "a": {
+                        "seed": "??? #2"
+                      },
+                      "b": {
+                        "seed": "??? #2"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "2라운드",
+                  "matches": [
+                    {
+                      "title": "Match 3 (6/29)",
+                      "a": {
+                        "label": "M1 승자"
+                      },
+                      "b": {
+                        "label": "M2 승자"
+                      }
+                    },
+                    {
+                      "title": "Match 4 (6/29)",
+                      "a": {
+                        "label": "M1 패자"
+                      },
+                      "b": {
+                        "label": "M2 패자"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "3라운드",
+                  "matches": [
+                    {
+                      "title": "Match 5 (6/30)",
+                      "a": {
+                        "label": "M3 패자"
+                      },
+                      "b": {
+                        "label": "M4 승자"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "최종 진출전",
+                  "matches": [
+                    {
+                      "title": "최종 진출전 (7/1)",
+                      "a": {
+                        "label": "M3 승자"
+                      },
+                      "b": {
+                        "label": "M5 승자"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
           ]
         }
       },
@@ -56,66 +189,313 @@
         "stage": "MSI 브래킷 스테이지 · 8팀",
         "rows": [],
         "qualifiers": [
-          { "short": "G2" },
-          { "short": "HLE" },
-          { "short": "TSW" },
-          { "short": "FUR" },
-          { "short": "TES" },
-          { "label": "LPL · BLG vs WE 승자" },
-          { "label": "LCS · (C9·TLAW 승자) vs LYON 승자" }
+          {
+            "short": "G2"
+          },
+          {
+            "short": "HLE"
+          },
+          {
+            "short": "TSW"
+          },
+          {
+            "short": "FUR"
+          },
+          {
+            "short": "TES"
+          },
+          {
+            "label": "LPL · BLG vs WE 승자"
+          },
+          {
+            "label": "LCS · (C9·TLAW 승자) vs LYON 승자"
+          }
         ],
         "bracket": {
           "desc": "8팀(브래킷 직행 7 + 플레이-인 통과 1) 더블 엘리미네이션 · 전 경기 Bo5",
-          "legend": [{ "color": "rgba(232,199,126,0.7)", "label": "MSI 우승" }],
+          "legend": [
+            {
+              "color": "rgba(232,199,126,0.7)",
+              "label": "MSI 우승"
+            }
+          ],
           "sections": [
-            { "name": "상위권 대진표", "connectors": [
-              [0, 0, "mid", 1, 0, "a"],
-              [0, 1, "mid", 1, 0, "b"],
-              [0, 2, "mid", 1, 1, "a"],
-              [0, 3, "mid", 1, 1, "b"],
-              [1, 0, "mid", 2, 0, "a"],
-              [1, 1, "mid", 2, 0, "b"],
-              [2, 0, "mid", 3, 0, "a"]
-            ], "rounds": [
-              { "title": "1라운드", "matches": [
-                { "title": "Match 1 (7/3)", "a": { "seed": "??? #1" }, "b": { "seed": "??? #1" } },
-                { "title": "Match 2 (7/3)", "a": { "seed": "??? #1" }, "b": { "seed": "??? #1" } },
-                { "title": "Match 3 (7/4)", "a": { "seed": "??? #1" }, "b": { "seed": "??? #1" } },
-                { "title": "Match 4 (7/4)", "a": { "seed": "??? #1" }, "b": { "seed": "??? #1" } }
-              ] },
-              { "title": "2라운드", "matches": [
-                { "title": "Match 5 (7/5)", "a": { "label": "M1 승자" }, "b": { "label": "M2 승자" } },
-                { "title": "Match 6 (7/6)", "a": { "label": "M3 승자" }, "b": { "label": "M4 승자" } }
-              ] },
-              { "title": "3라운드", "matches": [
-                { "title": "Match 11 (7/9)", "a": { "label": "M5 승자" }, "b": { "label": "M6 승자" } }
-              ] },
-              { "title": "결승", "matches": [
-                { "title": "Grand Finals (7/12)", "a": { "label": "M11 승자" }, "b": { "label": "M13 승자" } }
-              ] }
-            ] },
-            { "name": "하위권 대진표", "connectors": [
-              [0, 0, "mid", 1, 1, "b"],
-              [0, 1, "mid", 1, 0, "b"],
-              [1, 0, "mid", 2, 0, "a"],
-              [1, 1, "mid", 2, 0, "b"],
-              [2, 0, "mid", 3, 0, "b"]
-            ], "rounds": [
-              { "title": "1라운드", "matches": [
-                { "title": "Match 7 (7/5)", "a": { "label": "M1 패자" }, "b": { "label": "M2 패자" } },
-                { "title": "Match 8 (7/6)", "a": { "label": "M3 패자" }, "b": { "label": "M4 패자" } }
-              ] },
-              { "title": "2라운드", "matches": [
-                { "title": "Match 9 (7/8)", "a": { "label": "M5 패자" }, "b": { "label": "M8 승자" } },
-                { "title": "Match 10 (7/8)", "a": { "label": "M6 패자" }, "b": { "label": "M7 승자" } }
-              ] },
-              { "title": "3라운드", "matches": [
-                { "title": "Match 12 (7/10)", "a": { "label": "M9 승자" }, "b": { "label": "M10 승자" } }
-              ] },
-              { "title": "4라운드", "matches": [
-                { "title": "Match 13 (7/11)", "a": { "label": "M11 패자" }, "b": { "label": "M12 승자" } }
-              ] }
-            ] }
+            {
+              "name": "상위권 대진표",
+              "connectors": [
+                [
+                  0,
+                  0,
+                  "mid",
+                  1,
+                  0,
+                  "a"
+                ],
+                [
+                  0,
+                  1,
+                  "mid",
+                  1,
+                  0,
+                  "b"
+                ],
+                [
+                  0,
+                  2,
+                  "mid",
+                  1,
+                  1,
+                  "a"
+                ],
+                [
+                  0,
+                  3,
+                  "mid",
+                  1,
+                  1,
+                  "b"
+                ],
+                [
+                  1,
+                  0,
+                  "mid",
+                  2,
+                  0,
+                  "a"
+                ],
+                [
+                  1,
+                  1,
+                  "mid",
+                  2,
+                  0,
+                  "b"
+                ],
+                [
+                  2,
+                  0,
+                  "mid",
+                  3,
+                  0,
+                  "a"
+                ]
+              ],
+              "rounds": [
+                {
+                  "title": "1라운드",
+                  "matches": [
+                    {
+                      "title": "Match 1 (7/3)",
+                      "a": {
+                        "seed": "??? #1"
+                      },
+                      "b": {
+                        "seed": "??? #1"
+                      }
+                    },
+                    {
+                      "title": "Match 2 (7/3)",
+                      "a": {
+                        "seed": "??? #1"
+                      },
+                      "b": {
+                        "seed": "??? #1"
+                      }
+                    },
+                    {
+                      "title": "Match 3 (7/4)",
+                      "a": {
+                        "seed": "??? #1"
+                      },
+                      "b": {
+                        "seed": "??? #1"
+                      }
+                    },
+                    {
+                      "title": "Match 4 (7/4)",
+                      "a": {
+                        "seed": "??? #1"
+                      },
+                      "b": {
+                        "seed": "??? #1"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "2라운드",
+                  "matches": [
+                    {
+                      "title": "Match 5 (7/5)",
+                      "a": {
+                        "label": "M1 승자"
+                      },
+                      "b": {
+                        "label": "M2 승자"
+                      }
+                    },
+                    {
+                      "title": "Match 6 (7/6)",
+                      "a": {
+                        "label": "M3 승자"
+                      },
+                      "b": {
+                        "label": "M4 승자"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "3라운드",
+                  "matches": [
+                    {
+                      "title": "Match 11 (7/9)",
+                      "a": {
+                        "label": "M5 승자"
+                      },
+                      "b": {
+                        "label": "M6 승자"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "결승",
+                  "matches": [
+                    {
+                      "title": "Grand Finals (7/12)",
+                      "a": {
+                        "label": "M11 승자"
+                      },
+                      "b": {
+                        "label": "M13 승자"
+                      }
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "하위권 대진표",
+              "connectors": [
+                [
+                  0,
+                  0,
+                  "mid",
+                  1,
+                  1,
+                  "b"
+                ],
+                [
+                  0,
+                  1,
+                  "mid",
+                  1,
+                  0,
+                  "b"
+                ],
+                [
+                  1,
+                  0,
+                  "mid",
+                  2,
+                  0,
+                  "a"
+                ],
+                [
+                  1,
+                  1,
+                  "mid",
+                  2,
+                  0,
+                  "b"
+                ],
+                [
+                  2,
+                  0,
+                  "mid",
+                  3,
+                  0,
+                  "b"
+                ]
+              ],
+              "rounds": [
+                {
+                  "title": "1라운드",
+                  "matches": [
+                    {
+                      "title": "Match 7 (7/5)",
+                      "a": {
+                        "label": "M1 패자"
+                      },
+                      "b": {
+                        "label": "M2 패자"
+                      }
+                    },
+                    {
+                      "title": "Match 8 (7/6)",
+                      "a": {
+                        "label": "M3 패자"
+                      },
+                      "b": {
+                        "label": "M4 패자"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "2라운드",
+                  "matches": [
+                    {
+                      "title": "Match 9 (7/8)",
+                      "a": {
+                        "label": "M5 패자"
+                      },
+                      "b": {
+                        "label": "M8 승자"
+                      }
+                    },
+                    {
+                      "title": "Match 10 (7/8)",
+                      "a": {
+                        "label": "M6 패자"
+                      },
+                      "b": {
+                        "label": "M7 승자"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "3라운드",
+                  "matches": [
+                    {
+                      "title": "Match 12 (7/10)",
+                      "a": {
+                        "label": "M9 승자"
+                      },
+                      "b": {
+                        "label": "M10 승자"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "title": "4라운드",
+                  "matches": [
+                    {
+                      "title": "Match 13 (7/11)",
+                      "a": {
+                        "label": "M11 패자"
+                      },
+                      "b": {
+                        "label": "M12 승자"
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
           ]
         }
       }
@@ -174,58 +554,100 @@
           }
         ],
         "bracket": {
-          "desc": "상위 6팀 사다리식 · 전 경기 Bo5",
-          "totalRows": 6,
-          "connectors": [
-            [0, 0, "a", 1, 0, "b"],
-            [1, 0, "a", 2, 1, "b"],
-            [2, 0, "b", 3, 0, "a"],
-            [2, 1, "mid", 3, 0, "b"]
-          ],
+          "desc": "상위 6팀 사다리식 · 전 경기 Bo5 · 금색=MSI 진출, 파랑=라운드 승리, 빨강=탈락",
           "rounds": [
             {
+              "title": "",
               "matches": [
                 {
                   "title": "1라운드",
-                  "startRow": 4,
-                  "a": { "seed": "5위", "short": "DK", "score": 3, "win": true },
-                  "b": { "seed": "6위", "short": "BRO", "score": 0, "elim": true }
+                  "a": {
+                    "seed": "5위",
+                    "short": "DK",
+                    "score": 3,
+                    "win": true
+                  },
+                  "b": {
+                    "seed": "6위",
+                    "short": "BRO",
+                    "score": 0,
+                    "elim": true
+                  }
                 }
               ]
             },
             {
+              "title": "",
               "matches": [
                 {
                   "title": "2라운드",
-                  "startRow": 3,
-                  "a": { "seed": "4위", "short": "KT", "score": 3, "win": true },
-                  "b": { "seed": "1라운드 승자", "short": "DK", "score": 2, "elim": true }
+                  "a": {
+                    "seed": "4위",
+                    "short": "KT",
+                    "score": 3,
+                    "win": true
+                  },
+                  "b": {
+                    "seed": "1라운드 승자",
+                    "short": "DK",
+                    "score": 2,
+                    "elim": true
+                  }
                 }
               ]
             },
             {
+              "title": "",
               "matches": [
                 {
                   "title": "3라운드",
-                  "startRow": 0,
-                  "a": { "seed": "1위", "short": "HLE", "score": 3, "msi": true },
-                  "b": { "seed": "2위", "short": "T1", "score": 1 }
-                },
-                {
-                  "title": "4라운드",
-                  "startRow": 2,
-                  "a": { "seed": "3위", "short": "GEN" },
-                  "b": { "seed": "2라운드 승자", "short": "KT" }
+                  "a": {
+                    "seed": "1위",
+                    "short": "HLE",
+                    "score": 3,
+                    "msi": true
+                  },
+                  "b": {
+                    "seed": "2위",
+                    "short": "T1",
+                    "score": 1
+                  }
                 }
               ]
             },
             {
+              "title": "",
+              "matches": [
+                {
+                  "title": "4라운드",
+                  "a": {
+                    "seed": "3위",
+                    "short": "GEN",
+                    "score": 3,
+                    "win": true
+                  },
+                  "b": {
+                    "seed": "2라운드 승자",
+                    "short": "KT",
+                    "score": 0,
+                    "elim": true
+                  }
+                }
+              ]
+            },
+            {
+              "title": "",
               "matches": [
                 {
                   "title": "5라운드",
-                  "startRow": 1,
-                  "a": { "seed": "3라운드 패자", "short": "T1" },
-                  "b": { "seed": "4라운드 승자" }
+                  "a": {
+                    "seed": "4라운드 승자",
+                    "short": "GEN"
+                  },
+                  "b": {
+                    "seed": "3라운드 패자",
+                    "short": "T1"
+                  }
                 }
               ]
             }
