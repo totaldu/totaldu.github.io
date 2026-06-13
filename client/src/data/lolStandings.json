@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-12",
+  "updatedAt": "2026-06-13",
   "note": "리그별 → 세부대회별 공식 현재 순위표(정규시즌만, 토너먼트/플레이오프 제외). 있으면 우선 사용, 없으면 GPR 전적으로 대체. gw/gl은 세트(게임) 승-패.",
   "source": {
     "lck": "https://lolesports.com/ko-KR/leagues/lck",
@@ -11,48 +11,8 @@
   },
   "standings": {
     "lck": {
-      "Road to MSI": {
-        "stage": "MSI 선발전 · 정규 2R 종료 기준 상위 6팀 진출",
-        "rows": [
-          { "rank": 1, "team": "HLE", "w": 15, "l": 3, "gw": 32, "gl": 11 },
-          { "rank": 2, "team": "T1", "w": 14, "l": 4, "gw": 30, "gl": 10 },
-          { "rank": 3, "team": "GEN", "w": 14, "l": 4, "gw": 30, "gl": 11 },
-          { "rank": 4, "team": "KT", "w": 13, "l": 5, "gw": 26, "gl": 15 },
-          { "rank": 5, "team": "DK", "w": 11, "l": 7, "gw": 24, "gl": 18 },
-          { "rank": 6, "team": "BRO", "w": 6, "l": 12, "gw": 16, "gl": 24 }
-        ],
-        "bracket": {
-          "desc": "상위 6팀 사다리식 토너먼트 · 1·2위전(R3) 승자 MSI 직행, 패자는 최종전 · 최종전 승자도 MSI 진출 · 전 경기 Bo5",
-          "rounds": [
-            { "title": "1라운드", "matches": [
-              { "title": "Round 1 (6/6)",
-                "a": { "seed": "5위", "short": "DK", "score": 3, "win": true },
-                "b": { "seed": "6위", "short": "BRO", "score": 0, "elim": true } }
-            ] },
-            { "title": "2라운드", "matches": [
-              { "title": "Round 2 (6/7)",
-                "a": { "seed": "4위", "short": "KT", "score": 3, "win": true },
-                "b": { "label": "R1 승자", "short": "DK", "score": 2, "elim": true } }
-            ] },
-            { "title": "3-4라운드", "matches": [
-              { "title": "Round 3 (6/12)",
-                "a": { "seed": "1위", "short": "HLE", "score": 3, "msi": true },
-                "b": { "seed": "2위", "short": "T1", "score": 1 } },
-              { "title": "Round 4 (6/13)",
-                "a": { "seed": "3위", "short": "GEN" },
-                "b": { "label": "R2 승자", "short": "KT" } }
-            ] },
-            { "title": "최종전", "matches": [
-              { "title": "Final Round (6/14)",
-                "a": { "label": "R3 패자", "short": "T1" },
-                "b": { "label": "R4 승자" } }
-            ] }
-          ]
-        }
-      },
       "LCK": {
         "stage": "2026 스플릿 2 · 정규 1·2R (MSI 선발전 후 3·4R 진행)",
-        "seedsLocked": false,
         "rows": [
           {
             "rank": 1,
@@ -281,7 +241,7 @@
       }
     },
     "lec": {
-      "Spring": {
+      "Summer": {
         "stage": "2026 스프링 정규시즌",
         "rows": [
           {
@@ -439,8 +399,8 @@
       }
     },
     "lcs": {
-      "Spring": {
-        "stage": "2026 스프링 정규시즌",
+      "Summer": {
+        "stage": "2026 스플릿 2 정규시즌",
         "rows": [
           {
             "rank": 1,
@@ -510,7 +470,7 @@
       }
     },
     "cblol": {
-      "Split 1": {
+      "Split 2": {
         "stage": "2026 스플릿 1 정규시즌",
         "rows": [
           {

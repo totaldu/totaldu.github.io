@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-12T10:43:43.121Z",
+  "updatedAt": "2026-06-13T08:39:47.851Z",
   "source": "https://lolesports.com/ko-KR/gpr/2026/current",
   "iterationsDefault": 20000,
   "competitions": [
@@ -13,7 +13,7 @@
       "stage": "정규 3·4라운드 → 플레이인 → 플레이오프 (1·2R 결과 고정)",
       "format": "정규 4R Bo3(2R 후 레전드/라이즈 분할) → 플레이인·플레이오프 6팀 더블 엘리미네이션 Bo5",
       "iterations": 100000,
-      "generatedAt": "2026-06-12T10:43:41.501Z",
+      "generatedAt": "2026-06-13T08:39:46.658Z",
       "teams": [
         {
           "name": "Gen.G Esports",
@@ -23,12 +23,12 @@
         {
           "name": "T1",
           "short": "T1",
-          "rating": 1487
+          "rating": 1482
         },
         {
           "name": "Hanwha Life Esports",
           "short": "HLE",
-          "rating": 1454
+          "rating": 1459
         },
         {
           "name": "kt Rolster",
@@ -70,7 +70,7 @@
         {
           "a": "HLE",
           "b": "BFX",
-          "pA": 88,
+          "pA": 89,
           "winner": "HLE"
         },
         {
@@ -82,7 +82,7 @@
         {
           "a": "GEN",
           "b": "T1",
-          "pA": 59,
+          "pA": 61,
           "winner": "GEN"
         }
       ],
@@ -91,54 +91,54 @@
           "team": "GEN",
           "name": "Gen.G Esports",
           "rating": 1522,
-          "avgRank": 1.85757,
-          "champ": 50.81,
-          "worlds": 92.44,
+          "avgRank": 1.86004,
+          "champ": 51.3,
+          "worlds": 92.42,
           "advance": 100,
           "piPlus": 100,
-          "rank1": 43.2
+          "rank1": 42.73
         },
         {
           "team": "T1",
           "name": "T1",
-          "rating": 1487,
-          "avgRank": 2.26847,
-          "champ": 29.23,
-          "worlds": 84.93,
+          "rating": 1482,
+          "avgRank": 2.32922,
+          "champ": 26.82,
+          "worlds": 83.36,
           "advance": 100,
           "piPlus": 100,
-          "rank1": 22.46
+          "rank1": 20.38
         },
         {
           "team": "HLE",
           "name": "Hanwha Life Esports",
-          "rating": 1454,
-          "avgRank": 2.09048,
-          "champ": 16.48,
-          "worlds": 76.87,
+          "rating": 1459,
+          "avgRank": 2.03112,
+          "champ": 18.42,
+          "worlds": 79,
           "advance": 100,
           "piPlus": 100,
-          "rank1": 33.55
+          "rank1": 36.06
         },
         {
           "team": "KT",
           "name": "kt Rolster",
           "rating": 1392,
-          "avgRank": 3.8804,
-          "champ": 3.01,
-          "worlds": 33.55,
-          "advance": 99.79,
+          "avgRank": 3.87607,
+          "champ": 2.97,
+          "worlds": 33.03,
+          "advance": 99.81,
           "piPlus": 100,
-          "rank1": 0.79
+          "rank1": 0.84
         },
         {
           "team": "DK",
           "name": "Dplus KIA",
           "rating": 1347,
-          "avgRank": 4.90308,
-          "champ": 0.47,
-          "worlds": 10.82,
-          "advance": 95.04,
+          "avgRank": 4.90355,
+          "champ": 0.49,
+          "worlds": 10.84,
+          "advance": 95.12,
           "piPlus": 100,
           "rank1": 0
         },
@@ -146,44 +146,44 @@
           "team": "BFX",
           "name": "BNK FEARX",
           "rating": 1275,
-          "avgRank": 6.55488,
+          "avgRank": 6.55518,
           "champ": 0.01,
-          "worlds": 1.24,
-          "advance": 62.02,
-          "piPlus": 95.95,
+          "worlds": 1.21,
+          "advance": 62.03,
+          "piPlus": 95.88,
           "rank1": 0
         },
         {
           "team": "BRO",
           "name": "Hanjin BRION",
           "rating": 1205,
-          "avgRank": 7.46809,
+          "avgRank": 7.46296,
           "champ": 0,
           "worlds": 0.06,
-          "advance": 18.11,
-          "piPlus": 81.21,
+          "advance": 18.08,
+          "piPlus": 81.17,
           "rank1": 0
         },
         {
           "team": "KRX",
           "name": "KIWOOM DRX",
           "rating": 1219,
-          "avgRank": 7.86459,
+          "avgRank": 7.87519,
           "champ": 0,
-          "worlds": 0.06,
-          "advance": 15.15,
-          "piPlus": 67.72,
+          "worlds": 0.07,
+          "advance": 14.97,
+          "piPlus": 67.5,
           "rank1": 0
         },
         {
           "team": "NS",
           "name": "Nongshim RedForce",
           "rating": 1203,
-          "avgRank": 8.11678,
+          "avgRank": 8.11101,
           "champ": 0,
           "worlds": 0.03,
-          "advance": 9.9,
-          "piPlus": 55.1,
+          "advance": 9.99,
+          "piPlus": 55.43,
           "rank1": 0
         },
         {
@@ -194,26 +194,26 @@
           "champ": 0,
           "worlds": 0,
           "advance": 0,
-          "piPlus": 0.03,
+          "piPlus": 0.02,
           "rank1": 0
         }
       ],
       "situations": [
         {
           "label": "GEN 정규시즌 1위",
-          "prob": 43.2
+          "prob": 42.73
         },
         {
           "label": "GEN 우승",
-          "prob": 50.81
+          "prob": 51.3
         },
         {
           "label": "T1 우승",
-          "prob": 29.23
+          "prob": 26.82
         },
         {
           "label": "NS 플레이오프 진출",
-          "prob": 9.9
+          "prob": 9.99
         }
       ],
       "finalResult": null

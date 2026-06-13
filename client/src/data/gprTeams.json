@@ -1,6 +1,6 @@
 {
   "source": "https://lolesports.com/ko-KR/gpr/2026/current",
-  "updatedAt": "2026-06-12",
+  "updatedAt": "2026-06-13",
   "note": "GPR 팀별 점수(포인트)와 전적. score를 시뮬레이션 레이팅으로 사용. fst는 2026 First Stand 최종 순위.",
   "teams": [
     {
@@ -31,11 +31,11 @@
       "name": "T1",
       "short": "T1",
       "league": "LCK",
-      "score": 1487,
+      "score": 1482,
       "w": 19,
-      "l": 6,
-      "gw": 44,
-      "gl": 19,
+      "l": 7,
+      "gw": 45,
+      "gl": 22,
       "logo": "https://static.lolesports.com/teams/1726801573959_539px-T1_2019_full_allmode.png"
     },
     {
@@ -54,11 +54,11 @@
       "name": "Hanwha Life Esports",
       "short": "HLE",
       "league": "LCK",
-      "score": 1454,
-      "w": 17,
+      "score": 1459,
+      "w": 18,
       "l": 6,
-      "gw": 37,
-      "gl": 20,
+      "gw": 40,
+      "gl": 21,
       "logo": "https://static.lolesports.com/teams/1631819564399_hle-2021-worlds.png"
     },
     {
