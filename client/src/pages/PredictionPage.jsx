@@ -1,5 +1,5 @@
 // client/src/pages/PredictionPage.jsx
-import React, { useMemo, useEffect } from 'react';
+import React, { useMemo, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { Target, Trophy, ExternalLink, Crown, Hourglass } from 'lucide-react';
 import sim from '../data/lolSim.json';
@@ -85,16 +85,67 @@ const MsiBracket = ({ rounds, totalRows, connectors: connData }) => {
   const useGrid = !!totalRows;
   const colH = useGrid ? 2 * LABEL_H + totalRows * SLOT_H : undefined;
   const totalW = rounds.length * COL_W + (rounds.length - 1) * COL_GAP;
+  const wrapRef = useRef(null);
+  const [connPaths, setConnPaths] = useState([]);
+  const [svgSize, setSvgSize] = useState({ w: 0, h: 0 });
+
+  useLayoutEffect(() => {
+    if (useGrid || !connData?.length || !wrapRef.current) {
+      setConnPaths([]);
+      return;
+    }
+    const wrap = wrapRef.current;
+    const wRect = wrap.getBoundingClientRect();
+    setSvgSize({ w: wrap.scrollWidth, h: wrap.scrollHeight });
+
+    const slotCenterY = (el, slot) => {
+      const first = el.firstElementChild;
+      const hasTitleEl = first?.hasAttribute('data-title');
+      const slotAEl = hasTitleEl ? first.nextElementSibling : first;
+      const slotBEl = slotAEl?.nextElementSibling?.nextElementSibling;
+      if (!slotAEl || !slotBEl) {
+        const r = el.getBoundingClientRect();
+        return (r.top + r.bottom) / 2 - wRect.top;
+      }
+      const rA = slotAEl.getBoundingClientRect();
+      const rB = slotBEl.getBoundingClientRect();
+      const aCy = (rA.top + rA.bottom) / 2 - wRect.top;
+      const bCy = (rB.top + rB.bottom) / 2 - wRect.top;
+      if (slot === 'a') return aCy;
+      if (slot === 'b') return bCy;
+      return (aCy + bCy) / 2;
+    };
+
+    const paths = connData.map(([fR, fM, fS, tR, tM, tS]) => {
+      const fromEl = wrap.querySelector(`[data-card="${fR}-${fM}"]`);
+      const toEl = wrap.querySelector(`[data-card="${tR}-${tM}"]`);
+      if (!fromEl || !toEl) return null;
+      const fRect = fromEl.getBoundingClientRect();
+      const tRect = toEl.getBoundingClientRect();
+      const fx = fRect.right - wRect.left;
+      const tx = tRect.left - wRect.left;
+      const fy = slotCenterY(fromEl, fS);
+      const ty = slotCenterY(toEl, tS);
+      const mx = (fx + tx) / 2;
+      const flat = Math.abs(fy - ty) <= 2;
+      const d = flat
+        ? `M ${fx} ${fy} L ${tx} ${ty}`
+        : `M ${fx} ${fy} L ${mx} ${fy} L ${mx} ${ty} L ${tx} ${ty}`;
+      return d;
+    }).filter(Boolean);
+
+    setConnPaths(paths);
+  }, [useGrid, rounds, connData]);
 
   return (
     <div className="overflow-x-auto pb-1">
-      <div style={{
+      <div ref={wrapRef} style={{
         position: 'relative',
         display: 'flex',
         gap: COL_GAP,
         ...(useGrid ? { width: totalW, height: colH } : {}),
       }}>
-        {/* 계단식 브래킷 연결선 */}
+        {/* 그리드 모드 연결선 */}
         {useGrid && connData?.length > 0 && (
           <svg style={{
             position: 'absolute', top: 0, left: 0,
@@ -120,6 +171,21 @@ const MsiBracket = ({ rounds, totalRows, connectors: connData }) => {
           </svg>
         )}
 
+        {/* 비그리드 모드 연결선 */}
+        {!useGrid && connPaths.length > 0 && (
+          <svg style={{
+            position: 'absolute', top: 0, left: 0,
+            width: svgSize.w, height: svgSize.h,
+            pointerEvents: 'none', overflow: 'visible',
+          }}>
+            {connPaths.map((d, i) => (
+              <path key={i} d={d}
+                stroke="rgba(255,255,255,0.2)" strokeWidth={1.5}
+                fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            ))}
+          </svg>
+        )}
+
         {rounds.map((r, ri) => (
           <div key={ri}
             style={useGrid
@@ -131,8 +197,8 @@ const MsiBracket = ({ rounds, totalRows, connectors: connData }) => {
             {r.matches.map((m, mi) => {
               if (!useGrid) {
                 return (
-                  <div key={mi} className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
-                    {m.title && <div className="px-2.5 py-1.5 bg-white/10 text-[11px] font-black text-white/70">{m.title}</div>}
+                  <div key={mi} data-card={`${ri}-${mi}`} className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
+                    {m.title && <div data-title="" className="px-2.5 py-1.5 bg-white/10 text-[11px] font-black text-white/70">{m.title}</div>}
                     <MsiSlot s={m.a} />
                     <div className="h-px bg-white/10" />
                     <MsiSlot s={m.b} />
@@ -422,7 +488,7 @@ const SimulationView = ({ comp, sub, stage }) => {
                 {sec.name && (
                   <p className="text-xs font-black text-white/55 mb-3">{sec.name}</p>
                 )}
-                <MsiBracket rounds={sec.rounds} />
+                <MsiBracket rounds={sec.rounds} connectors={sec.connectors} />
               </div>
             ))}
           </div>
@@ -445,6 +511,28 @@ const SimulationView = ({ comp, sub, stage }) => {
         </section>
       )}
 
+      {/* 진출 팀 (MSI 스테이지) — 확정 팀은 로고, 미확정은 조건 텍스트 */}
+      {official?.qualifiers?.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">진출 팀</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {official.qualifiers.map((q, i) => (
+              <div key={i} className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 text-sm">
+                {q.short ? (
+                  <>
+                    <TeamLogo src={logoByShort[q.short]} size={20} />
+                    <span className="font-bold text-white/90 truncate">{nameByShort[q.short] || q.short}</span>
+                    <span className="ml-auto text-[10px] font-black text-[#34D399] shrink-0">확정</span>
+                  </>
+                ) : (
+                  <span className="text-white/55 truncate">{q.label}</span>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
       {/* MSI 스테이지 대진표 (플레이-인 / 브래킷) — 상위권/하위권 섹션 구조 */}
       {official?.bracket?.sections && (
         <section>
@@ -456,7 +544,7 @@ const SimulationView = ({ comp, sub, stage }) => {
             {official.bracket.sections.map((sec, si) => (
               <div key={si}>
                 {sec.name && <p className="text-xs font-black text-white/55 mb-3 pb-2 border-b border-white/10">{sec.name}</p>}
-                <MsiBracket rounds={sec.rounds} />
+                <MsiBracket rounds={sec.rounds} connectors={sec.connectors} />
               </div>
             ))}
           </div>
