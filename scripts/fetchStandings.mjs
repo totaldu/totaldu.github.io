@@ -397,6 +397,8 @@ try {
       const leagueId = LABEL_TO_LEAGUE[parsed.lgKey];
       if (!leagueId) continue;
 
+      // team1 없는 괄호형 label은 중간 경기가 미완료 → 건너뜀
+      if (!parsed.team1) continue;
       const result = await findMatchResult(leagueId, parsed.team1, parsed.team2);
       if (!result) continue;
 

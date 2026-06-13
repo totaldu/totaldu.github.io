@@ -138,7 +138,7 @@ const MsiBracket = ({ rounds, totalRows, connectors: connData }) => {
   }, [useGrid, rounds, connData]);
 
   return (
-    <div className="overflow-x-auto pb-1">
+    <div className="pb-1" style={useGrid ? { overflowX: 'auto' } : {}}>
       <div ref={wrapRef} style={{
         position: 'relative',
         display: 'flex',
@@ -190,7 +190,7 @@ const MsiBracket = ({ rounds, totalRows, connectors: connData }) => {
           <div key={ri}
             style={useGrid
               ? { position: 'relative', width: COL_W, flexShrink: 0, height: colH }
-              : { display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 20, minWidth: COL_W }}>
+              : { display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: 20, flex: 1, minWidth: 0 }}>
             {!useGrid && r.title && (
               <p className="text-[11px] font-black text-white/40 uppercase tracking-wider">{r.title}</p>
             )}
