@@ -21,6 +21,7 @@ const HL = 'ko-KR';
 
 // 갱신 대상: 국내(지역) 정규리그 6개. 국제전(FST·MSI·Worlds)은 정규시즌 개념이 없어 제외.
 // key = lolStandings.json 의 리그 키, sub = 세부대회 키(PredictionPage SUBTAB_DEFAULT 와 일치해야 함).
+const MSI_LEAGUE_ID = '98767991325878492'; // MSI 리그 ID
 const LEAGUES = [
   { key: 'lck', sub: 'LCK', id: '98767991310872058', groups: true },
   { key: 'lpl', sub: 'Split 2', id: '98767991314006698' },
@@ -193,32 +194,124 @@ async function buildLeague(lg) {
 
   // 포스트시즌 브래킷(LCK Road to MSI 등) — columns 있는 비정규 스테이지를 대진표로 변환
   let road = null;
+  let roadMsiTeam = null; // Road to MSI 우승팀 (LCK MSI 플레이-인 진출)
   if (lg.key === 'lck') {
     const rs = standing.stages.find((s) => s.slug === 'road_to_msi');
     const cols = rs?.sections?.[0]?.columns;
     if (cols?.length) {
       const top6 = [...rows].sort((a, b) => a.rank - b.rank).slice(0, 6)
         .map(({ group, ...r }) => r); // 진출 6팀(그룹 라벨 제거)
+      const rounds = bracketFromColumns(cols);
       road = {
         stage: `${standing.name} · MSI 선발전 (상위 6팀)`,
         rows: top6,
         bracket: {
           desc: '상위 6팀 사다리식 · 전 경기 Bo5 · 금색=MSI 진출, 파랑=라운드 승리, 빨강=탈락',
-          rounds: bracketFromColumns(cols),
+          rounds,
         },
       };
+      // Road to MSI 우승팀 추출 (msi: true 플래그)
+      for (const r of rounds) for (const m of r.matches) {
+        if (m.a?.msi && m.a?.short) roadMsiTeam = m.a.short;
+        if (m.b?.msi && m.b?.short) roadMsiTeam = m.b.short;
+      }
     }
   }
-  return { tour, rows, mismatches, stage, road };
+
+  return { tour, rows, mismatches, stage, road, roadMsiTeam };
+}
+
+// MSI 진출팀 갱신: getStandingsV3로 각 스테이지의 확정 팀을 가져와
+// lolStandings.json 의 msi[stage].qualifiers 를 업데이트한다.
+// 미확정(TBD) 슬롯은 기존 label 표기를 유지한다.
+async function buildMsiQualifiers(prevMsi) {
+  const tjson = await api('getTournamentsForLeague', { leagueId: MSI_LEAGUE_ID });
+  // pickCurrentTournament 은 진행 중/과거만 보므로 MSI는 별도로 선택.
+  // 올해(2026) 대회를 우선 선택하되, 아직 시작 전(미래)이어도 허용.
+  const today = new Date().toISOString().slice(0, 10);
+  const all = tjson.data.leagues[0].tournaments || [];
+  const y2026 = all.filter((t) => t.endDate >= '2026-01-01' && t.startDate <= '2026-12-31');
+  // 가장 가까운 2026 대회 (진행 중 우선, 없으면 다음 예정)
+  const tour = y2026.sort((a, b) => {
+    const da = Math.abs(new Date(a.startDate) - new Date(today));
+    const db = Math.abs(new Date(b.startDate) - new Date(today));
+    return da - db;
+  })[0] || null;
+  if (!tour) return null;
+
+  const sjson = await api('getStandingsV3', { tournamentId: tour.id });
+  const standing = sjson.data.standings[0];
+  const result = {};
+
+  for (const stage of standing.stages || []) {
+    const slug = (stage.slug || stage.name || '').toLowerCase();
+    const stageKey = slug.includes('play') ? '플레이-인 스테이지' : '브래킷 스테이지';
+    const prevStage = prevMsi[stageKey];
+    if (!prevStage) continue;
+
+    const prevQual = prevStage.qualifiers || [];
+    const slots = [];
+
+    // 1) 순위표 기반 (그룹 스테이지)
+    for (const sec of stage.sections || []) {
+      const ranked = [...(sec.rankings || [])].sort((a, b) => a.ordinal - b.ordinal);
+      for (const r of ranked) {
+        for (const t of r.teams || []) {
+          slots.push(t.code && t.code !== 'TBD' ? { short: t.code } : null);
+        }
+      }
+    }
+
+    // 2) 브래킷 시딩 기반 (순위표 없을 때)
+    if (!slots.length) {
+      const seen = new Map(); // seed → code
+      for (const sec of stage.sections || []) {
+        for (const col of sec.columns || []) {
+          for (const cell of col.cells || []) {
+            for (const m of cell.matches || []) {
+              for (const t of m.teams || []) {
+                if (t.origin?.type === 'seeding') {
+                  const seed = t.origin.slot;
+                  if (!seen.has(seed)) seen.set(seed, t.code && t.code !== 'TBD' ? t.code : null);
+                }
+              }
+            }
+          }
+        }
+      }
+      [...seen.keys()].sort((a, b) => a - b).forEach((s) => {
+        const code = seen.get(s);
+        slots.push(code ? { short: code } : null);
+      });
+    }
+
+    if (!slots.length) continue;
+
+    // null 슬롯 → 기존 label 유지 (기존 슬롯 수 초과분은 잘라냄)
+    const qualifiers = slots
+      .slice(0, prevQual.length)
+      .map((s, i) => s ?? prevQual[i] ?? null)
+      .filter(Boolean);
+
+    result[stageKey] = qualifiers;
+    const confirmed = qualifiers.filter((q) => q.short).length;
+    const names = qualifiers.filter((q) => q.short).map((q) => q.short).join(', ');
+    console.log(`MSI ${stageKey}: ${confirmed}/${qualifiers.length}팀 확정 (${names || '없음'})`);
+  }
+
+  return Object.keys(result).length ? result : null;
 }
 
 const data = JSON.parse(fs.readFileSync(file, 'utf8'));
 data.standings = data.standings || {};
 data.source = data.source || {};
 
+// 리그별 Road to MSI 우승팀 수집: lgKey → team code
+const roadMsiByLeague = {};
+
 for (const lg of LEAGUES) {
   try {
-    const { tour, rows, mismatches, stage, road } = await buildLeague(lg);
+    const { tour, rows, mismatches, stage, road, roadMsiTeam } = await buildLeague(lg);
     // 기존 수동 키(Road to MSI 등)를 보존하기 위해 통째로 덮어쓰지 않고 병합
     const prev = data.standings[lg.key] || {};
     data.standings[lg.key] = { ...prev, [lg.sub]: { stage, rows } };
@@ -227,9 +320,115 @@ for (const lg of LEAGUES) {
     const warn = mismatches ? ` ⚠️ 세트 불일치 ${mismatches}팀(gw/gl 생략)` : '';
     const br = road ? ` · 대진표 ${road.bracket.rounds.length}R` : '';
     console.log(`${lg.key.toUpperCase()}: ${tour.slug} · ${rows.length}팀 · 1위 ${rows[0].team} ${rows[0].w}-${rows[0].l}${warn}${br}`);
+    if (roadMsiTeam) roadMsiByLeague[lg.key] = roadMsiTeam;
   } catch (e) {
     console.warn(`${lg.label} 실패 — 기존 값 유지: ${e.message}`);
   }
+}
+
+// MSI 진출팀 갱신 — 두 단계로 시도:
+// 1) label 텍스트의 "리그 · 팀A vs 팀B 승자/패자" 패턴으로 스케줄 직접 조회 (즉시 반영)
+// 2) MSI API 직접 조회 (대회 시작 후 순위표가 생기면 반영)
+
+// 리그명(한글/영문 prefix) → LEAGUES leagueId 맵
+const LABEL_TO_LEAGUE = Object.fromEntries(
+  LEAGUES.map((lg) => [lg.key.toUpperCase(), lg.id])
+);
+
+// label에서 "리그 · TEAM1 vs TEAM2 승자/패자" 파싱
+// 두 팀 모두 직접 지정된 경우 team1+team2 모두 반환
+// parenthetical(괄호) 포함된 경우 구체적인 vsTeam만 반환
+function parseMsiLabel(label) {
+  // 단순 패턴: "LEAGUE · TEAM1 vs TEAM2 승자/패자" (양쪽 모두 직접 팀 코드)
+  const simple = label.match(/^([A-Z]+)\s·\s+(\w+)\s+vs\s+(\w+)\s+(승자|패자)$/);
+  if (simple) return { lgKey: simple[1], team1: simple[2], team2: simple[3], want: simple[4] };
+
+  // 복합 패턴: parenthetical 포함 → "vs TEAM" 부분만 추출
+  const complex = label.match(/^([A-Z]+)\s·\s.+\bvs\s+(\w+)\s+(승자|패자)$/);
+  if (complex) return { lgKey: complex[1], team2: complex[2], want: complex[3] };
+
+  return null;
+}
+
+// 해당 리그 스케줄에서 특정 매치 결과 조회
+// team1+team2 둘 다 주어지면 두 팀 모두 포함된 경기만 찾음
+// team2만 주어지면 team2가 포함된 가장 최근 완료 경기 검색
+async function findMatchResult(leagueId, team1, team2) {
+  let token = null;
+  for (let guard = 0; guard < 6; guard++) {
+    const params = { leagueId };
+    if (token) params.pageToken = token;
+    const { data: d } = await api('getSchedule', params);
+    const events = d.schedule.events || [];
+    for (const e of events) {
+      if (e.type !== 'match' || e.state !== 'completed') continue;
+      const teams = e.match?.teams || [];
+      const codes = teams.map((t) => t.code);
+      if (team1 && team2) {
+        if (!codes.includes(team1) || !codes.includes(team2)) continue;
+      } else {
+        if (!codes.includes(team2)) continue;
+      }
+      const winner = teams.find((t) => t.result?.outcome === 'win')?.code;
+      const loser  = teams.find((t) => t.result?.outcome === 'loss')?.code;
+      if (winner && loser) return { winner, loser };
+    }
+    token = d.schedule.pages?.older;
+    if (!token) break;
+  }
+  return null;
+}
+
+try {
+  const prevMsi = data.standings.msi || {};
+  let anyChanged = false;
+
+  for (const stageKey of ['플레이-인 스테이지', '브래킷 스테이지']) {
+    const prevStage = prevMsi[stageKey];
+    if (!prevStage?.qualifiers) continue;
+
+    for (let i = 0; i < prevStage.qualifiers.length; i++) {
+      const q = prevStage.qualifiers[i];
+      if (q.short || !q.label) continue;
+
+      // "리그 · TEAM1 vs TEAM2 승자/패자" 패턴 → 스케줄 직접 조회
+      const parsed = parseMsiLabel(q.label);
+      if (!parsed) continue;
+      const leagueId = LABEL_TO_LEAGUE[parsed.lgKey];
+      if (!leagueId) continue;
+
+      const result = await findMatchResult(leagueId, parsed.team1, parsed.team2);
+      if (!result) continue;
+
+      const code = parsed.want === '승자' ? result.winner : result.loser;
+      if (code) { prevStage.qualifiers[i] = { short: code }; anyChanged = true; }
+    }
+  }
+
+  if (anyChanged) {
+    data.standings.msi = prevMsi;
+    for (const stageKey of ['플레이-인 스테이지', '브래킷 스테이지']) {
+      const confirmed = (prevMsi[stageKey]?.qualifiers || [])
+        .filter((q) => q.short).map((q) => q.short).join(', ');
+      if (confirmed) console.log(`MSI ${stageKey}: ${confirmed}`);
+    }
+  }
+} catch (e) {
+  console.warn(`MSI 진출팀 갱신 실패 — 기존 값 유지: ${e.message}`);
+}
+
+// 2단계: MSI API 직접 조회 (대회 시작 후 순위표가 생기면 반영)
+try {
+  const prevMsi = data.standings.msi || {};
+  const msiQual = await buildMsiQualifiers(prevMsi);
+  if (msiQual) {
+    for (const [stageKey, qualifiers] of Object.entries(msiQual)) {
+      if (prevMsi[stageKey]) prevMsi[stageKey] = { ...prevMsi[stageKey], qualifiers };
+    }
+    data.standings.msi = prevMsi;
+  }
+} catch (e) {
+  console.warn(`MSI API 갱신 실패 — 기존 값 유지: ${e.message}`);
 }
 
 data.updatedAt = new Date().toISOString().slice(0, 10);

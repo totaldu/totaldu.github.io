@@ -22,10 +22,10 @@
             "short": "DCG"
           },
           {
-            "label": "LCK · GEN vs T1 승자"
+            "short": "T1"
           },
           {
-            "label": "LCS · (C9·TLAW 승자) vs LYON 패자"
+            "short": "DIG"
           }
         ],
         "bracket": {
@@ -205,10 +205,10 @@
             "short": "TES"
           },
           {
-            "label": "LPL · BLG vs WE 승자"
+            "short": "BLG"
           },
           {
-            "label": "LCS · (C9·TLAW 승자) vs LYON 승자"
+            "short": "LYON"
           }
         ],
         "bracket": {
