@@ -352,8 +352,8 @@ function parseMsiLabel(label) {
 
 // 해당 리그 스케줄에서 특정 매치 결과 조회
 // team1+team2 둘 다 주어지면 두 팀 모두 포함된 경기만 찾음
-// team2만 주어지면 team2가 포함된 가장 최근 완료 경기 검색
-async function findMatchResult(leagueId, team1, team2) {
+// afterDate(ISO 문자열)가 있으면 그 날짜 이후 경기만 인정
+async function findMatchResult(leagueId, team1, team2, afterDate = null) {
   let token = null;
   for (let guard = 0; guard < 6; guard++) {
     const params = { leagueId };
@@ -362,6 +362,7 @@ async function findMatchResult(leagueId, team1, team2) {
     const events = d.schedule.events || [];
     for (const e of events) {
       if (e.type !== 'match' || e.state !== 'completed') continue;
+      if (afterDate && e.startTime && e.startTime < afterDate) continue;
       const teams = e.match?.teams || [];
       const codes = teams.map((t) => t.code);
       if (team1 && team2) {
@@ -400,17 +401,17 @@ try {
       if (!parsed.team1) {
         // 괄호형: 선행 경기(parenTeam1 vs parenTeam2) 결과로 team1 확정 후 최종 경기 조회
         if (!parsed.parenTeam1) continue;
-        const preResult = await findMatchResult(leagueId, parsed.parenTeam1, parsed.parenTeam2);
+        const preResult = await findMatchResult(leagueId, parsed.parenTeam1, parsed.parenTeam2, q.after);
         if (!preResult) continue; // 선행 경기 미완료
         const resolvedTeam1 = parsed.parenWant === '승자' ? preResult.winner : preResult.loser;
         if (!resolvedTeam1) continue;
-        const result = await findMatchResult(leagueId, resolvedTeam1, parsed.team2);
+        const result = await findMatchResult(leagueId, resolvedTeam1, parsed.team2, q.after);
         if (!result) continue;
         const code = parsed.want === '승자' ? result.winner : result.loser;
         if (code) { prevStage.qualifiers[i] = { short: code }; anyChanged = true; }
         continue;
       }
-      const result = await findMatchResult(leagueId, parsed.team1, parsed.team2);
+      const result = await findMatchResult(leagueId, parsed.team1, parsed.team2, q.after);
       if (!result) continue;
 
       const code = parsed.want === '승자' ? result.winner : result.loser;
