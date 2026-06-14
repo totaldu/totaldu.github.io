@@ -287,11 +287,12 @@ async function buildMsiQualifiers(prevMsi) {
 
     if (!slots.length) continue;
 
-    // null 슬롯 → 기존 label 유지 (기존 슬롯 수 초과분은 잘라냄)
-    const qualifiers = slots
-      .slice(0, prevQual.length)
-      .map((s, i) => s ?? prevQual[i] ?? null)
-      .filter(Boolean);
+    // API 슬롯이 prevQual보다 짧을 수 있으므로 prevQual 길이 기준으로 iterate
+    // null 슬롯 또는 범위 초과 슬롯 → 기존 label 유지
+    const qualifiers = Array.from({ length: prevQual.length }, (_, i) => {
+      const s = i < slots.length ? slots[i] : null;
+      return s ?? prevQual[i] ?? null;
+    }).filter(Boolean);
 
     result[stageKey] = qualifiers;
     const confirmed = qualifiers.filter((q) => q.short).length;
