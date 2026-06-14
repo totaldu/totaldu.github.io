@@ -795,6 +795,69 @@
       }
     },
     "lpl": {
+      "Split 3": {
+        "stage": "2026 LPL Split 3 · 럼블 스테이지 조 편성 (12팀)",
+        "rows": [
+          { "rank": 1, "team": "BLG", "w": 0, "l": 0, "group": "등봉조" },
+          { "rank": 2, "team": "TES", "w": 0, "l": 0, "group": "등봉조" },
+          { "rank": 3, "team": "WE", "w": 0, "l": 0, "group": "등봉조" },
+          { "rank": 4, "team": "AL", "w": 0, "l": 0, "group": "등봉조" },
+          { "rank": 5, "team": "JDG", "w": 0, "l": 0, "group": "등봉조" },
+          { "rank": 6, "team": "LGD", "w": 0, "l": 0, "group": "등봉조" },
+          { "rank": 7, "team": "TT", "w": 0, "l": 0, "group": "등봉조" },
+          { "rank": 8, "team": "EDG", "w": 0, "l": 0, "group": "등봉조" },
+          { "rank": 1, "team": "NIP", "w": 0, "l": 0, "group": "열반조" },
+          { "rank": 2, "team": "WBG", "w": 0, "l": 0, "group": "열반조" },
+          { "rank": 3, "team": "IG", "w": 0, "l": 0, "group": "열반조" },
+          { "rank": 4, "team": "LNG", "w": 0, "l": 0, "group": "열반조" }
+        ],
+        "bracket": {
+          "desc": "럼블(조별 Bo3 더블 RR): 등봉 1~6위 녹아웃 직행·7·8위 기사의 길 / 열반 1~2위 기사의 길·3·4위 탈락. 기사의 길·녹아웃 Bo5",
+          "legend": [{ "color": "rgba(232,199,126,0.7)", "label": "LPL Split 3 우승" }],
+          "sections": [
+            { "name": "기사의 길", "rounds": [
+              { "title": "Bo5", "matches": [
+                { "title": "기사의 길 1경기", "a": { "seed": "등봉 7위" }, "b": { "seed": "열반 2위" } },
+                { "title": "기사의 길 2경기", "a": { "seed": "등봉 8위" }, "b": { "seed": "열반 1위" } }
+              ] }
+            ] },
+            { "name": "녹아웃 스테이지 · 상위권", "rounds": [
+              { "title": "1라운드", "matches": [
+                { "title": "Match 1", "a": { "seed": "녹아웃 진출" }, "b": { "seed": "녹아웃 진출" } },
+                { "title": "Match 2", "a": { "seed": "녹아웃 진출" }, "b": { "seed": "녹아웃 진출" } },
+                { "title": "Match 3", "a": { "seed": "녹아웃 진출" }, "b": { "seed": "녹아웃 진출" } },
+                { "title": "Match 4", "a": { "seed": "녹아웃 진출" }, "b": { "seed": "녹아웃 진출" } }
+              ] },
+              { "title": "2라운드", "matches": [
+                { "title": "Match 5", "a": { "label": "M1 승자" }, "b": { "label": "M2 승자" } },
+                { "title": "Match 6", "a": { "label": "M3 승자" }, "b": { "label": "M4 승자" } }
+              ] },
+              { "title": "3라운드", "matches": [
+                { "title": "Match 11", "a": { "label": "M5 승자" }, "b": { "label": "M6 승자" } }
+              ] },
+              { "title": "결승", "matches": [
+                { "title": "Grand Finals", "a": { "label": "M11 승자" }, "b": { "label": "M13 승자" } }
+              ] }
+            ] },
+            { "name": "녹아웃 스테이지 · 하위권", "rounds": [
+              { "title": "1라운드", "matches": [
+                { "title": "Match 7", "a": { "label": "M1 패자" }, "b": { "label": "M2 패자" } },
+                { "title": "Match 8", "a": { "label": "M3 패자" }, "b": { "label": "M4 패자" } }
+              ] },
+              { "title": "2라운드", "matches": [
+                { "title": "Match 9", "a": { "label": "M5 패자" }, "b": { "label": "M8 승자" } },
+                { "title": "Match 10", "a": { "label": "M6 패자" }, "b": { "label": "M7 승자" } }
+              ] },
+              { "title": "3라운드", "matches": [
+                { "title": "Match 12", "a": { "label": "M9 승자" }, "b": { "label": "M10 승자" } }
+              ] },
+              { "title": "4라운드", "matches": [
+                { "title": "Match 13", "a": { "label": "M11 패자" }, "b": { "label": "M12 승자" } }
+              ] }
+            ] }
+          ]
+        }
+      },
       "Split 2": {
         "stage": "2026 스플릿 2 정규시즌",
         "rows": [

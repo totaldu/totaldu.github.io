@@ -343,6 +343,9 @@ const SimulationView = ({ comp, sub, stage }) => {
   const hasDiff = current.some((t) => t.gd != null);
   // Road to MSI(MSI 선발전): 정규 2R 기준 진출 6팀 명단만 표기, 시즌 예측 확률 컬럼은 생략
   const roadToMsi = comp.key === 'lck' && sub === 'Road to MSI';
+  const lplSplit3 = comp.key === 'lpl' && sub === 'Split 3';
+  // 자체 대진표(토너먼트 포맷)가 있는 세부대회는 시즌 예측 확률 컬럼을 표기하지 않음
+  const noPredict = roadToMsi || !!official?.bracket;
   // 팀 약칭 → 시뮬 예측 확률 (현재 순위표에 합쳐 표기)
   const probByShort = Object.fromEntries((comp.standings || []).map((s) => [s.team, s]));
   // 그룹이 있으면 그룹별로 분리하고 각 그룹 내 1위부터 재번호
@@ -433,9 +436,18 @@ const SimulationView = ({ comp, sub, stage }) => {
       ? [...new Set(current.map((t) => t.group))].map((name, gi) => ({
           name: GROUP_META[name]?.label ?? name,
           badge: GROUP_META[name]?.badge ?? FALLBACK_BADGES[gi % FALLBACK_BADGES.length],
-          rows: current.filter((t) => t.group === name).map((t, i) => withProb(t, i + 1)),
+          rows: current.filter((t) => t.group === name).map((t, i) => (noPredict ? { ...t, rank: i + 1 } : withProb(t, i + 1))),
         }))
-      : [{ name: null, rows: current.map((t, i) => (roadToMsi ? { ...t, rank: t.rank ?? i + 1 } : withProb(t, t.rank ?? i + 1))) }];
+      : [{ name: null, rows: current.map((t, i) => (noPredict ? { ...t, rank: t.rank ?? i + 1 } : withProb(t, t.rank ?? i + 1))) }];
+  }
+
+  // LPL Split 3 단계별 표시: 럼블=조 순위만, 기사의 길/녹아웃=해당 대진표만
+  const hideStandings = lplSplit3 && stage && stage !== '럼블 스테이지';
+  let bracketSections = official?.bracket?.sections;
+  if (lplSplit3 && bracketSections && stage) {
+    if (stage === '럼블 스테이지') bracketSections = [];
+    else if (stage === '기사의 길') bracketSections = bracketSections.filter((s) => s.name?.includes('기사의 길'));
+    else if (stage === '녹아웃 스테이지') bracketSections = bracketSections.filter((s) => s.name?.includes('녹아웃'));
   }
 
   return (
@@ -450,7 +462,7 @@ const SimulationView = ({ comp, sub, stage }) => {
       </div>
 
       {/* 현재 순위 / 단계별 예측 */}
-      {current.length > 0 && (
+      {current.length > 0 && !hideStandings && (
         <section className="flex flex-col gap-5">
           <div className="flex items-baseline gap-2 flex-wrap">
             <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">{cfg?.heading || (roadToMsi ? '진출 팀' : '현재 순위')}</h3>
@@ -533,15 +545,15 @@ const SimulationView = ({ comp, sub, stage }) => {
         </section>
       )}
 
-      {/* MSI 스테이지 대진표 (플레이-인 / 브래킷) — 상위권/하위권 섹션 구조 */}
-      {official?.bracket?.sections && (
+      {/* MSI/LPL 스테이지 대진표 — 섹션 구조 (단계 선택 시 해당 섹션만) */}
+      {bracketSections?.length > 0 && (
         <section>
           <div className="flex items-baseline gap-2 flex-wrap mb-4">
             <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">대진표</h3>
             {official.bracket.desc && <span className="text-xs text-white/40">{official.bracket.desc}</span>}
           </div>
           <div className="flex flex-col gap-8">
-            {official.bracket.sections.map((sec, si) => (
+            {bracketSections.map((sec, si) => (
               <div key={si}>
                 {sec.name && <p className="text-xs font-black text-white/55 mb-3 pb-2 border-b border-white/10">{sec.name}</p>}
                 <MsiBracket rounds={sec.rounds} connectors={sec.connectors} />
@@ -666,11 +678,15 @@ const today = new Date().toISOString().slice(0, 10);
 const SUBTAB_DEFAULT = { lck: today < MSI_END ? 'Road to MSI' : 'LCK', lpl: 'Split 2', lec: 'Spring', lcp: 'Split 2', lcs: 'Spring', cblol: 'Split 1', msi: '플레이-인 스테이지' };
 // 아직 시작하지 않은 세부 대회 → "예정" 표시
 const SUB_UPCOMING = {
-  lpl: ['Split 3'],
   lec: ['Summer'],
   lcp: ['Split 3'],
   lcs: ['Summer'],
   cblol: ['Split 2'],
+};
+// 세부대회 안에서 단계(스테이지) 선택 — `${comp.key}|${sub}` → 단계 목록
+const STAGE_TABS = {
+  'lck|LCK': ['정규시즌', '플레이-인', '플레이오프'],
+  'lpl|Split 3': ['럼블 스테이지', '기사의 길', '녹아웃 스테이지'],
 };
 
 const PredictionPage = () => {
@@ -720,11 +736,11 @@ const PredictionPage = () => {
     }
     return `${comp?.name ?? ''}${subSuffix}`;
   })();
-  // LCK→LCK 일 때만 단계(정규시즌/플레이-인/플레이오프) 선택
-  const LCK_STAGES = ['정규시즌', '플레이-인', '플레이오프'];
-  const showStages = comp?.key === 'lck' && activeSub === 'LCK';
+  // 세부대회 내 단계 선택(LCK→LCK, LPL→Split 3 등)
+  const stageList = comp ? STAGE_TABS[`${comp.key}|${activeSub}`] : null;
+  const showStages = !!stageList;
   const activeStage = showStages
-    ? (LCK_STAGES.includes(searchParams.get('stage')) ? searchParams.get('stage') : '정규시즌')
+    ? (stageList.includes(searchParams.get('stage')) ? searchParams.get('stage') : stageList[0])
     : null;
   const setActiveStage = (s) =>
     setSearchParams((p) => { const n = new URLSearchParams(p); n.set('stage', s); return n; }, { replace: true });
@@ -819,7 +835,7 @@ const PredictionPage = () => {
               {/* 단계 선택 (LCK→LCK 전용) */}
               {showStages && (
                 <div className="inline-flex bg-white/5 rounded-xl p-1 mb-6 border border-white/10">
-                  {LCK_STAGES.map((s) => {
+                  {stageList.map((s) => {
                     const on = s === activeStage;
                     return (
                       <button
