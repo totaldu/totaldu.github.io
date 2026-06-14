@@ -224,21 +224,47 @@ async function buildLeague(lg) {
     if (cols?.length) {
       const top6 = [...rows].sort((a, b) => a.rank - b.rank).slice(0, 6)
         .map(({ group, ...r }) => r); // 진출 6팀(그룹 라벨 제거)
-      const { rounds, connectors } = bracketFromColumns(cols);
+      const { rounds: apiRounds, connectors: apiConnectors } = bracketFromColumns(cols);
+      // MSI 우승팀 추출 (msi: true 플래그) — API rounds에서 직접 추출
+      for (const r of apiRounds) for (const m of r.matches) {
+        if (m.a?.msi && m.a?.short) roadMsiTeam = m.a.short;
+        if (m.b?.msi && m.b?.short) roadMsiTeam = m.b.short;
+      }
+      // 기존 bracket 구조 보존: API가 컬럼을 1:1로 매핑(예: 5열)하더라도
+      // lolStandings.json에 이미 "컴팩트 구조"(열 합산, totalRows 포함)가 있으면
+      // startRow/totalRows/connectors는 유지하고 경기 결과만 갱신한다.
+      const prevBracket = data.standings.lck?.['Road to MSI']?.bracket;
+      const isCompact = prevBracket?.rounds && prevBracket.rounds.length < apiRounds.length;
+      let bracketRounds, bracketConnectors, bracketTotalRows;
+      if (isCompact) {
+        const apiByTitle = {};
+        for (const r of apiRounds) for (const m of r.matches) {
+          if (m.title) apiByTitle[m.title] = m;
+        }
+        bracketRounds = prevBracket.rounds.map((r) => ({
+          ...r,
+          matches: r.matches.map((m) => {
+            const fresh = m.title ? apiByTitle[m.title] : null;
+            return fresh ? { ...fresh, startRow: m.startRow } : m;
+          }),
+        }));
+        bracketConnectors = prevBracket.connectors;
+        bracketTotalRows = prevBracket.totalRows;
+      } else {
+        bracketRounds = apiRounds;
+        bracketConnectors = apiConnectors;
+        bracketTotalRows = undefined;
+      }
       road = {
         stage: `${standing.name} · MSI 선발전 (상위 6팀)`,
         rows: top6,
         bracket: {
           desc: '상위 6팀 사다리식 · 전 경기 Bo5 · 금색=MSI 진출, 파랑=라운드 승리, 빨강=탈락',
-          rounds,
-          connectors,
+          ...(bracketTotalRows != null ? { totalRows: bracketTotalRows } : {}),
+          rounds: bracketRounds,
+          connectors: bracketConnectors,
         },
       };
-      // Road to MSI 우승팀 추출 (msi: true 플래그)
-      for (const r of rounds) for (const m of r.matches) {
-        if (m.a?.msi && m.a?.short) roadMsiTeam = m.a.short;
-        if (m.b?.msi && m.b?.short) roadMsiTeam = m.b.short;
-      }
     }
   }
 
