@@ -663,7 +663,7 @@ const SUBTABS = {
 // 세부 대회 기본 선택(현재 진행/직전 완료된 대회)
 const MSI_END = '2026-07-13';
 const today = new Date().toISOString().slice(0, 10);
-const SUBTAB_DEFAULT = { lck: today <= MSI_END ? 'Road to MSI' : 'LCK', lpl: 'Split 2', lec: 'Spring', lcp: 'Split 2', lcs: 'Spring', cblol: 'Split 1', msi: '플레이-인 스테이지' };
+const SUBTAB_DEFAULT = { lck: today < MSI_END ? 'Road to MSI' : 'LCK', lpl: 'Split 2', lec: 'Spring', lcp: 'Split 2', lcs: 'Spring', cblol: 'Split 1', msi: '플레이-인 스테이지' };
 // 아직 시작하지 않은 세부 대회 → "예정" 표시
 const SUB_UPCOMING = {
   lpl: ['Split 3'],
