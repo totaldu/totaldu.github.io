@@ -36,4 +36,5 @@ jobs:
           node -e "const fs=require('fs'),f='client/src/data/lolSim.json',d=JSON.parse(fs.readFileSync(f,'utf8'));d.updatedAt=new Date().toISOString();fs.writeFileSync(f,JSON.stringify(d,null,2)+'\n');"
           git add client/src/data/gprTeams.json client/src/data/lolSim.json client/src/data/lolStandings.json
           git commit -m "chore: 순위표·GPR 자동 갱신 및 시뮬레이션 재계산" || echo "변경 없음 — 커밋 생략"
-          git push || echo "푸시 생략"
+          git pull --rebase origin main || true
+          git push
