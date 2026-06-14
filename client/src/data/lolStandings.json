@@ -803,84 +803,108 @@
             "team": "BLG",
             "w": 0,
             "l": 0,
-            "group": "등봉조"
+            "group": "등봉조",
+            "gw": 0,
+            "gl": 0
           },
           {
             "rank": 2,
             "team": "TES",
             "w": 0,
             "l": 0,
-            "group": "등봉조"
+            "group": "등봉조",
+            "gw": 0,
+            "gl": 0
           },
           {
             "rank": 3,
             "team": "WE",
             "w": 0,
             "l": 0,
-            "group": "등봉조"
+            "group": "등봉조",
+            "gw": 0,
+            "gl": 0
           },
           {
             "rank": 4,
             "team": "AL",
             "w": 0,
             "l": 0,
-            "group": "등봉조"
+            "group": "등봉조",
+            "gw": 0,
+            "gl": 0
           },
           {
             "rank": 5,
             "team": "JDG",
             "w": 0,
             "l": 0,
-            "group": "등봉조"
+            "group": "등봉조",
+            "gw": 0,
+            "gl": 0
           },
           {
             "rank": 6,
             "team": "LGD",
             "w": 0,
             "l": 0,
-            "group": "등봉조"
+            "group": "등봉조",
+            "gw": 0,
+            "gl": 0
           },
           {
             "rank": 7,
             "team": "TT",
             "w": 0,
             "l": 0,
-            "group": "등봉조"
+            "group": "등봉조",
+            "gw": 0,
+            "gl": 0
           },
           {
             "rank": 8,
             "team": "EDG",
             "w": 0,
             "l": 0,
-            "group": "등봉조"
+            "group": "등봉조",
+            "gw": 0,
+            "gl": 0
           },
           {
             "rank": 1,
             "team": "NIP",
             "w": 0,
             "l": 0,
-            "group": "열반조"
+            "group": "열반조",
+            "gw": 0,
+            "gl": 0
           },
           {
             "rank": 2,
             "team": "WBG",
             "w": 0,
             "l": 0,
-            "group": "열반조"
+            "group": "열반조",
+            "gw": 0,
+            "gl": 0
           },
           {
             "rank": 3,
             "team": "IG",
             "w": 0,
             "l": 0,
-            "group": "열반조"
+            "group": "열반조",
+            "gw": 0,
+            "gl": 0
           },
           {
             "rank": 4,
             "team": "LNG",
             "w": 0,
             "l": 0,
-            "group": "열반조"
+            "group": "열반조",
+            "gw": 0,
+            "gl": 0
           }
         ],
         "bracket": {

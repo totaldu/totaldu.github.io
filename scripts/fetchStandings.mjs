@@ -196,6 +196,7 @@ async function buildLeague(lg) {
         if (!ok) mismatches++;
         const row = { rank: r.ordinal, team: t.code, w, l };
         if (ok) { row.gw = s.gw; row.gl = s.gl; }
+        else if (!s && w === 0 && l === 0) { row.gw = 0; row.gl = 0; } // 미시작 → 득실차 0 표기
         if (multi) row.group = sec.name;
         rows.push(row);
       }
