@@ -211,6 +211,9 @@
           {
             "label": "LCS · (TLAW·C9 승자) vs LYON 승자",
             "after": "2026-06-13"
+          },
+          {
+            "label": "플레이-인 스테이지 생존팀"
           }
         ],
         "bracket": {
@@ -557,19 +560,12 @@
         ],
         "bracket": {
           "desc": "상위 6팀 사다리식 · 전 경기 Bo5 · 금색=MSI 진출, 파랑=라운드 승리, 빨강=탈락",
-          "totalRows": 6,
-          "connectors": [
-            [0, 0, "a", 1, 0, "b"],
-            [1, 0, "a", 2, 1, "b"],
-            [2, 0, "b", 3, 0, "a"],
-            [2, 1, "mid", 3, 0, "b"]
-          ],
           "rounds": [
             {
+              "title": "",
               "matches": [
                 {
                   "title": "1라운드",
-                  "startRow": 4,
                   "a": {
                     "seed": "5위",
                     "short": "DK",
@@ -586,10 +582,10 @@
               ]
             },
             {
+              "title": "",
               "matches": [
                 {
                   "title": "2라운드",
-                  "startRow": 3,
                   "a": {
                     "seed": "4위",
                     "short": "KT",
@@ -606,10 +602,10 @@
               ]
             },
             {
+              "title": "",
               "matches": [
                 {
                   "title": "3라운드",
-                  "startRow": 0,
                   "a": {
                     "seed": "1위",
                     "short": "HLE",
@@ -621,10 +617,14 @@
                     "short": "T1",
                     "score": 1
                   }
-                },
+                }
+              ]
+            },
+            {
+              "title": "",
+              "matches": [
                 {
                   "title": "4라운드",
-                  "startRow": 2,
                   "a": {
                     "seed": "3위",
                     "short": "GEN",
@@ -641,10 +641,10 @@
               ]
             },
             {
+              "title": "",
               "matches": [
                 {
                   "title": "5라운드",
-                  "startRow": 1,
                   "a": {
                     "seed": "3라운드 패자",
                     "short": "T1",
