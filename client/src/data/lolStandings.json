@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-14",
+  "updatedAt": "2026-06-15",
   "note": "리그별 → 세부대회별 공식 현재 순위표(정규시즌만, 토너먼트/플레이오프 제외). 있으면 우선 사용, 없으면 GPR 전적으로 대체. gw/gl은 세트(게임) 승-패.",
   "source": {
     "lck": "https://lolesports.com/ko-KR/leagues/lck",
@@ -25,8 +25,7 @@
             "short": "T1"
           },
           {
-            "label": "LCS · (TLAW·C9 승자) vs LYON 패자",
-            "after": "2026-06-13"
+            "short": "TLAW"
           }
         ],
         "bracket": {
@@ -209,8 +208,7 @@
             "short": "BLG"
           },
           {
-            "label": "LCS · (TLAW·C9 승자) vs LYON 승자",
-            "after": "2026-06-13"
+            "short": "LYON"
           },
           {
             "label": "플레이-인 스테이지 생존팀"
