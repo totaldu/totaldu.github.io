@@ -40,9 +40,30 @@
             {
               "name": "상위조",
               "connectors": [
-                [0, 0, "mid", 1, 0, "a"],
-                [0, 1, "mid", 1, 0, "b"],
-                [1, 0, "mid", 2, 0, "a"]
+                [
+                  0,
+                  0,
+                  "mid",
+                  1,
+                  0,
+                  "a"
+                ],
+                [
+                  0,
+                  1,
+                  "mid",
+                  1,
+                  0,
+                  "b"
+                ],
+                [
+                  1,
+                  0,
+                  "mid",
+                  2,
+                  0,
+                  "a"
+                ]
               ],
               "rounds": [
                 {
@@ -50,13 +71,25 @@
                   "matches": [
                     {
                       "title": "Match 1 (6/28)",
-                      "a": { "seed": "LEC #2", "short": "KC" },
-                      "b": { "seed": "LCP #2", "short": "DCG" }
+                      "a": {
+                        "seed": "LEC #2",
+                        "short": "KC"
+                      },
+                      "b": {
+                        "seed": "LCP #2",
+                        "short": "DCG"
+                      }
                     },
                     {
                       "title": "Match 2 (6/28)",
-                      "a": { "seed": "LCK #2", "short": "T1" },
-                      "b": { "seed": "LCS #2", "short": "TLAW" }
+                      "a": {
+                        "seed": "LCK #2",
+                        "short": "T1"
+                      },
+                      "b": {
+                        "seed": "LCS #2",
+                        "short": "TLAW"
+                      }
                     }
                   ]
                 },
@@ -65,8 +98,12 @@
                   "matches": [
                     {
                       "title": "Match 3 (6/29)",
-                      "a": { "label": "M1 승자" },
-                      "b": { "label": "M2 승자" }
+                      "a": {
+                        "label": "M1 승자"
+                      },
+                      "b": {
+                        "label": "M2 승자"
+                      }
                     }
                   ]
                 },
@@ -75,8 +112,12 @@
                   "matches": [
                     {
                       "title": "최종 진출전 (7/1)",
-                      "a": { "label": "M3 승자" },
-                      "b": { "label": "하위조 진출팀" }
+                      "a": {
+                        "label": "M3 승자"
+                      },
+                      "b": {
+                        "label": "하위조 진출팀"
+                      }
                     }
                   ]
                 }
@@ -85,7 +126,14 @@
             {
               "name": "하위조",
               "connectors": [
-                [0, 0, "mid", 1, 0, "b"]
+                [
+                  0,
+                  0,
+                  "mid",
+                  1,
+                  0,
+                  "b"
+                ]
               ],
               "rounds": [
                 {
@@ -93,8 +141,12 @@
                   "matches": [
                     {
                       "title": "Match 4 (6/29)",
-                      "a": { "label": "M1 패자" },
-                      "b": { "label": "M2 패자" }
+                      "a": {
+                        "label": "M1 패자"
+                      },
+                      "b": {
+                        "label": "M2 패자"
+                      }
                     }
                   ]
                 },
@@ -103,8 +155,12 @@
                   "matches": [
                     {
                       "title": "Match 5 (6/30)",
-                      "a": { "label": "M3 패자" },
-                      "b": { "label": "M4 승자" }
+                      "a": {
+                        "label": "M3 패자"
+                      },
+                      "b": {
+                        "label": "M4 승자"
+                      }
                     }
                   ]
                 }
