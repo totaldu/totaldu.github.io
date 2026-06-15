@@ -58,20 +58,24 @@
                       "title": "Match 1 (6/28)",
                       "startRow": 0,
                       "a": {
-                        "seed": "LEC #2"
+                        "seed": "LEC #2",
+                        "short": "KC"
                       },
                       "b": {
-                        "seed": "LCP #2"
+                        "seed": "LCP #2",
+                        "short": "DCG"
                       }
                     },
                     {
                       "title": "Match 2 (6/28)",
                       "startRow": 2,
                       "a": {
-                        "seed": "LCK #2"
+                        "seed": "LCK #2",
+                        "short": "T1"
                       },
                       "b": {
-                        "seed": "LCS #2"
+                        "seed": "LCS #2",
+                        "short": "TLAW"
                       }
                     }
                   ]
