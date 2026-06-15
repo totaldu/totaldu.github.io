@@ -22,20 +22,6 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Sync code from DownUp17 (canonical source)
-        # DownUp17가 코드 정원(source of truth). DownUp17 저장소 자신에서는 불필요해 건너뜀.
-        # 다른 저장소(totaldu 등)에서는 최신 코드를 fetch해 적용 후 스크립트를 실행한다.
-        # live 데이터(gprTeams.json·lolSim.json)는 건드리지 않음 — 아래 스텝이 API에서 갱신.
-        if: github.repository != 'DownUp17/DownUp17.github.io'
-        run: |
-          git fetch https://github.com/DownUp17/DownUp17.github.io.git main --depth=1 -q
-          BETA=FETCH_HEAD
-          git checkout $BETA -- scripts/
-          git checkout $BETA -- client/src/pages/
-          git checkout $BETA -- client/src/components/
-          git checkout $BETA -- client/src/utils/
-          git checkout $BETA -- client/src/data/lolStandings.json
-
       - name: Fetch league standings & brackets
         run: node scripts/fetchStandings.mjs
 
