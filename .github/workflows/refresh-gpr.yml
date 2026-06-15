@@ -22,19 +22,33 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Sync code from DownUp17 (canonical source)
+        # DownUp17가 코드 정원(source of truth). DownUp17 저장소 자신에서는 불필요해 건너뜀.
+        # 다른 저장소(totaldu 등)에서는 최신 코드를 fetch해 적용 후 스크립트를 실행한다.
+        # live 데이터(gprTeams.json·lolSim.json)는 건드리지 않음 — 아래 스텝이 API에서 갱신.
+        if: github.repository != 'DownUp17/DownUp17.github.io'
+        run: |
+          git fetch https://github.com/DownUp17/DownUp17.github.io.git main --depth=1 -q
+          BETA=FETCH_HEAD
+          git checkout $BETA -- scripts/
+          git checkout $BETA -- client/src/pages/
+          git checkout $BETA -- client/src/components/
+          git checkout $BETA -- client/src/utils/
+          git checkout $BETA -- client/src/data/lolStandings.json
+
       - name: Fetch league standings & brackets
-        run: node scripts/fetchStandings.mjs # 정규시즌 순위 + LCK Road to MSI 대진표 자동 갱신
+        run: node scripts/fetchStandings.mjs
 
       - name: Fetch GPR scores & re-simulate
-        run: node scripts/fetchGpr.mjs # 끝에서 simulateLol.mjs 자동 실행
+        run: node scripts/fetchGpr.mjs
 
       - name: Commit if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          # GPR/순위 변화 여부와 무관하게 갱신 시각을 항상 최신으로 기록
           node -e "const fs=require('fs'),f='client/src/data/lolSim.json',d=JSON.parse(fs.readFileSync(f,'utf8'));d.updatedAt=new Date().toISOString();fs.writeFileSync(f,JSON.stringify(d,null,2)+'\n');"
           git add client/src/data/gprTeams.json client/src/data/lolSim.json client/src/data/lolStandings.json
           git commit -m "chore: 순위표·GPR 자동 갱신 및 시뮬레이션 재계산" || echo "변경 없음 — 커밋 생략"
-          git pull --rebase origin main || true
+          # push 전 최신 커밋 통합 (동시 실행 시 충돌 방지)
+          git pull --rebase origin main || (git rebase --abort && git pull --ff-only origin main)
           git push
