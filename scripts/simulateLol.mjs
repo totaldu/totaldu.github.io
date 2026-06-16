@@ -349,7 +349,81 @@ function simulateMSI(direct, playIn) {
     .sort((a, b) => b.champ - a.champ);
 }
 
+// ---- 2026 LPL Split 3 전용 시뮬레이션 ----
+// 럼블 스테이지(조별 Bo3 더블 라운드로빈, 등봉조 8팀·열반조 4팀):
+//   등봉 1~6위 녹아웃 직행 / 등봉 7·8위·열반 1·2위 → 기사의 길(Bo5) 승자 녹아웃 합류 / 열반 3·4위 탈락.
+// 녹아웃 스테이지(8팀 더블 엘리미네이션 Bo5): 직행 6팀 + 기사의 길 승자 2팀을 GPR 점수로 시드(MSI 브래킷과 동일 페어링).
+function simulateLplSplit3(ascend, nirvana) {
+  const stat = {};
+  [...ascend, ...nirvana].forEach((t) => { stat[t.short] = { kiPlus: 0, knockout: 0, champ: 0 }; });
+
+  const rankGroup = (group) => {
+    const wins = new Array(group.length).fill(0);
+    for (let a = 0; a < group.length; a++)
+      for (let b = a + 1; b < group.length; b++)
+        for (let g = 0; g < 2; g++) {
+          if (simSeries(group[a], group[b], 2) === group[a]) wins[a]++; else wins[b]++;
+        }
+    return group.map((_, i) => i).sort((a, b) => (wins[b] - wins[a]) || (rng() - 0.5)).map((i) => group[i]);
+  };
+
+  for (let it = 0; it < ITER; it++) {
+    const aRanked = rankGroup(ascend); // 등봉 1~8위
+    const nRanked = rankGroup(nirvana); // 열반 1~4위
+    const direct = aRanked.slice(0, 6);
+    const [a7, a8] = aRanked.slice(6, 8);
+    const [n1, n2] = nRanked.slice(0, 2);
+
+    // 기사의 길+ = 기사의 길 또는 녹아웃 스테이지 둘 중 하나라도 진출 (등봉조 전원 + 열반 1·2위)
+    [...aRanked, n1, n2].forEach((t) => { stat[t.short].kiPlus++; });
+
+    // 기사의 길 (Bo5)
+    const ki1W = simSeries(a7, n2, 3);
+    const ki2W = simSeries(a8, n1, 3);
+    const knockoutTeams = [...direct, ki1W, ki2W];
+    knockoutTeams.forEach((t) => { stat[t.short].knockout++; });
+
+    // 녹아웃 스테이지: 8팀 더블 엘리미네이션, GPR 점수로 시드
+    const [s1, s2, s3, s4, s5, s6, s7, s8] = [...knockoutTeams].sort((a, b) => b.score - a.score);
+    const wb1aW = simSeries(s1, s8, 3), wb1aL = wb1aW === s1 ? s8 : s1;
+    const wb1bW = simSeries(s4, s5, 3), wb1bL = wb1bW === s4 ? s5 : s4;
+    const wb1cW = simSeries(s2, s7, 3), wb1cL = wb1cW === s2 ? s7 : s2;
+    const wb1dW = simSeries(s3, s6, 3), wb1dL = wb1dW === s3 ? s6 : s3;
+    const wb2aW = simSeries(wb1aW, wb1bW, 3), wb2aL = wb2aW === wb1aW ? wb1bW : wb1aW;
+    const wb2bW = simSeries(wb1cW, wb1dW, 3), wb2bL = wb2bW === wb1cW ? wb1dW : wb1cW;
+    const lb1aW = simSeries(wb1aL, wb1bL, 3);
+    const lb1bW = simSeries(wb1cL, wb1dL, 3);
+    const wbFinalW = simSeries(wb2aW, wb2bW, 3), wbFinalL = wbFinalW === wb2aW ? wb2bW : wb2aW;
+    const lb2aW = simSeries(wb2aL, lb1bW, 3);
+    const lb2bW = simSeries(wb2bL, lb1aW, 3);
+    const lb3W = simSeries(lb2aW, lb2bW, 3);
+    const lowerFinalW = simSeries(wbFinalL, lb3W, 3);
+    const champ = simSeries(wbFinalW, lowerFinalW, 3);
+    stat[champ.short].champ++;
+  }
+
+  return [...ascend, ...nirvana].map((t) => ({
+    team: t.short,
+    name: t.name,
+    rating: t.score,
+    piPlus: pct(stat[t.short].kiPlus / ITER),
+    advance: pct(stat[t.short].knockout / ITER),
+    champ: pct(stat[t.short].champ / ITER),
+  }));
+}
+
 const byShort = (short) => gpr.teams.find((t) => t.short === short);
+const lplS3Rows = standingsData.standings?.lpl?.['Split 3']?.rows || [];
+const lplAscend = lplS3Rows.filter((r) => r.group === '등봉조').map((r) => byShort(r.team)).filter(Boolean);
+const lplNirvana = lplS3Rows.filter((r) => r.group === '열반조').map((r) => byShort(r.team)).filter(Boolean);
+if (lplAscend.length === 8 && lplNirvana.length === 4) {
+  const split3Standings = simulateLplSplit3(lplAscend, lplNirvana);
+  const lplComp = sim.competitions.find((c) => c.key === 'lpl');
+  lplComp.split3 = split3Standings;
+  const split3Champ = [...split3Standings].sort((a, b) => b.champ - a.champ)[0];
+  console.log(`LPL Split3: 우승1위 ${split3Champ.team} ${split3Champ.champ}%`);
+}
+
 const msiDirect = ['G2', 'HLE', 'TSW', 'FUR', 'TES', 'BLG', 'LYON'].map(byShort);
 const msiPlayIn = ['KC', 'DCG', 'T1', 'TLAW'].map(byShort);
 const msiStandings = simulateMSI(msiDirect, msiPlayIn);

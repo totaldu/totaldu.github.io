@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-16T15:08:06.453Z",
+  "updatedAt": "2026-06-16T15:09:45.326Z",
   "source": "https://lolesports.com/ko-KR/gpr/2026/current",
   "iterationsDefault": 20000,
   "competitions": [
@@ -467,7 +467,105 @@
           "prob": 0.46
         }
       ],
-      "finalResult": null
+      "finalResult": null,
+      "split3": [
+        {
+          "team": "BLG",
+          "name": "Bilibili Gaming",
+          "rating": 1522,
+          "piPlus": 100,
+          "advance": 100,
+          "champ": 72.89
+        },
+        {
+          "team": "TES",
+          "name": "Top Esports",
+          "rating": 1417,
+          "piPlus": 100,
+          "advance": 99.97,
+          "champ": 14.21
+        },
+        {
+          "team": "WE",
+          "name": "Xi'an Team WE",
+          "rating": 1293,
+          "piPlus": 100,
+          "advance": 94.55,
+          "champ": 0.3
+        },
+        {
+          "team": "AL",
+          "name": "Anyone's Legend",
+          "rating": 1383,
+          "piPlus": 100,
+          "advance": 99.83,
+          "champ": 4.76
+        },
+        {
+          "team": "JDG",
+          "name": "Beijing JDG Esports",
+          "rating": 1385,
+          "piPlus": 100,
+          "advance": 99.85,
+          "champ": 6.28
+        },
+        {
+          "team": "LGD",
+          "name": "LGD Gaming",
+          "rating": 1185,
+          "piPlus": 100,
+          "advance": 45.96,
+          "champ": 0.01
+        },
+        {
+          "team": "TT",
+          "name": "ThunderTalk Gaming",
+          "rating": 1185,
+          "piPlus": 100,
+          "advance": 45.59,
+          "champ": 0
+        },
+        {
+          "team": "EDG",
+          "name": "Edward Gaming",
+          "rating": 1203,
+          "piPlus": 100,
+          "advance": 57.56,
+          "champ": 0
+        },
+        {
+          "team": "NIP",
+          "name": "Ninjas in Pyjamas",
+          "rating": 1309,
+          "piPlus": 51.47,
+          "advance": 39.86,
+          "champ": 0.2
+        },
+        {
+          "team": "WBG",
+          "name": "Weibo Gaming",
+          "rating": 1355,
+          "piPlus": 74.44,
+          "advance": 63.52,
+          "champ": 1.22
+        },
+        {
+          "team": "IG",
+          "name": "Invictus Gaming",
+          "rating": 1297,
+          "piPlus": 43.79,
+          "advance": 32.73,
+          "champ": 0.1
+        },
+        {
+          "team": "LNG",
+          "name": "Suzhou LNG Esports",
+          "rating": 1267,
+          "piPlus": 30.31,
+          "advance": 20.59,
+          "champ": 0.03
+        }
+      ]
     },
     {
       "key": "lec",
@@ -1237,7 +1335,7 @@
       "stage": "플레이-인 스테이지 (Bo5 더블 엘리미네이션) → 브래킷 스테이지 (Bo5 더블 엘리미네이션)",
       "format": "",
       "iterations": 100000,
-      "generatedAt": "2026-06-16T06:51:58.229Z",
+      "generatedAt": "2026-06-16T15:09:44.290Z",
       "teams": [
         {
           "name": "G2 Esports",
@@ -1301,39 +1399,39 @@
           "team": "BLG",
           "name": "Bilibili Gaming",
           "rating": 1522,
-          "champ": 47.57
+          "champ": 47.5
         },
         {
           "team": "G2",
           "name": "G2 Esports",
           "rating": 1472,
-          "champ": 18.26
+          "champ": 18.45
         },
         {
           "team": "T1",
           "name": "T1",
           "rating": 1484,
-          "champ": 17.74,
-          "advance": 76.94
+          "champ": 17.91,
+          "advance": 77.27
         },
         {
           "team": "HLE",
           "name": "Hanwha Life Esports",
           "rating": 1459,
-          "champ": 12.02
+          "champ": 11.93
         },
         {
           "team": "TES",
           "name": "Top Esports",
           "rating": 1417,
-          "champ": 3.89
+          "champ": 3.75
         },
         {
           "team": "KC",
           "name": "Karmine Corp",
           "rating": 1379,
-          "champ": 0.34,
-          "advance": 19.42
+          "champ": 0.28,
+          "advance": 19.1
         },
         {
           "team": "TSW",
@@ -1345,7 +1443,7 @@
           "team": "LYON",
           "name": "LYON",
           "rating": 1275,
-          "champ": 0.03
+          "champ": 0.02
         },
         {
           "team": "FUR",
@@ -1358,14 +1456,14 @@
           "name": "Relove Deep Cross Gaming",
           "rating": 1282,
           "champ": 0,
-          "advance": 2.07
+          "advance": 2.1
         },
         {
           "team": "TLAW",
           "name": "Team Liquid Alienware",
           "rating": 1275,
           "champ": 0,
-          "advance": 1.57
+          "advance": 1.53
         }
       ],
       "situations": [],

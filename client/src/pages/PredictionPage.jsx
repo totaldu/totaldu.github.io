@@ -390,8 +390,8 @@ const StandingsTable = ({ rows, color, hasDiff, cols }) => {
             <th className="text-left font-bold py-2 pr-2">팀</th>
             <th className="text-center font-bold py-2 px-2">승-패</th>
             {showDiff && <th className="text-center font-bold py-2 px-2">득실차</th>}
-            {hasPiPlus && <th className="text-right font-bold py-2 px-2">PI+ 진출</th>}
-            {hasAdvance && <th className="text-right font-bold py-2 px-2">PO 진출</th>}
+            {hasPiPlus && <th className="text-right font-bold py-2 px-2">{cols?.labels?.piPlus || 'PI+ 진출'}</th>}
+            {hasAdvance && <th className="text-right font-bold py-2 px-2">{cols?.labels?.advance || 'PO 진출'}</th>}
             {hasWorlds && <th className="text-right font-bold py-2 px-2">Worlds 진출</th>}
             {hasChamp && <th className="text-right font-bold py-2 px-2">우승</th>}
           </tr>
@@ -441,6 +441,7 @@ const STAGE_CFG = {
   '정규시즌': { cols: { diff: true, piPlus: true, advance: true, worlds: true, champ: true }, matches: false, heading: '정규시즌 순위', desc: '현재 순위 + 예상 진출·우승 확률.' },
   '플레이-인': { cols: { piPlus: true, advance: true }, matches: false, heading: '플레이-인 예측', desc: '레전드 5위 + 라이즈 1~3위가 겨루는 플레이-인 단계. PI+/플레이오프 진출 확률.' },
   '플레이오프': { cols: { advance: true, worlds: true, champ: true }, matches: false, heading: '플레이오프 예측', desc: '플레이오프 진출·우승·Worlds 진출 확률. 확정 시드 기준 대진표.' },
+  '럼블 스테이지': { cols: { piPlus: true, advance: true, champ: true, labels: { piPlus: '기사의 길+ 진출', advance: '녹아웃 진출' } }, matches: false, heading: '럼블 스테이지 순위', desc: '조별 Bo3 더블 라운드로빈 + 기사의 길+(기사의 길 또는 녹아웃 진출)/녹아웃/우승 확률.' },
 };
 
 // 시뮬레이션 결과(예측) 렌더
@@ -466,10 +467,12 @@ const SimulationView = ({ comp, sub, stage }) => {
   // Road to MSI(MSI 선발전): 정규 2R 기준 진출 6팀 명단만 표기, 시즌 예측 확률 컬럼은 생략
   const roadToMsi = comp.key === 'lck' && sub === 'Road to MSI';
   const lplSplit3 = comp.key === 'lpl' && sub === 'Split 3';
-  // 자체 대진표(토너먼트 포맷)가 있는 세부대회는 시즌 예측 확률 컬럼을 표기하지 않음
-  const noPredict = roadToMsi || !!official?.bracket;
-  // 팀 약칭 → 시뮬 예측 확률 (현재 순위표에 합쳐 표기)
-  const probByShort = Object.fromEntries((comp.standings || []).map((s) => [s.team, s]));
+  // 자체 대진표(토너먼트 포맷)가 있는 세부대회는 시즌 예측 확률 컬럼을 표기하지 않음 (LPL Split 3는 전용 확률을 표기하므로 예외)
+  const noPredict = roadToMsi || (!!official?.bracket && !lplSplit3);
+  // 팀 약칭 → 시뮬 예측 확률 (현재 순위표에 합쳐 표기) — LPL Split 3는 전용 시뮬 결과(comp.split3) 사용
+  const probByShort = lplSplit3
+    ? Object.fromEntries((comp.split3 || []).map((s) => [s.team, s]))
+    : Object.fromEntries((comp.standings || []).map((s) => [s.team, s]));
   // 그룹이 있으면 그룹별로 분리하고 각 그룹 내 1위부터 재번호
   const grouped = !!official && current.some((t) => t.group);
   const withProb = (t, rank) => ({ ...t, rank, prob: probByShort[t.short] });
