@@ -310,7 +310,13 @@ const BracketGroup = ({ sections, crossConnectors }) => {
           return m && +m[1] > loRound && +m[1] < hiRound;
         });
         if (skipped.length) {
-          const rects = skipped.map((el) => el.getBoundingClientRect());
+          // 매치 카드 바로 위에 떠 있는 라운드/매치 제목 라벨도 함께 피해야 글자를 가리지 않는다
+          const rects = skipped.flatMap((el) => {
+            const r = [el.getBoundingClientRect()];
+            const label = el.previousElementSibling;
+            if (label && label.tagName === 'SPAN') r.push(label.getBoundingClientRect());
+            return r;
+          });
           const minTop = Math.min(...rects.map((r) => r.top)) - wRect.top;
           const maxBottom = Math.max(...rects.map((r) => r.bottom)) - wRect.top;
           const above = minTop - 10;
