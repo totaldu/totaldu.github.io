@@ -1,6 +1,6 @@
 // client/src/components/GprTable.jsx
 // GPR 팀별 점수(레이팅) 전체 랭킹 표 — 다크 배경 카드 안에서 사용
-import React from 'react';
+import React, { useState } from 'react';
 import gpr from '../data/lolGpr.json';
 import gprTeams from '../data/gprTeams.json';
 import { textOn, lighten } from '../utils/colorContrast';
@@ -25,13 +25,44 @@ export const TeamLogo = ({ src, size = 20 }) =>
     <span className="shrink-0" style={{ width: size, height: size }} />
   );
 
-const GprTable = ({ showIntro = true }) => (
+const GprTable = ({ showIntro = true }) => {
+  const [selected, setSelected] = useState([]);
+  const toggleLeague = (key) =>
+    setSelected((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  const visible = selected.length > 0 ? gprRanked.filter((t) => selected.includes(t.league)) : gprRanked;
+
+  return (
   <div className="flex flex-col gap-4">
     {showIntro && (
       <p className="text-sm text-white/50">
         lolesports GPR 팀별 점수(레이팅) 전체 랭킹입니다. 이 점수가 시뮬레이션 승률 산출의 기준입니다.
       </p>
     )}
+    <div className="flex flex-wrap gap-2">
+      {gpr.regions.map((r) => {
+        const on = selected.includes(r.key);
+        return (
+          <button
+            key={r.key}
+            onClick={() => toggleLeague(r.key)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-black border transition-all ${
+              on ? '' : 'text-white/45 border-white/10 hover:border-white/30 hover:text-white/70 bg-transparent'
+            }`}
+            style={on ? { backgroundColor: r.color, borderColor: r.color, color: textOn(r.color) } : {}}
+          >
+            {r.name}
+          </button>
+        );
+      })}
+      {selected.length > 0 && (
+        <button
+          onClick={() => setSelected([])}
+          className="px-3 py-1.5 rounded-lg text-xs font-bold text-white/45 border border-white/10 hover:border-white/30 hover:text-white/70 bg-transparent"
+        >
+          전체 보기
+        </button>
+      )}
+    </div>
     <div className="overflow-x-auto">
       <table className="w-full text-sm border-collapse">
         <thead>
@@ -44,7 +75,7 @@ const GprTable = ({ showIntro = true }) => (
           </tr>
         </thead>
         <tbody>
-          {gprRanked.map((t, i) => {
+          {visible.map((t, i) => {
             const col = leagueColor[t.league] || '#888';
             const barCol = col;
             return (
@@ -88,6 +119,7 @@ const GprTable = ({ showIntro = true }) => (
       </table>
     </div>
   </div>
-);
+  );
+};
 
 export default GprTable;
