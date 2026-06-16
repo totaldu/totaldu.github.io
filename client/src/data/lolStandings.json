@@ -30,6 +30,7 @@
         ],
         "bracket": {
           "desc": "4팀 더블 엘리미네이션 · 1팀만 브래킷 스테이지 진출 · 전 경기 Bo5",
+          "crossConnectors": [[1, 1, 0, "mid", 0, 2, 0, "b"]],
           "legend": [
             {
               "color": "rgba(232,199,126,0.7)",
@@ -137,7 +138,7 @@
               ],
               "rounds": [
                 {
-                  "title": "2라운드 (패자전)",
+                  "title": "1라운드",
                   "matches": [
                     {
                       "title": "Match 4 (6/29)",
@@ -151,7 +152,7 @@
                   ]
                 },
                 {
-                  "title": "3라운드",
+                  "title": "2라운드",
                   "matches": [
                     {
                       "title": "Match 5 (6/30)",
