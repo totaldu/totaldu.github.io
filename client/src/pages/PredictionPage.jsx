@@ -706,7 +706,7 @@ const SimulationView = ({ comp, sub, stage }) => {
       )}
 
       {/* 대진별 예측 — 진행중인 리그에서만 (단계별 대진표가 있으면 생략) */}
-    {comp.status === 'ongoing' && (!cfg || cfg.matches) && !bracket && !roadToMsi && comp.matches?.length > 0 && (
+    {comp.status === 'ongoing' && (!cfg || cfg.matches) && !bracket && !roadToMsi && comp.matches?.length > 0 && !(comp.key === 'lpl' && sub === 'Split 3') && (
       <section>
         <h3 className="text-sm font-black text-[#E8C77E] mb-4 uppercase tracking-wider">대진별 예측</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
