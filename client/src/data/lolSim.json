@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-16T02:49:53.029Z",
+  "updatedAt": "2026-06-16T06:51:58.363Z",
   "source": "https://lolesports.com/ko-KR/gpr/2026/current",
   "iterationsDefault": 20000,
   "competitions": [
@@ -1232,15 +1232,142 @@
       "name": "2026 MSI",
       "scope": "intl",
       "color": "#fe0000",
-      "status": "upcoming",
+      "status": "ongoing",
       "ready": true,
       "stage": "플레이-인 → 브래킷 스테이지",
       "format": "11팀 · 브래킷 직행 7 + 플레이-인 4(1팀 추가 진출) · 더블 엘리미네이션 Bo5",
-      "iterations": 0,
-      "generatedAt": null,
-      "teams": [],
+      "iterations": 100000,
+      "generatedAt": "2026-06-16T06:51:58.229Z",
+      "teams": [
+        {
+          "name": "G2 Esports",
+          "short": "G2",
+          "rating": 1472
+        },
+        {
+          "name": "Hanwha Life Esports",
+          "short": "HLE",
+          "rating": 1459
+        },
+        {
+          "name": "Team Secret Whales",
+          "short": "TSW",
+          "rating": 1321
+        },
+        {
+          "name": "FURIA",
+          "short": "FUR",
+          "rating": 1215
+        },
+        {
+          "name": "Top Esports",
+          "short": "TES",
+          "rating": 1417
+        },
+        {
+          "name": "Bilibili Gaming",
+          "short": "BLG",
+          "rating": 1522
+        },
+        {
+          "name": "LYON",
+          "short": "LYON",
+          "rating": 1275
+        },
+        {
+          "name": "Karmine Corp",
+          "short": "KC",
+          "rating": 1379
+        },
+        {
+          "name": "Relove Deep Cross Gaming",
+          "short": "DCG",
+          "rating": 1282
+        },
+        {
+          "name": "T1",
+          "short": "T1",
+          "rating": 1484
+        },
+        {
+          "name": "Team Liquid Alienware",
+          "short": "TLAW",
+          "rating": 1275
+        }
+      ],
       "matches": [],
-      "standings": [],
+      "standings": [
+        {
+          "team": "BLG",
+          "name": "Bilibili Gaming",
+          "rating": 1522,
+          "champ": 47.57
+        },
+        {
+          "team": "G2",
+          "name": "G2 Esports",
+          "rating": 1472,
+          "champ": 18.26
+        },
+        {
+          "team": "T1",
+          "name": "T1",
+          "rating": 1484,
+          "champ": 17.74,
+          "advance": 76.94
+        },
+        {
+          "team": "HLE",
+          "name": "Hanwha Life Esports",
+          "rating": 1459,
+          "champ": 12.02
+        },
+        {
+          "team": "TES",
+          "name": "Top Esports",
+          "rating": 1417,
+          "champ": 3.89
+        },
+        {
+          "team": "KC",
+          "name": "Karmine Corp",
+          "rating": 1379,
+          "champ": 0.34,
+          "advance": 19.42
+        },
+        {
+          "team": "TSW",
+          "name": "Team Secret Whales",
+          "rating": 1321,
+          "champ": 0.16
+        },
+        {
+          "team": "LYON",
+          "name": "LYON",
+          "rating": 1275,
+          "champ": 0.03
+        },
+        {
+          "team": "FUR",
+          "name": "FURIA",
+          "rating": 1215,
+          "champ": 0
+        },
+        {
+          "team": "DCG",
+          "name": "Relove Deep Cross Gaming",
+          "rating": 1282,
+          "champ": 0,
+          "advance": 2.07
+        },
+        {
+          "team": "TLAW",
+          "name": "Team Liquid Alienware",
+          "rating": 1275,
+          "champ": 0,
+          "advance": 1.57
+        }
+      ],
       "situations": [],
       "finalResult": null
     },

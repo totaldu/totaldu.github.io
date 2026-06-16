@@ -35,10 +35,26 @@ const recordByShort = Object.fromEntries(
 // 팀 short → 로고 / 풀네임
 const logoByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.logo]));
 const nameByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.name]));
+// 팀 short → GPR 점수 (대진 확정·미진행 경기의 승부예측에 사용)
+const gprScoreByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.score]));
 
+// Elo식 단판 승률 + Bo5 시리즈 승률 (scripts/simulateLol.mjs 와 동일 공식) — 대진표 미진행 경기 예측용
+const ELO_SCALE = 400;
+const bracketGameProb = (ra, rb) => 1 / (1 + Math.pow(10, (rb - ra) / ELO_SCALE));
+const bracketBo5Prob = (pa) => { const q = 1 - pa; return pa * pa * pa * (1 + 3 * q + 6 * q * q); };
+// 매치의 양 팀이 모두 확정(short 보유)이고 아직 결과가 안 나왔으면(점수·승패 표기 없음) 승부예측 %를 반환
+const matchPrediction = (a, b) => {
+  if (!a?.short || !b?.short) return null;
+  const played = a.score != null || b.score != null || a.win || a.elim || a.msi || b.win || b.elim || b.msi;
+  if (played) return null;
+  const ra = gprScoreByShort[a.short], rb = gprScoreByShort[b.short];
+  if (ra == null || rb == null) return null;
+  const pA = Math.round(bracketBo5Prob(bracketGameProb(ra, rb)) * 100);
+  return { pA, pB: 100 - pA };
+};
 
 // Road to MSI(선발전) 사다리식 대진표 — 실제 점수·진출/MSI 결과 표기
-const MsiSlot = ({ s }) => {
+const MsiSlot = ({ s, predPct }) => {
   // MSI(토너먼트) 진출 = 금색, 하위 라운드 승자 = 파랑, 탈락 = 빨강 배경
   const accent = s?.msi ? '#E8C77E' : s?.win ? '#60A5FA' : null;
   const bg = s?.msi ? 'rgba(232,199,126,0.16)' : s?.win ? 'rgba(96,165,250,0.14)' : s?.elim ? 'rgba(248,113,113,0.18)' : 'transparent';
@@ -54,9 +70,13 @@ const MsiSlot = ({ s }) => {
       ) : (
         <span className="text-xs text-white/35 truncate">{label || '미정'}</span>
       )}
-      {s?.score != null && (
+      {s?.score != null ? (
         <span className="ml-auto text-sm font-black font-mono shrink-0" style={{ color: accent || 'rgba(255,255,255,0.45)' }}>
           {s.score}
+        </span>
+      ) : predPct != null && (
+        <span className="ml-auto text-xs font-black font-mono shrink-0 text-white/55">
+          {predPct}%
         </span>
       )}
     </div>
@@ -195,13 +215,14 @@ const MsiBracket = ({ rounds, totalRows, connectors: connData, cardPrefix = '', 
               <p className="text-[11px] font-black text-white/40 uppercase tracking-wider">{r.title}</p>
             )}
             {r.matches.map((m, mi) => {
+              const pred = matchPrediction(m.a, m.b);
               if (!useGrid) {
                 return (
                   <div key={mi} data-card={`${ri}-${mi}`} {...(cardPrefix && { 'data-xcard': `${cardPrefix}${ri}-${mi}` })} className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
                     {m.title && <div data-title="" className="px-2.5 py-1.5 bg-white/10 text-[11px] font-black text-white/70">{m.title}</div>}
-                    <MsiSlot s={m.a} />
+                    <MsiSlot s={m.a} predPct={pred?.pA} />
                     <div className="h-px bg-white/10" />
-                    <MsiSlot s={m.b} />
+                    <MsiSlot s={m.b} predPct={pred?.pB} />
                   </div>
                 );
               }
@@ -223,9 +244,9 @@ const MsiBracket = ({ rounds, totalRows, connectors: connData, cardPrefix = '', 
                     {...(cardPrefix && { 'data-xcard': `${cardPrefix}${ri}-${mi}` })}
                     className="rounded-xl bg-white/5 border border-white/10 overflow-hidden"
                     style={{ position: 'absolute', top: cardTop, left: 0, right: 0 }}>
-                    <MsiSlot s={m.a} />
+                    <MsiSlot s={m.a} predPct={pred?.pA} />
                     <div className="h-px bg-white/10" />
-                    <MsiSlot s={m.b} />
+                    <MsiSlot s={m.b} predPct={pred?.pB} />
                   </div>
                 </React.Fragment>
               );
@@ -595,24 +616,35 @@ const SimulationView = ({ comp, sub, stage }) => {
         </section>
       )}
 
-      {/* 진출 팀 (MSI 스테이지) — 확정 팀은 로고, 미확정은 조건 텍스트 */}
+      {/* 진출 팀 (MSI 스테이지) — 확정 팀은 로고+시뮬 확률, 미확정은 조건 텍스트 */}
       {official?.qualifiers?.length > 0 && (
         <section className="flex flex-col gap-3">
           <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">참가 팀</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {official.qualifiers.map((q, i) => (
-              <div key={i} className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 text-sm">
-                {q.short ? (
-                  <>
-                    <TeamLogo src={logoByShort[q.short]} size={20} />
-                    <span className="font-bold text-white/90 truncate">{nameByShort[q.short] || q.short}</span>
-                    <span className="ml-auto text-[10px] font-black text-[#34D399] shrink-0">확정</span>
-                  </>
-                ) : (
-                  <span className="text-white/55 truncate">{q.label}</span>
-                )}
-              </div>
-            ))}
+            {official.qualifiers.map((q, i) => {
+              const p = q.short ? probByShort[q.short] : null;
+              return (
+                <div key={i} className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 text-sm">
+                  {q.short ? (
+                    <>
+                      <TeamLogo src={logoByShort[q.short]} size={20} />
+                      <span className="font-bold text-white/90 truncate">{nameByShort[q.short] || q.short}</span>
+                      {q.seed && <span className="text-[10px] text-white/40 shrink-0">{q.seed}</span>}
+                      <span className="ml-auto flex items-center gap-2 shrink-0">
+                        {p?.advance != null && (
+                          <span className="text-[10px] font-bold text-white/45">진출 {p.advance}%</span>
+                        )}
+                        {p?.champ != null && (
+                          <span className="text-[10px] font-black text-[#34D399]">우승 {p.champ}%</span>
+                        )}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-white/55 truncate">{q.label}</span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </section>
       )}

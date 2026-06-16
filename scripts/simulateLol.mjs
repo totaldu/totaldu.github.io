@@ -300,6 +300,68 @@ for (const lg of leagues) {
   console.log(`${lg}: 우승1위 ${standings[0].team} ${standings[0].champ}% / 팀수 ${teams.length}`);
 }
 
+// ---- 2026 MSI 전용 시뮬레이션 ----
+// 플레이-인(4팀, 더블 엘리미네이션 변형): M1 KC-DCG, M2 T1-TLAW → M3 승자전(M1w-M2w),
+//   M4 하위조1R(M1l-M2l) → M5 하위조2R(M3l-M4w) → 최종 진출전(M3w-M5w) → 1팀만 브래킷 진출.
+// 브래킷 스테이지(8팀, 표준 더블 엘리미네이션): 직행 7팀 + 플레이-인 생존팀을 GPR 점수로 시드.
+function simulateMSI(direct, playIn) {
+  const champCount = {};
+  const advanceCount = {};
+  [...direct, ...playIn].forEach((t) => { champCount[t.short] = 0; });
+  playIn.forEach((t) => { advanceCount[t.short] = 0; });
+
+  const [kc, dcg, t1, tlaw] = playIn;
+  for (let it = 0; it < ITER; it++) {
+    // 플레이-인
+    const m1w = simSeries(kc, dcg, 3), m1l = m1w === kc ? dcg : kc;
+    const m2w = simSeries(t1, tlaw, 3), m2l = m2w === t1 ? tlaw : t1;
+    const m3w = simSeries(m1w, m2w, 3), m3l = m3w === m1w ? m2w : m1w;
+    const m4w = simSeries(m1l, m2l, 3);
+    const m5w = simSeries(m3l, m4w, 3);
+    const survivor = simSeries(m3w, m5w, 3);
+    advanceCount[survivor.short]++;
+
+    // 브래킷 스테이지: 직행 7팀 + 생존팀 = 8팀, GPR 점수로 시드
+    const [s1, s2, s3, s4, s5, s6, s7, s8] = [...direct, survivor].sort((a, b) => b.score - a.score);
+    const wb1aW = simSeries(s1, s8, 3), wb1aL = wb1aW === s1 ? s8 : s1;
+    const wb1bW = simSeries(s4, s5, 3), wb1bL = wb1bW === s4 ? s5 : s4;
+    const wb1cW = simSeries(s2, s7, 3), wb1cL = wb1cW === s2 ? s7 : s2;
+    const wb1dW = simSeries(s3, s6, 3), wb1dL = wb1dW === s3 ? s6 : s3;
+    const wb2aW = simSeries(wb1aW, wb1bW, 3), wb2aL = wb2aW === wb1aW ? wb1bW : wb1aW;
+    const wb2bW = simSeries(wb1cW, wb1dW, 3), wb2bL = wb2bW === wb1cW ? wb1dW : wb1cW;
+    const lb1aW = simSeries(wb1aL, wb1bL, 3);
+    const lb1bW = simSeries(wb1cL, wb1dL, 3);
+    const wbFinalW = simSeries(wb2aW, wb2bW, 3), wbFinalL = wbFinalW === wb2aW ? wb2bW : wb2aW;
+    const lb2aW = simSeries(wb2aL, lb1bW, 3);
+    const lb2bW = simSeries(wb2bL, lb1aW, 3);
+    const lb3W = simSeries(lb2aW, lb2bW, 3);
+    const lowerFinalW = simSeries(wbFinalL, lb3W, 3);
+    const champ = simSeries(wbFinalW, lowerFinalW, 3);
+    champCount[champ.short]++;
+  }
+
+  return [...direct, ...playIn]
+    .map((t) => {
+      const row = { team: t.short, name: t.name, rating: t.score, champ: pct(champCount[t.short] / ITER) };
+      if (advanceCount[t.short] != null) row.advance = pct(advanceCount[t.short] / ITER);
+      return row;
+    })
+    .sort((a, b) => b.champ - a.champ);
+}
+
+const byShort = (short) => gpr.teams.find((t) => t.short === short);
+const msiDirect = ['G2', 'HLE', 'TSW', 'FUR', 'TES', 'BLG', 'LYON'].map(byShort);
+const msiPlayIn = ['KC', 'DCG', 'T1', 'TLAW'].map(byShort);
+const msiStandings = simulateMSI(msiDirect, msiPlayIn);
+const msi = sim.competitions.find((c) => c.key === 'msi');
+msi.ready = true;
+msi.status = 'ongoing';
+msi.iterations = ITER;
+msi.generatedAt = GENERATED_AT;
+msi.teams = [...msiDirect, ...msiPlayIn].map((t) => ({ name: t.name, short: t.short, rating: t.score }));
+msi.standings = msiStandings;
+console.log(`MSI: 우승1위 ${msiStandings[0].team} ${msiStandings[0].champ}%`);
+
 // ---- FST 2026 (종료) 실제 결과 ----
 const fstTeams = gpr.teams.filter((t) => t.fst).sort((a, b) => a.fst - b.fst);
 const fst = sim.competitions.find((c) => c.key === 'fst');
