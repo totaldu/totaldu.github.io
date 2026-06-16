@@ -1070,6 +1070,16 @@
         ],
         "bracket": {
           "desc": "럼블(조별 Bo3 더블 RR): 등봉 1~6위 녹아웃 직행·7·8위 기사의 길 / 열반 1~2위 기사의 길·3·4위 탈락. 기사의 길·녹아웃 Bo5",
+          "crossConnectors": [
+            [0, 0, 0, "mid", 1, 1, 0, "a"],
+            [0, 0, 1, "mid", 1, 1, 0, "b"],
+            [0, 0, 2, "mid", 1, 1, 1, "a"],
+            [0, 0, 3, "mid", 1, 1, 1, "b"],
+            [0, 1, 0, "mid", 1, 2, 0, "a"],
+            [0, 1, 1, "mid", 1, 2, 1, "a"],
+            [0, 2, 0, "mid", 1, 4, 0, "a"],
+            [1, 4, 0, "mid", 0, 5, 0, "b"]
+          ],
           "legend": [
             {
               "color": "rgba(232,199,126,0.7)",
@@ -1079,12 +1089,14 @@
           "sections": [
             {
               "name": "기사의 길",
+              "totalRows": 2,
               "rounds": [
                 {
                   "title": "Bo5",
                   "matches": [
                     {
                       "title": "기사의 길 1경기",
+                      "startRow": 0,
                       "a": {
                         "seed": "등봉 7위"
                       },
@@ -1099,6 +1111,7 @@
                   "matches": [
                     {
                       "title": "기사의 길 2경기",
+                      "startRow": 0,
                       "a": {
                         "seed": "등봉 8위"
                       },
@@ -1112,12 +1125,23 @@
             },
             {
               "name": "녹아웃 스테이지 · 상위권",
+              "totalRows": 8,
+              "connectors": [
+                [0, 0, "mid", 1, 0, "a"],
+                [0, 1, "mid", 1, 0, "b"],
+                [0, 2, "mid", 1, 1, "a"],
+                [0, 3, "mid", 1, 1, "b"],
+                [1, 0, "mid", 2, 0, "a"],
+                [1, 1, "mid", 2, 0, "b"],
+                [2, 0, "mid", 5, 0, "a"]
+              ],
               "rounds": [
                 {
                   "title": "1라운드",
                   "matches": [
                     {
                       "title": "Match 1",
+                      "startRow": 0,
                       "a": {
                         "seed": "녹아웃 진출"
                       },
@@ -1127,6 +1151,7 @@
                     },
                     {
                       "title": "Match 2",
+                      "startRow": 2,
                       "a": {
                         "seed": "녹아웃 진출"
                       },
@@ -1136,6 +1161,7 @@
                     },
                     {
                       "title": "Match 3",
+                      "startRow": 4,
                       "a": {
                         "seed": "녹아웃 진출"
                       },
@@ -1145,6 +1171,7 @@
                     },
                     {
                       "title": "Match 4",
+                      "startRow": 6,
                       "a": {
                         "seed": "녹아웃 진출"
                       },
@@ -1159,6 +1186,7 @@
                   "matches": [
                     {
                       "title": "Match 5",
+                      "startRow": 1,
                       "a": {
                         "label": "M1 승자"
                       },
@@ -1168,6 +1196,7 @@
                     },
                     {
                       "title": "Match 6",
+                      "startRow": 5,
                       "a": {
                         "label": "M3 승자"
                       },
@@ -1182,6 +1211,7 @@
                   "matches": [
                     {
                       "title": "Match 11",
+                      "startRow": 3,
                       "a": {
                         "label": "M5 승자"
                       },
@@ -1192,10 +1222,19 @@
                   ]
                 },
                 {
+                  "title": "",
+                  "matches": []
+                },
+                {
+                  "title": "",
+                  "matches": []
+                },
+                {
                   "title": "결승",
                   "matches": [
                     {
                       "title": "Grand Finals",
+                      "startRow": 3,
                       "a": {
                         "label": "M11 승자"
                       },
@@ -1209,12 +1248,25 @@
             },
             {
               "name": "녹아웃 스테이지 · 하위권",
+              "totalRows": 4,
+              "connectors": [
+                [1, 0, "mid", 2, 1, "b"],
+                [1, 1, "mid", 2, 0, "b"],
+                [2, 0, "mid", 3, 0, "a"],
+                [2, 1, "mid", 3, 0, "b"],
+                [3, 0, "mid", 4, 0, "b"]
+              ],
               "rounds": [
+                {
+                  "title": "",
+                  "matches": []
+                },
                 {
                   "title": "1라운드",
                   "matches": [
                     {
                       "title": "Match 7",
+                      "startRow": 0,
                       "a": {
                         "label": "M1 패자"
                       },
@@ -1224,6 +1276,7 @@
                     },
                     {
                       "title": "Match 8",
+                      "startRow": 2,
                       "a": {
                         "label": "M3 패자"
                       },
@@ -1238,6 +1291,7 @@
                   "matches": [
                     {
                       "title": "Match 9",
+                      "startRow": 2,
                       "a": {
                         "label": "M5 패자"
                       },
@@ -1247,6 +1301,7 @@
                     },
                     {
                       "title": "Match 10",
+                      "startRow": 0,
                       "a": {
                         "label": "M6 패자"
                       },
@@ -1261,6 +1316,7 @@
                   "matches": [
                     {
                       "title": "Match 12",
+                      "startRow": 1,
                       "a": {
                         "label": "M9 승자"
                       },
@@ -1275,6 +1331,7 @@
                   "matches": [
                     {
                       "title": "Match 13",
+                      "startRow": 1,
                       "a": {
                         "label": "M11 패자"
                       },

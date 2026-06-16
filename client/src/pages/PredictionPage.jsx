@@ -818,6 +818,15 @@ const SUB_UPCOMING = {
   lcs: ['Summer'],
   cblol: ['Split 2'],
 };
+// 이미 종료된 세부 대회 → 리그 전체 상태(진행중)와 무관하게 "종료" 표시
+const SUB_FINISHED = {
+  lpl: ['Split 1', 'Split 2'],
+  lec: ['Versus', 'Spring'],
+  lcp: ['Split 1', 'Split 2'],
+  lcs: ['Lock-In', 'Spring'],
+  cblol: ['Copa', 'Split 1'],
+  lck: ['Road to MSI'],
+};
 // 세부대회 안에서 단계(스테이지) 선택 — `${comp.key}|${sub}` → 단계 목록
 const STAGE_TABS = {
   'lck|LCK': ['정규시즌', '플레이-인', '플레이오프'],
@@ -844,7 +853,6 @@ const PredictionPage = () => {
 
   const isGpr = activeKey === 'gpr';
   const comp = useMemo(() => comps.find((c) => c.key === activeKey), [comps, activeKey]);
-  const st = comp ? (statusMeta[comp.status] || statusMeta.upcoming) : null;
   const subTabs = comp ? SUBTABS[comp.key] : null;
   const subParam = searchParams.get('sub');
   const activeSub = subTabs
@@ -852,6 +860,9 @@ const PredictionPage = () => {
     : null;
   const setActiveSub = (s) => setSearchParams({ sub: s }, { replace: true });
   const subUpcoming = !!(comp && activeSub && SUB_UPCOMING[comp.key]?.includes(activeSub));
+  // 세부 대회가 이미 종료됐으면 리그 전체 상태와 무관하게 "종료" 배지를 표시
+  const subFinished = !!(comp && activeSub && SUB_FINISHED[comp.key]?.includes(activeSub));
+  const st = comp ? (statusMeta[subFinished ? 'finished' : comp.status] || statusMeta.upcoming) : null;
   // 제목 접미사: 점(·) 없이 공백으로 이어붙이되, 리그명이 sub에 중복되면 제거
   // 예) LPL+'Split 2' → "Split 2", LCK+'LCK' → "", LCK+'LCK CUP' → "CUP"
   const subSuffix = (() => {

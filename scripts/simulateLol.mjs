@@ -355,7 +355,7 @@ const msiPlayIn = ['KC', 'DCG', 'T1', 'TLAW'].map(byShort);
 const msiStandings = simulateMSI(msiDirect, msiPlayIn);
 const msi = sim.competitions.find((c) => c.key === 'msi');
 msi.ready = true;
-msi.status = 'ongoing';
+msi.status = 'upcoming';
 msi.iterations = ITER;
 msi.generatedAt = GENERATED_AT;
 msi.teams = [...msiDirect, ...msiPlayIn].map((t) => ({ name: t.name, short: t.short, rating: t.score }));
