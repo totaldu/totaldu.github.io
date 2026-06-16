@@ -1015,6 +1015,9 @@ const PredictionPage = () => {
           >
             레이팅 출처: lolesports.com Global Power Rankings <ExternalLink size={11} /> · 갱신 {fmtUpdated(sim.updatedAt)}
           </a>
+          <p className="text-white/30 text-[11px] mt-2">
+            TotalDU는 Riot Games의 서비스가 아닌 개인의 비공식 서비스이며 Riot Games 또는 리그 오브 레전드의 비공개 데이터를 이용하지 않습니다. 리그 오브 레전드 및 Riot Games는 Riot Games, Inc.의 상표 또는 등록 상표입니다. League of Legends © Riot Games, Inc.
+          </p>
         </div>
       </div>
     </div>
