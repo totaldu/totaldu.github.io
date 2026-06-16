@@ -818,14 +818,20 @@ const SUB_UPCOMING = {
   lcs: ['Summer'],
   cblol: ['Split 2'],
 };
-// 이미 종료된 세부 대회 → 리그 전체 상태(진행중)와 무관하게 "종료" 표시
-const SUB_FINISHED = {
-  lpl: ['Split 1', 'Split 2'],
-  lec: ['Versus', 'Spring'],
-  lcp: ['Split 1', 'Split 2'],
-  lcs: ['Lock-In', 'Spring'],
-  cblol: ['Copa', 'Split 1'],
-  lck: ['Road to MSI'],
+// 세부 대회별 상태 배지 오버라이드 — 리그 전체 상태(comp.status)와 무관하게 표시할 값
+const SUB_STATUS = {
+  'lpl|Split 1': 'finished',
+  'lpl|Split 2': 'finished',
+  'lpl|Split 3': 'upcoming',
+  'lec|Versus': 'finished',
+  'lec|Spring': 'finished',
+  'lcp|Split 1': 'finished',
+  'lcp|Split 2': 'finished',
+  'lcs|Lock-In': 'finished',
+  'lcs|Spring': 'finished',
+  'cblol|Copa': 'finished',
+  'cblol|Split 1': 'finished',
+  'lck|Road to MSI': 'finished',
 };
 // 세부대회 안에서 단계(스테이지) 선택 — `${comp.key}|${sub}` → 단계 목록
 const STAGE_TABS = {
@@ -860,9 +866,9 @@ const PredictionPage = () => {
     : null;
   const setActiveSub = (s) => setSearchParams({ sub: s }, { replace: true });
   const subUpcoming = !!(comp && activeSub && SUB_UPCOMING[comp.key]?.includes(activeSub));
-  // 세부 대회가 이미 종료됐으면 리그 전체 상태와 무관하게 "종료" 배지를 표시
-  const subFinished = !!(comp && activeSub && SUB_FINISHED[comp.key]?.includes(activeSub));
-  const st = comp ? (statusMeta[subFinished ? 'finished' : comp.status] || statusMeta.upcoming) : null;
+  // 세부 대회별 상태 오버라이드가 있으면 리그 전체 상태(comp.status) 대신 그 값으로 배지를 표시
+  const subStatus = comp && activeSub ? SUB_STATUS[`${comp.key}|${activeSub}`] : null;
+  const st = comp ? (statusMeta[subStatus || comp.status] || statusMeta.upcoming) : null;
   // 제목 접미사: 점(·) 없이 공백으로 이어붙이되, 리그명이 sub에 중복되면 제거
   // 예) LPL+'Split 2' → "Split 2", LCK+'LCK' → "", LCK+'LCK CUP' → "CUP"
   const subSuffix = (() => {
