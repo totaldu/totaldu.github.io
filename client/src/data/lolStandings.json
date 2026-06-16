@@ -191,25 +191,32 @@
         "rows": [],
         "qualifiers": [
           {
-            "short": "G2"
+            "short": "G2",
+            "seed": "LEC #1"
           },
           {
-            "short": "HLE"
+            "short": "HLE",
+            "seed": "LCK #1"
           },
           {
-            "short": "TSW"
+            "short": "TSW",
+            "seed": "LCP #1"
           },
           {
-            "short": "FUR"
+            "short": "FUR",
+            "seed": "CBLOL #1"
           },
           {
-            "short": "TES"
+            "short": "TES",
+            "seed": "LPL #2"
           },
           {
-            "short": "BLG"
+            "short": "BLG",
+            "seed": "LPL #1"
           },
           {
-            "short": "LYON"
+            "short": "LYON",
+            "seed": "LCS #1"
           },
           {
             "label": "플레이-인 스테이지 생존팀"
