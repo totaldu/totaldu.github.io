@@ -158,7 +158,7 @@ const MsiBracket = ({ rounds, totalRows, connectors: connData, cardPrefix = '', 
   }, [useGrid, rounds, connData]);
 
   return (
-    <div className="pb-1" style={useGrid && wrapScroll ? { overflowX: 'auto' } : {}}>
+    <div className={`pb-1${useGrid && wrapScroll ? ' msi-scroll' : ''}`} style={useGrid && wrapScroll ? { overflowX: 'auto' } : {}}>
       <div ref={wrapRef} style={{
         position: 'relative',
         display: 'flex',
@@ -308,7 +308,7 @@ const BracketGroup = ({ sections, crossConnectors }) => {
   }, [sections, crossConnectors]);
 
   return (
-    <div className="pb-1" style={{ overflowX: 'auto' }}>
+    <div className="pb-1 msi-scroll" style={{ overflowX: 'auto' }}>
       <div ref={wrapRef} className="flex flex-col gap-8" style={{ position: 'relative', width: 'max-content' }}>
         {crossPaths.length > 0 && (
           <svg style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible' }}>
