@@ -297,12 +297,35 @@ const BracketGroup = ({ sections, crossConnectors }) => {
       const fy = slotY(fromEl, fSlot, wRect);
       const ty = slotY(toEl, tSlot, wRect);
       if (fy == null || ty == null) return null;
-      const mx = (fx + tx) / 2;
       const flat = Math.abs(fy - ty) <= 2;
-      const d = flat
-        ? `M ${fx} ${fy} L ${tx} ${ty}`
-        : `M ${fx} ${fy} L ${mx} ${fy} L ${mx} ${ty} L ${tx} ${ty}`;
-      return d;
+      if (flat) return `M ${fx} ${fy} L ${tx} ${ty}`;
+
+      // 두 라운드 사이에 다른 라운드(매치)를 건너뛰는 연결선은 그 매치 카드를 관통하지 않도록
+      // 칸 사이 빈 공간(gap)에서만 꺾이고, 가로 이동은 건너뛰는 매치들을 모두 피하는 y에서 한다
+      const loRound = Math.min(fR, tR);
+      const hiRound = Math.max(fR, tR);
+      if (hiRound - loRound > 1) {
+        const skipped = Array.from(wrap.querySelectorAll('[data-xcard]')).filter((el) => {
+          const m = el.getAttribute('data-xcard').match(/^s\d+-(\d+)-/);
+          return m && +m[1] > loRound && +m[1] < hiRound;
+        });
+        if (skipped.length) {
+          const rects = skipped.map((el) => el.getBoundingClientRect());
+          const minTop = Math.min(...rects.map((r) => r.top)) - wRect.top;
+          const maxBottom = Math.max(...rects.map((r) => r.bottom)) - wRect.top;
+          const above = minTop - 10;
+          const below = maxBottom + 10;
+          const detourY = Math.abs(fy - above) + Math.abs(ty - above) <= Math.abs(fy - below) + Math.abs(ty - below)
+            ? above
+            : below;
+          const gx1 = fx + COL_GAP / 2;
+          const gx2 = tx - COL_GAP / 2;
+          return `M ${fx} ${fy} L ${gx1} ${fy} L ${gx1} ${detourY} L ${gx2} ${detourY} L ${gx2} ${ty} L ${tx} ${ty}`;
+        }
+      }
+
+      const mx = (fx + tx) / 2;
+      return `M ${fx} ${fy} L ${mx} ${fy} L ${mx} ${ty} L ${tx} ${ty}`;
     }).filter(Boolean);
     setCrossPaths(paths);
   }, [sections, crossConnectors]);
