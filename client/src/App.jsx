@@ -511,9 +511,11 @@ const App = () => {
               )}
             </nav>
             <div className="flex items-center gap-3">
-              <button className="hidden sm:flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-50 px-5 py-2.5 rounded-full border border-gray-200 hover:bg-gray-100 transition-all">
-                <LogIn size={16} /> 로그인
-              </button>
+              {IS_BETA && (
+                <button className="hidden sm:flex items-center gap-2 text-sm font-bold text-gray-700 bg-gray-50 px-5 py-2.5 rounded-full border border-gray-200 hover:bg-gray-100 transition-all">
+                  <LogIn size={16} /> 로그인
+                </button>
+              )}
               <button className="lg:hidden p-2 text-gray-600"><Menu size={28} /></button>
             </div>
           </div>
