@@ -88,7 +88,11 @@ const TeamPage = () => {
                       <div
                         key={p.name}
                         className="flex items-center gap-4 p-3 rounded-xl"
-                        style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
+                        style={{
+                          backgroundColor: 'rgba(255,255,255,0.04)',
+                          border: '1px solid rgba(255,255,255,0.06)',
+                          opacity: p.starter === false ? 0.55 : 1,
+                        }}
                       >
                         <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-white/5">
                           {p.image ? (
@@ -103,7 +107,13 @@ const TeamPage = () => {
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-black text-white text-lg leading-tight">{p.name}</div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-black text-white text-lg leading-tight">{p.name}</span>
+                            {p.starter && (
+                              <span className="text-[10px] font-black px-2 py-0.5 rounded shrink-0"
+                                style={{ backgroundColor: 'rgba(200,150,62,0.2)', color: '#E8C77E' }}>주전</span>
+                            )}
+                          </div>
                           {(p.firstName || p.lastName) && (
                             <div className="text-white/40 text-sm mt-0.5">
                               {[p.firstName, p.lastName].filter(Boolean).join(' ')}

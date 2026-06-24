@@ -83,7 +83,11 @@ const TeamPanel = ({ teamShort, onClose, onNavigate }) => {
                     <div className="flex flex-col gap-1.5">
                       {players.map(p => (
                         <div key={p.name} className="flex items-center gap-3 p-2.5 rounded-xl"
-                          style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+                          style={{
+                            backgroundColor: 'rgba(255,255,255,0.04)',
+                            border: '1px solid rgba(255,255,255,0.06)',
+                            opacity: p.starter === false ? 0.55 : 1,
+                          }}>
                           <div className="w-11 h-11 rounded-lg overflow-hidden shrink-0 bg-white/5">
                             {p.image
                               ? <img src={p.image} alt={p.name} className="w-full h-full object-cover object-top"
@@ -91,8 +95,14 @@ const TeamPanel = ({ teamShort, onClose, onNavigate }) => {
                               : <div className="w-full h-full flex items-center justify-center text-white/20 text-xs">?</div>
                             }
                           </div>
-                          <div className="min-w-0">
-                            <div className="font-black text-white text-sm leading-tight">{p.name}</div>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="font-black text-white text-sm leading-tight">{p.name}</span>
+                              {p.starter && (
+                                <span className="text-[9px] font-black px-1.5 py-0.5 rounded shrink-0"
+                                  style={{ backgroundColor: 'rgba(200,150,62,0.2)', color: '#E8C77E' }}>주전</span>
+                              )}
+                            </div>
                             {(p.firstName || p.lastName) && (
                               <div className="text-white/35 text-xs mt-0.5 truncate">
                                 {[p.firstName, p.lastName].filter(Boolean).join(' ')}

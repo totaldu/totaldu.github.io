@@ -77,16 +77,87 @@ const TEAM_IDS = {
 
 const ROLE_ORDER = ['top', 'jungle', 'mid', 'bottom', 'support'];
 
+// 주전 판별용 리그 일정 (MyPredictionPage 와 동일)
+const LEAGUE_IDS = [
+  '98767991310872058',  // LCK
+  '98767991314006698',  // LPL
+  '98767991302996019',  // LEC
+  '98767991299243165',  // LCS
+  '98767991325878492',  // MSI
+  '107898214974993351', // LCP
+  '98767991332355509',  // CBLOL
+];
+
+const api = (path) =>
+  fetch(`https://esports-api.lolesports.com/persisted/gw/${path}`, {
+    headers: { 'x-api-key': API_KEY },
+  }).then((r) => r.json());
+
 async function fetchTeam(id) {
-  const res = await fetch(
-    `https://esports-api.lolesports.com/persisted/gw/getTeams?hl=ko-KR&id=${id}`,
-    { headers: { 'x-api-key': API_KEY } }
-  );
-  const json = await res.json();
+  const json = await api(`getTeams?hl=ko-KR&id=${id}`);
   return json?.data?.teams?.[0] ?? null;
 }
 
+// 모든 리그의 완료 경기를 모아 팀코드 → 최근 완료 matchId 맵 생성
+// (일정 API의 팀 객체에는 id가 없고 code만 있으므로 code 기준으로 키 생성)
+async function buildRecentMatchMap() {
+  const recent = {}; // teamCode → { startTime, matchId }
+  for (const lid of LEAGUE_IDS) {
+    try {
+      const json = await api(`getSchedule?hl=ko-KR&leagueId=${lid}`);
+      const events = json?.data?.schedule?.events ?? [];
+      for (const e of events) {
+        if (e.type !== 'match' || e.state !== 'completed') continue;
+        for (const t of e.match.teams) {
+          if (!t.code) continue;
+          const prev = recent[t.code];
+          if (!prev || new Date(e.startTime) > new Date(prev.startTime)) {
+            recent[t.code] = { startTime: e.startTime, matchId: e.match.id };
+          }
+        }
+      }
+    } catch (e) {
+      console.log(`  schedule ${lid} ERROR: ${e.message}`);
+    }
+    await new Promise((r) => setTimeout(r, 80));
+  }
+  return recent;
+}
+
+// 라인업 소환사명에서 팀 코드 접두사 제거: "GEN Kiin"(공백) / "BLGBin"(공백 없음) 모두 처리
+const stripCode = (n, code) => {
+  if (code && n.startsWith(code + ' ')) return n.slice(code.length + 1).trim();
+  if (code && n.startsWith(code)) return n.slice(code.length).trim();
+  return n.replace(/^\S+\s+/, '').trim();
+};
+
+// 최근 경기 game1 라인업 → 해당 팀 주전 소환사명 Set
+// 주의: getEventDetails 의 blue/red 와 livestats window 의 blue/red 배정이 서로 다르므로
+//       side 매핑 대신 로스터 이름과 가장 많이 일치하는 블록을 주전 라인업으로 선택한다.
+async function fetchStarters(matchId, teamCode, rosterNames) {
+  const det = await api(`getEventDetails?hl=ko-KR&id=${matchId}`);
+  const game = det?.data?.event?.match?.games?.find((g) => g.state === 'completed');
+  if (!game) return null;
+  const r = await fetch(`https://feed.lolesports.com/livestats/v1/window/${game.id}`, {
+    headers: { 'x-api-key': API_KEY },
+  });
+  if (r.status !== 200) return null;
+  const win = await r.json();
+  const blocks = [win?.gameMetadata?.blueTeamMetadata, win?.gameMetadata?.redTeamMetadata];
+  let best = null, bestCount = 0;
+  for (const b of blocks) {
+    const names = (b?.participantMetadata ?? []).map((p) => stripCode(p.summonerName, teamCode));
+    const count = names.filter((n) => rosterNames.has(n)).length;
+    if (count > bestCount) { bestCount = count; best = names; }
+  }
+  return best ? new Set(best) : null;
+}
+
 async function main() {
+  console.log('Building recent match map...');
+  const recentMatch = await buildRecentMatchMap();
+  console.log(`  ${Object.keys(recentMatch).length} teams have recent matches\n`);
+
   const rosters = {};
   const shorts = Object.keys(TEAM_IDS);
 
@@ -96,18 +167,37 @@ async function main() {
     try {
       const team = await fetchTeam(id);
       if (!team) { console.log(' no data'); continue; }
-      const players = (team.players ?? [])
-        .filter(p => ROLE_ORDER.includes(p.role))
-        .sort((a, b) => ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role))
+
+      const rosterPlayers = (team.players ?? []).filter(p => ROLE_ORDER.includes(p.role));
+      const rosterNames = new Set(rosterPlayers.map(p => p.summonerName));
+
+      // 최근 경기 주전 라인업 판별 (팀 코드로 최근 경기 조회)
+      let starters = null;
+      const rm = recentMatch[team.code];
+      if (rm) {
+        try {
+          starters = await fetchStarters(rm.matchId, team.code, rosterNames);
+        } catch { /* 라인업 조회 실패 시 무시 */ }
+      }
+
+      const players = rosterPlayers
         .map(p => ({
           name: p.summonerName,
           firstName: p.firstName || '',
           lastName: p.lastName || '',
           role: p.role,
           image: p.image || '',
-        }));
+          starter: starters ? starters.has(p.summonerName) : false,
+        }))
+        // 역할 순서 → 같은 역할 내에서는 주전 먼저
+        .sort((a, b) => {
+          const r = ROLE_ORDER.indexOf(a.role) - ROLE_ORDER.indexOf(b.role);
+          if (r !== 0) return r;
+          return (b.starter ? 1 : 0) - (a.starter ? 1 : 0);
+        });
+
       rosters[short] = { id, players };
-      console.log(` ${players.length} players`);
+      console.log(` ${players.length} players${starters ? ` (주전 ${players.filter(p => p.starter).length})` : ''}`);
     } catch (e) {
       console.log(` ERROR: ${e.message}`);
     }
