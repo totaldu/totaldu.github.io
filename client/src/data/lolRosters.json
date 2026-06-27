@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-24",
+  "updatedAt": "2026-06-27",
   "rosters": {
     "GEN": {
       "id": "100205573495116443",
@@ -1189,7 +1189,7 @@
           "lastName": "Yoon",
           "role": "top",
           "image": "http://static.lolesports.com/players/1768348332479_hoya.png",
-          "starter": false
+          "starter": true
         },
         {
           "name": "Guwon",
@@ -1258,7 +1258,7 @@
           "lastName": "ZOU",
           "role": "mid",
           "image": "http://static.lolesports.com/players/default-headshot.png",
-          "starter": false
+          "starter": true
         },
         {
           "name": "Renard",
@@ -1568,7 +1568,7 @@
           "lastName": " Yan",
           "role": "top",
           "image": "http://static.lolesports.com/players/1775225838229_sasi.png",
-          "starter": false
+          "starter": true
         },
         {
           "name": "climber",
@@ -1674,7 +1674,7 @@
           "lastName": "Çelik",
           "role": "top",
           "image": "http://static.lolesports.com/players/1768550002850_BrokenBlade-01.png",
-          "starter": false
+          "starter": true
         },
         {
           "name": "SkewMond",
@@ -2454,6 +2454,51 @@
         }
       ]
     },
+    "SEN": {
+      "id": "115688562107799886",
+      "players": [
+        {
+          "name": "Impact",
+          "firstName": "Eon-Young",
+          "lastName": "Jeong",
+          "role": "top",
+          "image": "http://static.lolesports.com/players/1769150328282_AME_LCS26S1_SEN_IMPACT.png",
+          "starter": true
+        },
+        {
+          "name": "HamBak",
+          "firstName": "Yujin",
+          "lastName": "Ham",
+          "role": "jungle",
+          "image": "http://static.lolesports.com/players/1769752624889_hambak.png",
+          "starter": true
+        },
+        {
+          "name": "DARKWINGS",
+          "firstName": "Isaac",
+          "lastName": "Chou",
+          "role": "mid",
+          "image": "http://static.lolesports.com/players/1769150251794_AME_LCS26S1_SEN_DARKWINGS.png",
+          "starter": true
+        },
+        {
+          "name": "Rahel",
+          "firstName": "Minseong",
+          "lastName": "Cho",
+          "role": "bottom",
+          "image": "http://static.lolesports.com/players/1769752604733_rahel.png",
+          "starter": true
+        },
+        {
+          "name": "huhi",
+          "firstName": "Jae Hyun",
+          "lastName": "Choi",
+          "role": "support",
+          "image": "http://static.lolesports.com/players/1769150288234_AME_LCS26S1_SEN_HUHI.png",
+          "starter": true
+        }
+      ]
+    },
     "TSW": {
       "id": "113661839307879869",
       "players": [
@@ -2516,7 +2561,7 @@
           "lastName": "Tran Duy ",
           "role": "top",
           "image": "http://static.lolesports.com/players/1769231292377_Kiaya.png",
-          "starter": true
+          "starter": false
         },
         {
           "name": "Draktharr",
@@ -2548,7 +2593,7 @@
           "lastName": "Tran Quoc ",
           "role": "bottom",
           "image": "http://static.lolesports.com/players/1769231486961_Artemis.png",
-          "starter": true
+          "starter": false
         },
         {
           "name": "Taki",
@@ -2646,7 +2691,7 @@
           "lastName": "Chiu",
           "role": "bottom",
           "image": "http://static.lolesports.com/players/1769232306480_Doggo.png",
-          "starter": true
+          "starter": false
         },
         {
           "name": "Kino",

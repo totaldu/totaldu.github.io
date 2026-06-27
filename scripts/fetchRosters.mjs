@@ -55,6 +55,7 @@ const TEAM_IDS = {
   DIG:  '98926509883054987',
   DSG:  '110428362822825796',
   SR:   '111504538396430510',
+  SEN:  '115688562107799886',
   // LCP
   TSW: '113661839307879869',
   GAM: '98767991954244555',
@@ -131,6 +132,32 @@ const stripCode = (n, code) => {
   return n.replace(/^\S+\s+/, '').trim();
 };
 
+// 이름 정규화: 소문자화 + 공백/구두점 제거 + 혼동 문자 통일
+// window 피드에 "BrokenBIade"(대문자 I)처럼 l↔I 오타가 있어 정확 매칭이 실패하므로
+// i·l·1·| 을 한 글자로, o·0 을 한 글자로 접어 매칭한다.
+const normName = (s) =>
+  s.toLowerCase().replace(/[\s_.\-]/g, '').replace(/[il1|]/g, 'i').replace(/0/g, 'o');
+
+// 편집거리 ≤1 판정 (치환·삽입·삭제 1회 이내). 정규화 후에도 "Nia"↔"Nia1",
+// "sasi"↔"sasii" 처럼 한 글자 차이가 나는 표기 불일치를 흡수한다.
+const within1 = (a, b) => {
+  if (a === b) return true;
+  const la = a.length, lb = b.length;
+  if (Math.abs(la - lb) > 1) return false;
+  if (la === lb) {
+    let diff = 0;
+    for (let i = 0; i < la; i++) if (a[i] !== b[i] && ++diff > 1) return false;
+    return true;
+  }
+  const [s, l] = la < lb ? [a, b] : [b, a];
+  let i = 0, j = 0, skipped = false;
+  while (i < s.length && j < l.length) {
+    if (s[i] === l[j]) { i++; j++; }
+    else { if (skipped) return false; skipped = true; j++; }
+  }
+  return true;
+};
+
 // 최근 경기 game1 라인업 → 해당 팀 주전 소환사명 Set
 // 주의: getEventDetails 의 blue/red 와 livestats window 의 blue/red 배정이 서로 다르므로
 //       side 매핑 대신 로스터 이름과 가장 많이 일치하는 블록을 주전 라인업으로 선택한다.
@@ -143,14 +170,36 @@ async function fetchStarters(matchId, teamCode, rosterNames) {
   });
   if (r.status !== 200) return null;
   const win = await r.json();
-  const blocks = [win?.gameMetadata?.blueTeamMetadata, win?.gameMetadata?.redTeamMetadata];
+  const rosterArr = [...rosterNames];
+
+  // window 블록의 라인업 이름을 로스터 원본 이름에 1:1 매칭 (정확 → 편집거리≤1 폴백)
+  const matchBlock = (meta) => {
+    const winNorms = (meta?.participantMetadata ?? []).map((p) => normName(stripCode(p.summonerName, teamCode)));
+    const used = new Set();
+    const matched = new Set();
+    // 1차: 정규화 정확 일치
+    const exactDone = new Array(winNorms.length).fill(false);
+    winNorms.forEach((s, idx) => {
+      const o = rosterArr.find((n) => !used.has(n) && normName(n) === s);
+      if (o) { used.add(o); matched.add(o); exactDone[idx] = true; }
+    });
+    // 2차: 남은 슬롯에 편집거리≤1 폴백
+    winNorms.forEach((s, idx) => {
+      if (exactDone[idx]) return;
+      const o = rosterArr.find((n) => !used.has(n) && within1(normName(n), s));
+      if (o) { used.add(o); matched.add(o); }
+    });
+    return matched;
+  };
+
   let best = null, bestCount = 0;
-  for (const b of blocks) {
-    const names = (b?.participantMetadata ?? []).map((p) => stripCode(p.summonerName, teamCode));
-    const count = names.filter((n) => rosterNames.has(n)).length;
-    if (count > bestCount) { bestCount = count; best = names; }
+  for (const b of [win?.gameMetadata?.blueTeamMetadata, win?.gameMetadata?.redTeamMetadata]) {
+    const matched = matchBlock(b);
+    if (matched.size > bestCount) { bestCount = matched.size; best = matched; }
   }
-  return best ? new Set(best) : null;
+  // 5명 중 4명 이상 일치할 때만 신뢰. 그 미만은 오래된·교체된 라인업일 가능성이 커
+  // 일부만 주전으로 잘못 표기되는 것을 막고 역할순 폴백에 맡긴다.
+  return best && best.size >= 4 ? best : null;
 }
 
 async function main() {
