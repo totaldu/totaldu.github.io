@@ -120,24 +120,30 @@
                       "title": "1라운드 · Match 1 (6/28)",
                       "startRow": 0,
                       "a": {
-                        "seed": "LEC #2",
-                        "short": "KC"
+                        "seed": "LCK #2",
+                        "short": "T1",
+                        "score": 3,
+                        "win": true
                       },
                       "b": {
-                        "seed": "LCP #2",
-                        "short": "DCG"
+                        "seed": "LCS #2",
+                        "short": "TLAW",
+                        "score": 0
                       }
                     },
                     {
                       "title": "1라운드 · Match 2 (6/28)",
                       "startRow": 2,
                       "a": {
-                        "seed": "LCK #2",
-                        "short": "T1"
+                        "seed": "LEC #2",
+                        "short": "KC",
+                        "score": 3,
+                        "win": true
                       },
                       "b": {
-                        "seed": "LCS #2",
-                        "short": "TLAW"
+                        "seed": "LCP #2",
+                        "short": "DCG",
+                        "score": 0
                       }
                     }
                   ]
@@ -149,10 +155,15 @@
                       "title": "2라운드 (승자전) · Match 3 (6/29)",
                       "startRow": 1,
                       "a": {
-                        "label": "M1 승자"
+                        "label": "M1 승자",
+                        "short": "T1",
+                        "score": 3,
+                        "win": true
                       },
                       "b": {
-                        "label": "M2 승자"
+                        "label": "M2 승자",
+                        "short": "KC",
+                        "score": 0
                       }
                     }
                   ]
@@ -203,10 +214,16 @@
                       "title": "2라운드 · Match 4 (6/29)",
                       "startRow": 2,
                       "a": {
-                        "label": "M1 패자"
+                        "label": "M1 패자",
+                        "short": "TLAW",
+                        "score": 3,
+                        "win": true
                       },
                       "b": {
-                        "label": "M2 패자"
+                        "label": "M2 패자",
+                        "short": "DCG",
+                        "score": 0,
+                        "elim": true
                       }
                     }
                   ]
