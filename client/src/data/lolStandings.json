@@ -179,7 +179,8 @@
                       "title": "4라운드 · 최종 진출전 (7/1)",
                       "startRow": 1,
                       "a": {
-                        "label": "M3 승자"
+                        "label": "M3 승자",
+                        "short": "T1"
                       },
                       "b": {
                         "label": "하위조 진출팀"
@@ -235,10 +236,12 @@
                       "title": "3라운드 · Match 5 (6/30)",
                       "startRow": 2,
                       "a": {
-                        "label": "M3 패자"
+                        "label": "M3 패자",
+                        "short": "KC"
                       },
                       "b": {
-                        "label": "M4 승자"
+                        "label": "M4 승자",
+                        "short": "TLAW"
                       }
                     }
                   ]

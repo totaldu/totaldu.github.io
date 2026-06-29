@@ -504,18 +504,32 @@ async function fillMsiPlayinResults(prevMsi) {
   };
 
   // 5) 의존성 순서대로 결과·플래그 기입
+  const snap = (sl) => JSON.stringify([sl.short, sl.score, !!sl.win, !!sl.elim, !!sl.msi]);
+  // 미진행 경기 슬롯: 확정된 팀(시드)만 채우고 점수·플래그는 비운다.
+  // → 다음 대진이 "M3 패자" 대신 실제 팀으로 표시되고, 승부예측 %도 산출된다.
+  const seedSlot = (slot, short) => {
+    if (!short) return;
+    const before = snap(slot);
+    slot.short = short;
+    delete slot.score; delete slot.win; delete slot.elim; delete slot.msi;
+    if (snap(slot) !== before) changed = true;
+  };
+
   let changed = false;
   for (const num of ['1', '2', '3', '4', '5', 'F']) {
     const mt = byNum[num];
     if (!mt) continue;
     const ta = resolveShort(mt.a), tb = resolveShort(mt.b);
-    if (!ta || !tb) continue;
-    const res = findResult(ta, tb);
-    if (!res) continue;
+    const res = ta && tb ? findResult(ta, tb) : null;
+    if (!res) {
+      // 아직 안 끝난(또는 한쪽만 확정된) 경기 → 확정된 팀만 시드로 채움
+      seedSlot(mt.a, ta);
+      seedSlot(mt.b, tb);
+      continue;
+    }
     resolved[num] = { winner: res.winner, loser: res.loser };
     const flagNum = num === 'F' ? null : num; // 최종전 승자는 항상 진출(msi)
     const apply = (slot, short) => {
-      const snap = (sl) => JSON.stringify([sl.short, sl.score, !!sl.win, !!sl.elim, !!sl.msi]);
       const before = snap(slot);
       slot.short = short;
       slot.score = res.score[short];
