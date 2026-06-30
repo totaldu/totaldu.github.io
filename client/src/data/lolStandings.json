@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-29",
+  "updatedAt": "2026-06-30",
   "note": "리그별 → 세부대회별 공식 현재 순위표(정규시즌만, 토너먼트/플레이오프 제외). 있으면 우선 사용, 없으면 GPR 전적으로 대체. gw/gl은 세트(게임) 승-패.",
   "source": {
     "lck": "https://lolesports.com/ko-KR/leagues/lck",
@@ -180,10 +180,15 @@
                       "startRow": 1,
                       "a": {
                         "label": "M3 승자",
-                        "short": "T1"
+                        "short": "T1",
+                        "score": 3,
+                        "msi": true
                       },
                       "b": {
-                        "label": "하위조 진출팀"
+                        "label": "하위조 진출팀",
+                        "short": "TLAW",
+                        "score": 0,
+                        "elim": true
                       }
                     }
                   ]
@@ -237,11 +242,15 @@
                       "startRow": 2,
                       "a": {
                         "label": "M3 패자",
-                        "short": "KC"
+                        "short": "KC",
+                        "score": 0,
+                        "elim": true
                       },
                       "b": {
                         "label": "M4 승자",
-                        "short": "TLAW"
+                        "short": "TLAW",
+                        "score": 3,
+                        "win": true
                       }
                     }
                   ]
