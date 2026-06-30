@@ -300,25 +300,70 @@ for (const lg of leagues) {
   console.log(`${lg}: 우승1위 ${standings[0].team} ${standings[0].champ}% / 팀수 ${teams.length}`);
 }
 
+// 플레이-인 브래킷에서 이미 끝난 경기 결과를 추출 (lolStandings.json — fetchStandings가 갱신).
+//   pairing[key]=[a,b] : 1라운드 실제 대진, fixed[key]=승자 short : 확정 결과.
+//   key = 'Match N'의 N / 최종 진출전 'F'. 진행 흐름에 따라 확률이 실제 결과를 반영하도록 한다.
+function extractMsiPlayinFixed() {
+  const out = { pairing: {}, fixed: {} };
+  const bracket = standingsData.standings?.msi?.['플레이-인 스테이지']?.bracket;
+  if (!bracket?.sections) return out;
+  const winnerOf = (m) => {
+    const { a, b } = m;
+    if (!a?.short || !b?.short) return null;
+    if (a.win || a.msi) return a.short;
+    if (b.win || b.msi) return b.short;
+    if (a.score != null && b.score != null && a.score !== b.score) return a.score > b.score ? a.short : b.short;
+    return null; // 시드만 채워지고 미진행
+  };
+  for (const sec of bracket.sections)
+    for (const r of sec.rounds || [])
+      for (const m of r.matches || []) {
+        const mm = (m.title || '').match(/Match\s*(\d+)/);
+        const key = mm ? mm[1] : (/최종\s*진출전/.test(m.title || '') ? 'F' : null);
+        if (!key) continue;
+        if (m.a?.short && m.b?.short) out.pairing[key] = [m.a.short, m.b.short];
+        const w = winnerOf(m);
+        if (w) out.fixed[key] = w;
+      }
+  return out;
+}
+
 // ---- 2026 MSI 전용 시뮬레이션 ----
-// 플레이-인(4팀, 더블 엘리미네이션 변형): M1 KC-DCG, M2 T1-TLAW → M3 승자전(M1w-M2w),
+// 플레이-인(4팀, 더블 엘리미네이션 변형): M1·M2 → M3 승자전(M1w-M2w),
 //   M4 하위조1R(M1l-M2l) → M5 하위조2R(M3l-M4w) → 최종 진출전(M3w-M5w) → 1팀만 브래킷 진출.
+//   이미 끝난 경기(fixed)는 그 결과로 고정하고 남은 경기만 시뮬레이션한다.
 // 브래킷 스테이지(8팀, 표준 더블 엘리미네이션): 직행 7팀 + 플레이-인 생존팀을 GPR 점수로 시드.
-function simulateMSI(direct, playIn) {
+function simulateMSI(direct, playIn, fixedInfo = { pairing: {}, fixed: {} }) {
   const champCount = {};
   const advanceCount = {};
   [...direct, ...playIn].forEach((t) => { champCount[t.short] = 0; });
   playIn.forEach((t) => { advanceCount[t.short] = 0; });
 
+  const byS = Object.fromEntries(playIn.map((t) => [t.short, t]));
   const [kc, dcg, t1, tlaw] = playIn;
+  // 1라운드 대진: 실제 브래킷(Match1·Match2) 기준, 없으면 기본 순서
+  const pairFor = (key, defA, defB) => {
+    const p = fixedInfo.pairing[key];
+    return p && byS[p[0]] && byS[p[1]] ? [byS[p[0]], byS[p[1]]] : [defA, defB];
+  };
+  const [m1a, m1b] = pairFor('1', t1, tlaw);
+  const [m2a, m2b] = pairFor('2', kc, dcg);
+  // 확정 경기는 그 승자 반환, 아니면 시뮬레이션
+  const decide = (key, A, B) => {
+    const w = fixedInfo.fixed[key];
+    if (w && (A.short === w || B.short === w)) return A.short === w ? A : B;
+    return simSeries(A, B, 3);
+  };
+  const other = (w, A, B) => (w === A ? B : A);
+
   for (let it = 0; it < ITER; it++) {
-    // 플레이-인
-    const m1w = simSeries(kc, dcg, 3), m1l = m1w === kc ? dcg : kc;
-    const m2w = simSeries(t1, tlaw, 3), m2l = m2w === t1 ? tlaw : t1;
-    const m3w = simSeries(m1w, m2w, 3), m3l = m3w === m1w ? m2w : m1w;
-    const m4w = simSeries(m1l, m2l, 3);
-    const m5w = simSeries(m3l, m4w, 3);
-    const survivor = simSeries(m3w, m5w, 3);
+    // 플레이-인 (확정 결과 우선)
+    const m1w = decide('1', m1a, m1b), m1l = other(m1w, m1a, m1b);
+    const m2w = decide('2', m2a, m2b), m2l = other(m2w, m2a, m2b);
+    const m3w = decide('3', m1w, m2w), m3l = other(m3w, m1w, m2w);
+    const m4w = decide('4', m1l, m2l);
+    const m5w = decide('5', m3l, m4w);
+    const survivor = decide('F', m3w, m5w);
     advanceCount[survivor.short]++;
 
     // 브래킷 스테이지: 직행 7팀 + 생존팀 = 8팀, GPR 점수로 시드
@@ -426,7 +471,10 @@ if (lplAscend.length === 8 && lplNirvana.length === 4) {
 
 const msiDirect = ['G2', 'HLE', 'TSW', 'FUR', 'TES', 'BLG', 'LYON'].map(byShort);
 const msiPlayIn = ['KC', 'DCG', 'T1', 'TLAW'].map(byShort);
-const msiStandings = simulateMSI(msiDirect, msiPlayIn);
+const msiFixed = extractMsiPlayinFixed();
+const msiStandings = simulateMSI(msiDirect, msiPlayIn, msiFixed);
+const fixedKeys = Object.keys(msiFixed.fixed);
+if (fixedKeys.length) console.log(`MSI 플레이-인 확정 반영: ${fixedKeys.map((k) => `${k}=${msiFixed.fixed[k]}`).join(', ')}`);
 const msi = sim.competitions.find((c) => c.key === 'msi');
 msi.ready = true;
 msi.status = 'upcoming';
@@ -453,6 +501,10 @@ fst.finalResult = {
   })),
 };
 console.log(`FST: 우승 ${fstTeams[0].name}`);
+
+// MSI 플레이-인 브래킷 시그니처 저장 — fetchGpr가 "GPR 변화 없이 경기 결과만 바뀐 경우"를
+// 감지해 시뮬을 재실행하도록 하는 기준값.
+sim.msiBracketSig = JSON.stringify(standingsData.standings?.msi?.['플레이-인 스테이지']?.bracket ?? null);
 
 sim.updatedAt = new Date().toISOString(); // 시간까지 포함(페이지에서 KST로 표시)
 fs.writeFileSync(path.join(dataDir, 'lolSim.json'), JSON.stringify(sim, null, 2) + '\n');

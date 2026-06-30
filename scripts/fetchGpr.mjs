@@ -74,11 +74,30 @@ data.updatedAt = new Date().toISOString().slice(0, 10);
 fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n');
 console.log(`gprTeams.json 갱신: ${updated}팀 변경(점수 변화 ${scoreChanged}팀), updatedAt=${data.updatedAt}`);
 
+// MSI 플레이-인 경기 결과만 바뀐 경우(GPR 점수는 그대로)에도 시뮬을 재실행해야
+// 참가팀 확률이 갱신된다. lolStandings 의 플레이-인 브래킷과 lolSim 의 저장 시그니처를 비교.
+let msiChanged = false;
+try {
+  const stPath = path.join(__dirname, '..', 'client', 'src', 'data', 'lolStandings.json');
+  const simPath = path.join(__dirname, '..', 'client', 'src', 'data', 'lolSim.json');
+  const st = JSON.parse(fs.readFileSync(stPath, 'utf8'));
+  const simData = JSON.parse(fs.readFileSync(simPath, 'utf8'));
+  const sig = JSON.stringify(st.standings?.msi?.['플레이-인 스테이지']?.bracket ?? null);
+  msiChanged = simData.msiBracketSig !== sig;
+} catch (e) {
+  console.warn(`MSI 변화 감지 실패(무시): ${e.message}`);
+}
+
 // 점수가 바뀐 팀이 속한 리그만 시뮬 재계산 (변화 없는 리그는 기존 결과 유지)
+// MSI·LPL Split3 블록은 simulateLol 내에서 인자와 무관하게 항상 재계산되므로,
+// MSI 결과만 바뀐 경우 리그 인자 없이 실행해 MSI 확률만 갱신한다.
 const simLeagues = [...changedLeagues];
-if (simLeagues.length) {
-  console.log(`— GPR 점수 변화 리그 [${simLeagues.join(', ')}] → 해당 리그만 시뮬 재실행 —`);
+if (simLeagues.length || msiChanged) {
+  const reason = simLeagues.length
+    ? `GPR 점수 변화 리그 [${simLeagues.join(', ')}]${msiChanged ? ' + MSI 결과' : ''}`
+    : 'MSI 플레이-인 결과 변화';
+  console.log(`— ${reason} → 시뮬 재실행 —`);
   execFileSync('node', [path.join(__dirname, 'simulateLol.mjs'), ...simLeagues], { stdio: 'inherit' });
 } else {
-  console.log('— GPR 점수 변화 없음 → 시뮬레이션 생략 —');
+  console.log('— GPR·MSI 변화 없음 → 시뮬레이션 생략 —');
 }
