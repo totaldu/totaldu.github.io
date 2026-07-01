@@ -180,15 +180,11 @@
                       "startRow": 1,
                       "a": {
                         "label": "M3 승자",
-                        "short": "T1",
-                        "score": 3,
-                        "msi": true
+                        "short": "T1"
                       },
                       "b": {
                         "label": "하위조 진출팀",
-                        "short": "TLAW",
-                        "score": 0,
-                        "elim": true
+                        "short": "TLAW"
                       }
                     }
                   ]

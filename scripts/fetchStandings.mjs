@@ -460,6 +460,7 @@ async function fillMsiPlayinResults(prevMsi) {
       const [x, y] = teams;
       if (!x.code || !y.code || x.code === 'TBD' || y.code === 'TBD') continue;
       completed.push({
+        date: e.startTime.slice(0, 10), // YYYY-MM-DD (UTC)
         score: { [x.code]: x.result?.gameWins ?? 0, [y.code]: y.result?.gameWins ?? 0 },
         winner: teams.find((t) => t.result?.outcome === 'win')?.code || null,
         loser: teams.find((t) => t.result?.outcome === 'loss')?.code || null,
@@ -468,8 +469,21 @@ async function fillMsiPlayinResults(prevMsi) {
     token = d.schedule.pages?.older;
     if (!token) break;
   }
-  const findResult = (t1, t2) =>
-    completed.find((m) => m.score[t1] != null && m.score[t2] != null && m.winner) || null;
+  // 브래킷 매치 제목의 "(M/D)" → 2026-MM-DD (같은 대진이 여러 번 열릴 때 날짜로 구분)
+  const dateOf = (title) => {
+    const m = (title || '').match(/\((\d{1,2})\/(\d{1,2})\)/);
+    return m ? `2026-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}` : null;
+  };
+  // 날짜가 주어지면 그 날짜의 완료 경기만 인정(예: T1-TLAW 가 6/28 M1·7/1 최종전 두 번 열려도
+  //   각각의 경기에 올바로 매칭). 이미 사용한 경기는 제외해 중복 매칭도 방지.
+  const used = new Set();
+  const findResult = (t1, t2, date) => {
+    const ok = (m) => !used.has(m) && m.score[t1] != null && m.score[t2] != null && m.winner;
+    const chosen = date ? completed.find((m) => ok(m) && m.date === date)
+                        : completed.find(ok);
+    if (chosen) used.add(chosen);
+    return chosen || null;
+  };
 
   // 2) 매치를 번호로 수집: 제목의 "Match N", 최종 진출전은 'F'
   const byNum = {};
@@ -520,7 +534,7 @@ async function fillMsiPlayinResults(prevMsi) {
     const mt = byNum[num];
     if (!mt) continue;
     const ta = resolveShort(mt.a), tb = resolveShort(mt.b);
-    const res = ta && tb ? findResult(ta, tb) : null;
+    const res = ta && tb ? findResult(ta, tb, dateOf(mt.title)) : null;
     if (!res) {
       // 아직 안 끝난(또는 한쪽만 확정된) 경기 → 확정된 팀만 시드로 채움
       seedSlot(mt.a, ta);
