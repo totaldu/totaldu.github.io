@@ -457,11 +457,14 @@
                       "startRow": 0,
                       "a": {
                         "seed": "LCK #1",
-                        "short": "HLE"
+                        "short": "HLE",
+                        "score": 3,
+                        "win": true
                       },
                       "b": {
                         "seed": "LCP #1",
-                        "short": "TSW"
+                        "short": "TSW",
+                        "score": 0
                       }
                     },
                     {
