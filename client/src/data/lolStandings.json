@@ -647,12 +647,16 @@
                       "a": {
                         "label": "M1 패자",
                         "short": "TSW",
-                        "seed": "LCP #1"
+                        "seed": "LCP #1",
+                        "score": 3,
+                        "win": true
                       },
                       "b": {
                         "label": "M2 패자",
                         "short": "TES",
-                        "seed": "LPL #2"
+                        "seed": "LPL #2",
+                        "score": 1,
+                        "elim": true
                       }
                     },
                     {
