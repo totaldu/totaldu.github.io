@@ -449,6 +449,21 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
   const probByShort = lplSplit3
     ? Object.fromEntries((comp.split3 || []).map((s) => [s.team, s]))
     : Object.fromEntries((comp.standings || []).map((s) => [s.team, s]));
+  // 브래킷 스테이지 여부 + 대진표에서 탈락(elim) 확정된 팀 집합 (참가팀 목록 회색 처리용)
+  const isBracketStage = sub === '브래킷 스테이지';
+  const eliminatedSet = useMemo(() => {
+    const set = new Set();
+    const secs = official?.bracket?.sections;
+    const collect = (rounds) => {
+      for (const r of rounds || [])
+        for (const m of r.matches || [])
+          for (const slot of [m.a, m.b])
+            if (slot?.elim && slot?.short) set.add(slot.short);
+    };
+    if (secs) secs.forEach((sec) => collect(sec.rounds));
+    else collect(official?.bracket?.rounds);
+    return set;
+  }, [official]);
   // 그룹이 있으면 그룹별로 분리하고 각 그룹 내 1위부터 재번호
   const grouped = !!official && current.some((t) => t.group);
   const withProb = (t, rank) => ({ ...t, rank, prob: probByShort[t.short] });
@@ -640,18 +655,23 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
                   <span className="font-mono tabular-nums text-[11px] w-12 text-right shrink-0" style={{ color, fontWeight: strong ? 800 : 600 }}>{v}%</span>
                 </div>
               );
+              const eliminated = q.short && eliminatedSet.has(q.short);
+              // 브래킷 스테이지에서는 진출 확률은 의미가 없으므로 우승 확률만 표기
+              const showAdvance = !isBracketStage && p?.advance != null;
               return (
                 <div key={i} className="flex flex-col gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 text-sm">
                   {q.short ? (
                     <>
                       <div className="flex items-center gap-2 min-w-0">
-                        <TeamLogo src={logoByShort[q.short]} size={20} />
-                        <span className="font-bold text-white/90 truncate">{nameByShort[q.short] || q.short}</span>
+                        <div style={eliminated ? { filter: 'grayscale(1)', opacity: 0.4 } : undefined} className="shrink-0">
+                          <TeamLogo src={logoByShort[q.short]} size={20} />
+                        </div>
+                        <span className={`font-bold truncate ${eliminated ? 'text-white/35' : 'text-white/90'}`}>{nameByShort[q.short] || q.short}</span>
                         {q.seed && <span className="text-[10px] text-white/40 shrink-0 ml-auto">{q.seed}</span>}
                       </div>
-                      {(p?.advance != null || p?.champ != null) && (
+                      {(showAdvance || p?.champ != null) && (
                         <div className="flex flex-col gap-1">
-                          {p?.advance != null && probRow('진출', p.advance, comp.color)}
+                          {showAdvance && probRow('진출', p.advance, comp.color)}
                           {p?.champ != null && probRow('우승', p.champ, '#E8C77E', true)}
                         </div>
                       )}
