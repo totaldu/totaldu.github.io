@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-05",
+  "updatedAt": "2026-07-06",
   "note": "리그별 → 세부대회별 공식 현재 순위표(정규시즌만, 토너먼트/플레이오프 제외). 있으면 우선 사용, 없으면 GPR 전적으로 대체. gw/gl은 세트(게임) 승-패.",
   "source": {
     "lck": "https://lolesports.com/ko-KR/leagues/lck",
@@ -541,12 +541,15 @@
                       "a": {
                         "label": "M3 승자",
                         "short": "LYON",
-                        "seed": "LCS #1"
+                        "seed": "LCS #1",
+                        "score": 0
                       },
                       "b": {
                         "label": "M4 승자",
                         "short": "BLG",
-                        "seed": "LPL #1"
+                        "seed": "LPL #1",
+                        "score": 3,
+                        "win": true
                       }
                     }
                   ]
@@ -558,10 +561,14 @@
                       "title": "3라운드 · Match 11 (7/9 17:00)",
                       "startRow": 3,
                       "a": {
-                        "label": "M5 승자"
+                        "label": "M5 승자",
+                        "short": "HLE",
+                        "seed": "LCK #1"
                       },
                       "b": {
-                        "label": "M6 승자"
+                        "label": "M6 승자",
+                        "short": "BLG",
+                        "seed": "LPL #1"
                       }
                     }
                   ]
@@ -668,12 +675,16 @@
                       "a": {
                         "label": "M3 패자",
                         "short": "FUR",
-                        "seed": "CBLOL #1"
+                        "seed": "CBLOL #1",
+                        "score": 0,
+                        "elim": true
                       },
                       "b": {
                         "label": "M4 패자",
                         "short": "T1",
-                        "seed": "플레이-인"
+                        "seed": "플레이-인",
+                        "score": 3,
+                        "win": true
                       }
                     }
                   ]
@@ -682,23 +693,31 @@
                   "title": "2라운드",
                   "matches": [
                     {
-                      "title": "2라운드 · Match 9 (7/8 12:00)",
+                      "title": "2라운드 · Match 9 (7/8 17:00)",
                       "startRow": 2,
                       "a": {
-                        "label": "M5 패자"
+                        "label": "M5 패자",
+                        "short": "G2",
+                        "seed": "LEC #1"
                       },
                       "b": {
-                        "label": "M8 승자"
+                        "label": "M8 승자",
+                        "short": "T1",
+                        "seed": "플레이-인"
                       }
                     },
                     {
-                      "title": "2라운드 · Match 10 (7/8 17:00)",
+                      "title": "2라운드 · Match 10 (7/8 12:00)",
                       "startRow": 0,
                       "a": {
-                        "label": "M6 패자"
+                        "label": "M6 패자",
+                        "short": "LYON",
+                        "seed": "LCS #1"
                       },
                       "b": {
-                        "label": "M7 승자"
+                        "label": "M7 승자",
+                        "short": "TSW",
+                        "seed": "LCP #1"
                       }
                     }
                   ]
