@@ -712,12 +712,16 @@
                       "a": {
                         "label": "M6 패자",
                         "short": "LYON",
-                        "seed": "LCS #1"
+                        "seed": "LCS #1",
+                        "score": 3,
+                        "win": true
                       },
                       "b": {
                         "label": "M7 승자",
                         "short": "TSW",
-                        "seed": "LCP #1"
+                        "seed": "LCP #1",
+                        "score": 0,
+                        "elim": true
                       }
                     }
                   ]
