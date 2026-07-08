@@ -698,12 +698,16 @@
                       "a": {
                         "label": "M5 패자",
                         "short": "G2",
-                        "seed": "LEC #1"
+                        "seed": "LEC #1",
+                        "score": 3,
+                        "win": true
                       },
                       "b": {
                         "label": "M8 승자",
                         "short": "T1",
-                        "seed": "플레이-인"
+                        "seed": "플레이-인",
+                        "score": 1,
+                        "elim": true
                       }
                     },
                     {
@@ -712,12 +716,16 @@
                       "a": {
                         "label": "M6 패자",
                         "short": "LYON",
-                        "seed": "LCS #1"
+                        "seed": "LCS #1",
+                        "score": 3,
+                        "win": true
                       },
                       "b": {
                         "label": "M7 승자",
                         "short": "TSW",
-                        "seed": "LCP #1"
+                        "seed": "LCP #1",
+                        "score": 0,
+                        "elim": true
                       }
                     }
                   ]
@@ -729,10 +737,14 @@
                       "title": "3라운드 · Match 12 (7/10 17:00)",
                       "startRow": 1,
                       "a": {
-                        "label": "M9 승자"
+                        "label": "M9 승자",
+                        "short": "G2",
+                        "seed": "LEC #1"
                       },
                       "b": {
-                        "label": "M10 승자"
+                        "label": "M10 승자",
+                        "short": "LYON",
+                        "seed": "LCS #1"
                       }
                     }
                   ]

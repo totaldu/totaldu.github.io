@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-08T00:16:14.276Z",
+  "updatedAt": "2026-07-08T10:38:11.980Z",
   "source": "https://lolesports.com/ko-KR/gpr/2026/current",
   "iterationsDefault": 20000,
   "competitions": [
@@ -13,7 +13,7 @@
       "stage": "",
       "format": "정규시즌 1-2R (Bo3) → 그룹분할 → 정규시즌 3-4R (Bo3) → 플레이인 (Bo5) → 플레이오프 (Bo5)",
       "iterations": 100000,
-      "generatedAt": "2026-07-07T11:22:51.127Z",
+      "generatedAt": "2026-07-08T10:38:06.578Z",
       "teams": [
         {
           "name": "Gen.G Esports",
@@ -228,7 +228,7 @@
       "stage": "정규시즌 + 플레이오프 (시즌 전체)",
       "format": "싱글 라운드로빈 Bo3 → 상위 6팀 Bo5 플레이오프",
       "iterations": 100000,
-      "generatedAt": "2026-07-07T11:22:51.127Z",
+      "generatedAt": "2026-07-08T10:38:06.578Z",
       "teams": [
         {
           "name": "Bilibili Gaming",
@@ -475,23 +475,23 @@
           "rating": 1562,
           "piPlus": 100,
           "advance": 100,
-          "champ": 85.95
+          "champ": 85.82
         },
         {
           "team": "TES",
           "name": "Top Esports",
           "rating": 1400,
           "piPlus": 100,
-          "advance": 99.97,
-          "champ": 7.56
+          "advance": 99.98,
+          "champ": 7.68
         },
         {
           "team": "WE",
           "name": "Xi'an Team WE",
           "rating": 1278,
           "piPlus": 100,
-          "advance": 94.61,
-          "champ": 0.12
+          "advance": 94.52,
+          "champ": 0.14
         },
         {
           "team": "AL",
@@ -499,22 +499,22 @@
           "rating": 1368,
           "piPlus": 100,
           "advance": 99.82,
-          "champ": 2.36
+          "champ": 2.22
         },
         {
           "team": "JDG",
           "name": "Beijing JDG Esports",
           "rating": 1370,
           "piPlus": 100,
-          "advance": 99.85,
-          "champ": 3.31
+          "advance": 99.88,
+          "champ": 3.38
         },
         {
           "team": "LGD",
           "name": "LGD Gaming",
           "rating": 1170,
           "piPlus": 100,
-          "advance": 45.99,
+          "advance": 45.91,
           "champ": 0
         },
         {
@@ -522,7 +522,7 @@
           "name": "ThunderTalk Gaming",
           "rating": 1170,
           "piPlus": 100,
-          "advance": 45.97,
+          "advance": 45.76,
           "champ": 0
         },
         {
@@ -530,39 +530,39 @@
           "name": "Edward Gaming",
           "rating": 1188,
           "piPlus": 100,
-          "advance": 57.67,
+          "advance": 57.46,
           "champ": 0
         },
         {
           "team": "NIP",
           "name": "Ninjas in Pyjamas",
           "rating": 1294,
-          "piPlus": 51.42,
-          "advance": 39.51,
-          "champ": 0.08
+          "piPlus": 51.63,
+          "advance": 39.89,
+          "champ": 0.09
         },
         {
           "team": "WBG",
           "name": "Weibo Gaming",
           "rating": 1340,
-          "piPlus": 74.42,
-          "advance": 63.35,
-          "champ": 0.56
+          "piPlus": 74.48,
+          "advance": 63.69,
+          "champ": 0.59
         },
         {
           "team": "IG",
           "name": "Invictus Gaming",
           "rating": 1282,
-          "piPlus": 43.82,
-          "advance": 32.72,
+          "piPlus": 43.97,
+          "advance": 32.76,
           "champ": 0.05
         },
         {
           "team": "LNG",
           "name": "Suzhou LNG Esports",
           "rating": 1252,
-          "piPlus": 30.35,
-          "advance": 20.56,
+          "piPlus": 29.93,
+          "advance": 20.33,
           "champ": 0.01
         }
       ]
@@ -577,7 +577,7 @@
       "stage": "정규시즌 + 플레이오프 (시즌 전체)",
       "format": "싱글 라운드로빈 Bo3 → 상위 6팀 Bo5 플레이오프",
       "iterations": 100000,
-      "generatedAt": "2026-07-06T12:16:28.630Z",
+      "generatedAt": "2026-07-08T10:38:06.578Z",
       "teams": [
         {
           "name": "G2 Esports",
@@ -655,16 +655,16 @@
           "team": "G2",
           "name": "G2 Esports",
           "rating": 1476,
-          "avgRank": 1.422,
+          "avgRank": 1.42197,
           "champ": 71.37,
           "advance": 99.96,
-          "rank1": 69.52
+          "rank1": 69.53
         },
         {
           "team": "KC",
           "name": "Karmine Corp",
           "rating": 1376,
-          "avgRank": 2.46647,
+          "avgRank": 2.46611,
           "champ": 19.96,
           "advance": 98.7,
           "rank1": 19.51
@@ -673,25 +673,25 @@
           "team": "MKOI",
           "name": "Movistar KOI",
           "rating": 1323,
-          "avgRank": 3.44164,
-          "champ": 6.87,
-          "advance": 94.64,
+          "avgRank": 3.44133,
+          "champ": 6.88,
+          "advance": 94.65,
           "rank1": 8.41
         },
         {
           "team": "VIT",
           "name": "Team Vitality",
           "rating": 1244,
-          "avgRank": 5.2582,
+          "avgRank": 5.25852,
           "champ": 0.92,
-          "advance": 73.55,
+          "advance": 73.54,
           "rank1": 1.15
         },
         {
           "team": "FNC",
           "name": "Fnatic",
           "rating": 1224,
-          "avgRank": 5.76831,
+          "avgRank": 5.7686,
           "champ": 0.42,
           "advance": 64.43,
           "rank1": 0.6
@@ -700,52 +700,52 @@
           "team": "GX",
           "name": "GIANTX",
           "rating": 1217,
-          "avgRank": 5.95417,
+          "avgRank": 5.95352,
           "champ": 0.32,
-          "advance": 60.31,
+          "advance": 60.32,
           "rank1": 0.53
         },
         {
           "team": "NAVI",
           "name": "Natus Vincere",
           "rating": 1180,
-          "avgRank": 6.90998,
+          "avgRank": 6.91082,
           "champ": 0.08,
-          "advance": 40.74,
+          "advance": 40.73,
           "rank1": 0.14
         },
         {
           "team": "SHFT",
           "name": "Shifters",
           "rating": 1170,
-          "avgRank": 7.13346,
+          "avgRank": 7.13242,
           "champ": 0.05,
-          "advance": 36.36,
+          "advance": 36.38,
           "rank1": 0.1
         },
         {
           "team": "SK",
           "name": "SK Gaming",
           "rating": 1123,
-          "avgRank": 8.20241,
+          "avgRank": 8.203,
           "champ": 0,
-          "advance": 17.46,
+          "advance": 17.44,
           "rank1": 0.01
         },
         {
           "team": "TH",
           "name": "Team Heretics",
           "rating": 1112,
-          "avgRank": 8.44336,
+          "avgRank": 8.44371,
           "champ": 0,
-          "advance": 13.87,
+          "advance": 13.86,
           "rank1": 0.01
         }
       ],
       "situations": [
         {
           "label": "G2 정규시즌 1위",
-          "prob": 69.52
+          "prob": 69.53
         },
         {
           "label": "G2 우승",
@@ -757,7 +757,7 @@
         },
         {
           "label": "TH 플레이오프 진출",
-          "prob": 13.87
+          "prob": 13.86
         }
       ],
       "finalResult": null
@@ -772,7 +772,7 @@
       "stage": "정규시즌 + 플레이오프 (시즌 전체)",
       "format": "싱글 라운드로빈 Bo3 → 상위 6팀 Bo5 플레이오프",
       "iterations": 100000,
-      "generatedAt": "2026-07-06T12:16:28.630Z",
+      "generatedAt": "2026-07-08T10:38:06.578Z",
       "teams": [
         {
           "name": "CTBC Flying Oyster",
@@ -840,70 +840,70 @@
           "team": "TSW",
           "name": "Team Secret Whales",
           "rating": 1369,
-          "avgRank": 2.2067,
-          "champ": 45.12,
+          "avgRank": 2.20663,
+          "champ": 45.11,
           "advance": 99.03,
-          "rank1": 40.65
+          "rank1": 40.66
         },
         {
           "team": "CFO",
           "name": "CTBC Flying Oyster",
           "rating": 1338,
-          "avgRank": 2.72856,
+          "avgRank": 2.72874,
           "champ": 28.09,
-          "advance": 97.73,
-          "rank1": 27.87
+          "advance": 97.72,
+          "rank1": 27.86
         },
         {
           "team": "GAM",
           "name": "GAM Esports",
           "rating": 1288,
-          "avgRank": 3.71318,
-          "champ": 11.28,
+          "avgRank": 3.71339,
+          "champ": 11.29,
           "advance": 92.72,
-          "rank1": 12.02
+          "rank1": 12.01
         },
         {
           "team": "DCG",
           "name": "Relove Deep Cross Gaming",
           "rating": 1279,
-          "avgRank": 3.88794,
+          "avgRank": 3.88716,
           "champ": 9.11,
-          "advance": 91.37,
+          "advance": 91.38,
           "rank1": 11.1
         },
         {
           "team": "MVK",
           "name": "MVK Esports",
           "rating": 1255,
-          "avgRank": 4.39992,
+          "avgRank": 4.40041,
           "champ": 5.19,
-          "advance": 86.42,
+          "advance": 86.41,
           "rank1": 6.15
         },
         {
           "team": "SHG",
           "name": "Fukuoka SoftBank HAWKS",
           "rating": 1200,
-          "avgRank": 5.54417,
+          "avgRank": 5.54456,
           "champ": 1.05,
-          "advance": 66.91,
+          "advance": 66.9,
           "rank1": 1.74
         },
         {
           "team": "GZ",
           "name": "Ground Zero Gaming",
           "rating": 1147,
-          "avgRank": 6.5112,
+          "avgRank": 6.51095,
           "champ": 0.14,
-          "advance": 39.77,
+          "advance": 39.78,
           "rank1": 0.36
         },
         {
           "team": "DFM",
           "name": "DetonatioN FocusMe",
           "rating": 1109,
-          "avgRank": 7.00833,
+          "avgRank": 7.00816,
           "champ": 0.03,
           "advance": 26.06,
           "rank1": 0.12
@@ -912,11 +912,11 @@
       "situations": [
         {
           "label": "TSW 정규시즌 1위",
-          "prob": 40.65
+          "prob": 40.66
         },
         {
           "label": "TSW 우승",
-          "prob": 45.12
+          "prob": 45.11
         },
         {
           "label": "CFO 우승",
@@ -939,7 +939,7 @@
       "stage": "정규시즌 + 플레이오프 (시즌 전체)",
       "format": "싱글 라운드로빈 Bo3 → 상위 6팀 Bo5 플레이오프",
       "iterations": 100000,
-      "generatedAt": "2026-07-07T11:22:51.127Z",
+      "generatedAt": "2026-07-08T10:38:06.578Z",
       "teams": [
         {
           "name": "FlyQuest",
@@ -1007,91 +1007,91 @@
           "team": "FLY",
           "name": "FlyQuest",
           "rating": 1333,
-          "avgRank": 2.44788,
-          "champ": 35.61,
-          "advance": 98.64,
-          "rank1": 34.83
+          "avgRank": 2.45932,
+          "champ": 35.74,
+          "advance": 98.68,
+          "rank1": 34.28
         },
         {
           "team": "TLAW",
           "name": "Team Liquid Alienware",
           "rating": 1306,
-          "avgRank": 2.94783,
-          "champ": 23.19,
-          "advance": 97.1,
-          "rank1": 23.46
+          "avgRank": 2.94285,
+          "champ": 23.27,
+          "advance": 97.14,
+          "rank1": 23.71
         },
         {
           "team": "LYON",
           "name": "LYON",
           "rating": 1302,
-          "avgRank": 2.99922,
-          "champ": 21.87,
-          "advance": 96.91,
-          "rank1": 21.76
+          "avgRank": 3.00264,
+          "champ": 21.7,
+          "advance": 96.82,
+          "rank1": 21.9
         },
         {
           "team": "C9",
           "name": "Cloud9 Kia",
           "rating": 1290,
-          "avgRank": 3.20671,
-          "champ": 17.55,
-          "advance": 95.96,
-          "rank1": 16.67
+          "avgRank": 3.20311,
+          "champ": 17.49,
+          "advance": 95.85,
+          "rank1": 16.86
         },
         {
           "team": "SEN",
           "name": "Sentinels",
           "rating": 1177,
-          "avgRank": 5.53878,
-          "champ": 0.96,
-          "advance": 67.94,
-          "rank1": 1.58
+          "avgRank": 5.54124,
+          "champ": 1,
+          "advance": 67.66,
+          "rank1": 1.6
         },
         {
           "team": "SR",
           "name": "Shopify Rebellion",
           "rating": 1153,
-          "avgRank": 6.0035,
-          "champ": 0.42,
-          "advance": 56.2,
-          "rank1": 0.73
+          "avgRank": 5.99952,
+          "champ": 0.4,
+          "advance": 56.3,
+          "rank1": 0.78
         },
         {
           "team": "DSG",
           "name": "Disguised",
           "rating": 1149,
-          "avgRank": 6.08418,
-          "champ": 0.34,
-          "advance": 53.21,
-          "rank1": 0.78
+          "avgRank": 6.08104,
+          "champ": 0.35,
+          "advance": 53.4,
+          "rank1": 0.7
         },
         {
           "team": "DIG",
           "name": "Dignitas",
           "rating": 1105,
-          "avgRank": 6.7719,
+          "avgRank": 6.77028,
           "champ": 0.06,
-          "advance": 34.06,
-          "rank1": 0.2
+          "advance": 34.16,
+          "rank1": 0.18
         }
       ],
       "situations": [
         {
           "label": "FLY 정규시즌 1위",
-          "prob": 34.83
+          "prob": 34.28
         },
         {
           "label": "FLY 우승",
-          "prob": 35.61
+          "prob": 35.74
         },
         {
           "label": "TLAW 우승",
-          "prob": 23.19
+          "prob": 23.27
         },
         {
           "label": "DIG 플레이오프 진출",
-          "prob": 34.06
+          "prob": 34.16
         }
       ],
       "finalResult": null
@@ -1106,7 +1106,7 @@
       "stage": "정규시즌 + 플레이오프 (시즌 전체)",
       "format": "싱글 라운드로빈 Bo3 → 상위 6팀 Bo5 플레이오프",
       "iterations": 100000,
-      "generatedAt": "2026-07-07T11:22:51.127Z",
+      "generatedAt": "2026-07-08T10:38:06.578Z",
       "teams": [
         {
           "name": "FURIA",
@@ -1174,91 +1174,91 @@
           "team": "FUR",
           "name": "FURIA",
           "rating": 1188,
-          "avgRank": 3.26599,
-          "champ": 26.89,
-          "advance": 91.11,
-          "rank1": 25.03
+          "avgRank": 3.25889,
+          "champ": 26.7,
+          "advance": 91.2,
+          "rank1": 25.07
         },
         {
           "team": "RED",
           "name": "RED Canids Kalunga",
           "rating": 1180,
-          "avgRank": 3.43629,
-          "champ": 22.94,
-          "advance": 90.16,
-          "rank1": 20.77
+          "avgRank": 3.42776,
+          "champ": 23.27,
+          "advance": 90.27,
+          "rank1": 20.74
         },
         {
           "team": "VKS",
           "name": "Vivo Keyd Stars",
           "rating": 1166,
-          "avgRank": 3.78995,
-          "champ": 17.17,
+          "avgRank": 3.8022,
+          "champ": 17.28,
           "advance": 86.52,
-          "rank1": 18.03
+          "rank1": 17.89
         },
         {
           "team": "LOUD",
           "name": "LOUD",
           "rating": 1153,
-          "avgRank": 4.12152,
-          "champ": 13.09,
-          "advance": 83,
-          "rank1": 13.74
+          "avgRank": 4.1306,
+          "champ": 13.05,
+          "advance": 82.78,
+          "rank1": 13.61
         },
         {
           "team": "LOS",
           "name": "LOS",
           "rating": 1136,
-          "avgRank": 4.59189,
-          "champ": 8.75,
-          "advance": 77.32,
-          "rank1": 9.34
+          "avgRank": 4.58305,
+          "champ": 8.72,
+          "advance": 77.45,
+          "rank1": 9.47
         },
         {
           "team": "PAIN",
           "name": "paiN Gaming",
           "rating": 1133,
-          "avgRank": 4.66685,
-          "champ": 8.19,
-          "advance": 75.57,
-          "rank1": 8.69
+          "avgRank": 4.66982,
+          "champ": 8.08,
+          "advance": 75.54,
+          "rank1": 8.85
         },
         {
           "team": "FX",
           "name": "Fluxo",
           "rating": 1078,
-          "avgRank": 5.99053,
-          "champ": 1.7,
+          "avgRank": 5.98456,
+          "champ": 1.71,
           "advance": 49.82,
-          "rank1": 2.41
+          "rank1": 2.48
         },
         {
           "team": "LEV",
           "name": "Leviatán",
           "rating": 1069,
-          "avgRank": 6.13698,
-          "champ": 1.28,
-          "advance": 46.5,
-          "rank1": 1.99
+          "avgRank": 6.14312,
+          "champ": 1.2,
+          "advance": 46.42,
+          "rank1": 1.9
         }
       ],
       "situations": [
         {
           "label": "FUR 정규시즌 1위",
-          "prob": 25.03
+          "prob": 25.07
         },
         {
           "label": "FUR 우승",
-          "prob": 26.89
+          "prob": 26.7
         },
         {
           "label": "RED 우승",
-          "prob": 22.94
+          "prob": 23.27
         },
         {
           "label": "LEV 플레이오프 진출",
-          "prob": 46.5
+          "prob": 46.42
         }
       ],
       "finalResult": null
@@ -1335,7 +1335,7 @@
       "stage": "플레이-인 스테이지 (Bo5 더블 엘리미네이션) → 브래킷 스테이지 (Bo5 더블 엘리미네이션)",
       "format": "",
       "iterations": 100000,
-      "generatedAt": "2026-07-07T11:22:51.127Z",
+      "generatedAt": "2026-07-08T10:38:06.578Z",
       "teams": [
         {
           "name": "G2 Esports",
@@ -1399,38 +1399,31 @@
           "team": "BLG",
           "name": "Bilibili Gaming",
           "rating": 1562,
-          "champ": 49.16
+          "champ": 52.89
         },
         {
           "team": "HLE",
           "name": "Hanwha Life Esports",
           "rating": 1539,
-          "champ": 36.47
-        },
-        {
-          "team": "T1",
-          "name": "T1",
-          "rating": 1532,
-          "champ": 11.52,
-          "advance": 100
+          "champ": 38.85
         },
         {
           "team": "G2",
           "name": "G2 Esports",
           "rating": 1476,
-          "champ": 2.68
-        },
-        {
-          "team": "TSW",
-          "name": "Team Secret Whales",
-          "rating": 1369,
-          "champ": 0.16
+          "champ": 8.22
         },
         {
           "team": "LYON",
           "name": "LYON",
           "rating": 1302,
-          "champ": 0.01
+          "champ": 0.04
+        },
+        {
+          "team": "TSW",
+          "name": "Team Secret Whales",
+          "rating": 1369,
+          "champ": 0
         },
         {
           "team": "FUR",
@@ -1457,6 +1450,13 @@
           "rating": 1279,
           "champ": 0,
           "advance": 0
+        },
+        {
+          "team": "T1",
+          "name": "T1",
+          "rating": 1532,
+          "champ": 0,
+          "advance": 100
         },
         {
           "team": "TLAW",
@@ -1487,5 +1487,5 @@
       "finalResult": null
     }
   ],
-  "msiBracketSig": "{\"pi\":{\"desc\":\"4팀 더블 엘리미네이션 · 1팀만 브래킷 스테이지 진출 · 전 경기 Bo5\",\"crossConnectors\":[[0,0,0,\"mid\",1,1,0,\"a\"],[0,0,1,\"mid\",1,1,0,\"b\"],[0,1,0,\"mid\",1,2,0,\"a\"],[1,2,0,\"mid\",0,3,0,\"b\"]],\"legend\":[{\"color\":\"rgba(232,199,126,0.7)\",\"label\":\"브래킷 스테이지 진출\"}],\"sections\":[{\"name\":\"상위조\",\"totalRows\":4,\"connectors\":[[0,0,\"mid\",1,0,\"a\"],[0,1,\"mid\",1,0,\"b\"],[1,0,\"mid\",3,0,\"a\"]],\"rounds\":[{\"title\":\"1라운드\",\"matches\":[{\"title\":\"1라운드 · Match 1 (6/28 12:00)\",\"startRow\":0,\"a\":{\"seed\":\"LCK #2\",\"short\":\"T1\",\"score\":3,\"win\":true},\"b\":{\"seed\":\"LCS #2\",\"short\":\"TLAW\",\"score\":0}},{\"title\":\"1라운드 · Match 2 (6/28 17:00)\",\"startRow\":2,\"a\":{\"seed\":\"LEC #2\",\"short\":\"KC\",\"score\":3,\"win\":true},\"b\":{\"seed\":\"LCP #2\",\"short\":\"DCG\",\"score\":0}}]},{\"title\":\"2라운드 (승자전)\",\"matches\":[{\"title\":\"2라운드 (승자전) · Match 3 (6/29 12:00)\",\"startRow\":1,\"a\":{\"label\":\"M1 승자\",\"short\":\"T1\",\"score\":3,\"win\":true},\"b\":{\"label\":\"M2 승자\",\"short\":\"KC\",\"score\":0}}]},{\"title\":\"\",\"matches\":[]},{\"title\":\"4라운드\",\"matches\":[{\"title\":\"4라운드 · 최종 진출전 (7/1 17:00)\",\"startRow\":1,\"a\":{\"label\":\"M3 승자\",\"short\":\"T1\",\"score\":3,\"msi\":true},\"b\":{\"label\":\"하위조 진출팀\",\"short\":\"TLAW\",\"score\":0,\"elim\":true}}]}]},{\"name\":\"하위조\",\"totalRows\":4,\"connectors\":[[1,0,\"mid\",2,0,\"b\"]],\"rounds\":[{\"title\":\"\",\"matches\":[]},{\"title\":\"2라운드\",\"matches\":[{\"title\":\"2라운드 · Match 4 (6/29 17:00)\",\"startRow\":2,\"a\":{\"label\":\"M1 패자\",\"short\":\"TLAW\",\"score\":3,\"win\":true},\"b\":{\"label\":\"M2 패자\",\"short\":\"DCG\",\"score\":0,\"elim\":true}}]},{\"title\":\"3라운드\",\"matches\":[{\"title\":\"3라운드 · Match 5 (6/30 17:00)\",\"startRow\":2,\"a\":{\"label\":\"M3 패자\",\"short\":\"KC\",\"score\":0,\"elim\":true},\"b\":{\"label\":\"M4 승자\",\"short\":\"TLAW\",\"score\":3,\"win\":true}}]}]}]},\"br\":{\"desc\":\"8팀(브래킷 직행 7 + 플레이-인 통과 1) 더블 엘리미네이션 · 전 경기 Bo5\",\"crossConnectors\":[[0,0,0,\"mid\",1,1,0,\"a\"],[0,0,1,\"mid\",1,1,0,\"b\"],[0,0,2,\"mid\",1,1,1,\"a\"],[0,0,3,\"mid\",1,1,1,\"b\"],[0,1,0,\"mid\",1,2,0,\"a\"],[0,1,1,\"mid\",1,2,1,\"a\"],[0,2,0,\"mid\",1,4,0,\"a\"],[1,4,0,\"mid\",0,5,0,\"b\"]],\"legend\":[{\"color\":\"rgba(232,199,126,0.7)\",\"label\":\"MSI 우승\"}],\"sections\":[{\"name\":\"상위권 대진표\",\"totalRows\":8,\"connectors\":[[0,0,\"mid\",1,0,\"a\"],[0,1,\"mid\",1,0,\"b\"],[0,2,\"mid\",1,1,\"a\"],[0,3,\"mid\",1,1,\"b\"],[1,0,\"mid\",2,0,\"a\"],[1,1,\"mid\",2,0,\"b\"],[2,0,\"mid\",5,0,\"a\"]],\"rounds\":[{\"title\":\"1라운드\",\"matches\":[{\"title\":\"1라운드 · Match 1 (7/3 12:00)\",\"startRow\":0,\"a\":{\"seed\":\"LCK #1\",\"short\":\"HLE\",\"score\":3,\"win\":true},\"b\":{\"seed\":\"LCP #1\",\"short\":\"TSW\",\"score\":0}},{\"title\":\"1라운드 · Match 2 (7/3 17:00)\",\"startRow\":2,\"a\":{\"seed\":\"LEC #1\",\"short\":\"G2\",\"score\":3,\"win\":true},\"b\":{\"seed\":\"LPL #2\",\"short\":\"TES\",\"score\":2}},{\"title\":\"1라운드 · Match 3 (7/4 12:00)\",\"startRow\":4,\"a\":{\"seed\":\"LCS #1\",\"short\":\"LYON\",\"score\":3,\"win\":true},\"b\":{\"seed\":\"CBLOL #1\",\"short\":\"FUR\",\"score\":0}},{\"title\":\"1라운드 · Match 4 (7/4 17:00)\",\"startRow\":6,\"a\":{\"seed\":\"LPL #1\",\"short\":\"BLG\",\"score\":3,\"win\":true},\"b\":{\"short\":\"T1\",\"score\":2,\"seed\":\"플레이-인\"}}]},{\"title\":\"2라운드\",\"matches\":[{\"title\":\"2라운드 · Match 5 (7/5 17:00)\",\"startRow\":1,\"a\":{\"label\":\"M1 승자\",\"short\":\"HLE\",\"seed\":\"LCK #1\",\"score\":3,\"win\":true},\"b\":{\"label\":\"M2 승자\",\"short\":\"G2\",\"seed\":\"LEC #1\",\"score\":0}},{\"title\":\"2라운드 · Match 6 (7/6 12:00)\",\"startRow\":5,\"a\":{\"label\":\"M3 승자\",\"short\":\"LYON\",\"seed\":\"LCS #1\",\"score\":0},\"b\":{\"label\":\"M4 승자\",\"short\":\"BLG\",\"seed\":\"LPL #1\",\"score\":3,\"win\":true}}]},{\"title\":\"3라운드\",\"matches\":[{\"title\":\"3라운드 · Match 11 (7/9 17:00)\",\"startRow\":3,\"a\":{\"label\":\"M5 승자\",\"short\":\"HLE\",\"seed\":\"LCK #1\"},\"b\":{\"label\":\"M6 승자\",\"short\":\"BLG\",\"seed\":\"LPL #1\"}}]},{\"title\":\"\",\"matches\":[]},{\"title\":\"\",\"matches\":[]},{\"title\":\"결승\",\"matches\":[{\"title\":\"결승 · Grand Finals (7/12 15:00)\",\"startRow\":3,\"a\":{\"label\":\"M11 승자\"},\"b\":{\"label\":\"M13 승자\"}}]}]},{\"name\":\"하위권 대진표\",\"totalRows\":4,\"connectors\":[[1,0,\"mid\",2,1,\"b\"],[1,1,\"mid\",2,0,\"b\"],[2,0,\"mid\",3,0,\"a\"],[2,1,\"mid\",3,0,\"b\"],[3,0,\"mid\",4,0,\"b\"]],\"rounds\":[{\"title\":\"\",\"matches\":[]},{\"title\":\"1라운드\",\"matches\":[{\"title\":\"1라운드 · Match 7 (7/5 12:00)\",\"startRow\":0,\"a\":{\"label\":\"M1 패자\",\"short\":\"TSW\",\"seed\":\"LCP #1\",\"score\":3,\"win\":true},\"b\":{\"label\":\"M2 패자\",\"short\":\"TES\",\"seed\":\"LPL #2\",\"score\":1,\"elim\":true}},{\"title\":\"1라운드 · Match 8 (7/6 17:00)\",\"startRow\":2,\"a\":{\"label\":\"M3 패자\",\"short\":\"FUR\",\"seed\":\"CBLOL #1\",\"score\":0,\"elim\":true},\"b\":{\"label\":\"M4 패자\",\"short\":\"T1\",\"seed\":\"플레이-인\",\"score\":3,\"win\":true}}]},{\"title\":\"2라운드\",\"matches\":[{\"title\":\"2라운드 · Match 9 (7/8 17:00)\",\"startRow\":2,\"a\":{\"label\":\"M5 패자\",\"short\":\"G2\",\"seed\":\"LEC #1\"},\"b\":{\"label\":\"M8 승자\",\"short\":\"T1\",\"seed\":\"플레이-인\"}},{\"title\":\"2라운드 · Match 10 (7/8 12:00)\",\"startRow\":0,\"a\":{\"label\":\"M6 패자\",\"short\":\"LYON\",\"seed\":\"LCS #1\"},\"b\":{\"label\":\"M7 승자\",\"short\":\"TSW\",\"seed\":\"LCP #1\"}}]},{\"title\":\"3라운드\",\"matches\":[{\"title\":\"3라운드 · Match 12 (7/10 17:00)\",\"startRow\":1,\"a\":{\"label\":\"M9 승자\"},\"b\":{\"label\":\"M10 승자\"}}]},{\"title\":\"4라운드\",\"matches\":[{\"title\":\"4라운드 · Match 13 (7/11 17:00)\",\"startRow\":1,\"a\":{\"label\":\"M11 패자\"},\"b\":{\"label\":\"M12 승자\"}}]}]}]}}"
+  "msiBracketSig": "{\"pi\":{\"desc\":\"4팀 더블 엘리미네이션 · 1팀만 브래킷 스테이지 진출 · 전 경기 Bo5\",\"crossConnectors\":[[0,0,0,\"mid\",1,1,0,\"a\"],[0,0,1,\"mid\",1,1,0,\"b\"],[0,1,0,\"mid\",1,2,0,\"a\"],[1,2,0,\"mid\",0,3,0,\"b\"]],\"legend\":[{\"color\":\"rgba(232,199,126,0.7)\",\"label\":\"브래킷 스테이지 진출\"}],\"sections\":[{\"name\":\"상위조\",\"totalRows\":4,\"connectors\":[[0,0,\"mid\",1,0,\"a\"],[0,1,\"mid\",1,0,\"b\"],[1,0,\"mid\",3,0,\"a\"]],\"rounds\":[{\"title\":\"1라운드\",\"matches\":[{\"title\":\"1라운드 · Match 1 (6/28 12:00)\",\"startRow\":0,\"a\":{\"seed\":\"LCK #2\",\"short\":\"T1\",\"score\":3,\"win\":true},\"b\":{\"seed\":\"LCS #2\",\"short\":\"TLAW\",\"score\":0}},{\"title\":\"1라운드 · Match 2 (6/28 17:00)\",\"startRow\":2,\"a\":{\"seed\":\"LEC #2\",\"short\":\"KC\",\"score\":3,\"win\":true},\"b\":{\"seed\":\"LCP #2\",\"short\":\"DCG\",\"score\":0}}]},{\"title\":\"2라운드 (승자전)\",\"matches\":[{\"title\":\"2라운드 (승자전) · Match 3 (6/29 12:00)\",\"startRow\":1,\"a\":{\"label\":\"M1 승자\",\"short\":\"T1\",\"score\":3,\"win\":true},\"b\":{\"label\":\"M2 승자\",\"short\":\"KC\",\"score\":0}}]},{\"title\":\"\",\"matches\":[]},{\"title\":\"4라운드\",\"matches\":[{\"title\":\"4라운드 · 최종 진출전 (7/1 17:00)\",\"startRow\":1,\"a\":{\"label\":\"M3 승자\",\"short\":\"T1\",\"score\":3,\"msi\":true},\"b\":{\"label\":\"하위조 진출팀\",\"short\":\"TLAW\",\"score\":0,\"elim\":true}}]}]},{\"name\":\"하위조\",\"totalRows\":4,\"connectors\":[[1,0,\"mid\",2,0,\"b\"]],\"rounds\":[{\"title\":\"\",\"matches\":[]},{\"title\":\"2라운드\",\"matches\":[{\"title\":\"2라운드 · Match 4 (6/29 17:00)\",\"startRow\":2,\"a\":{\"label\":\"M1 패자\",\"short\":\"TLAW\",\"score\":3,\"win\":true},\"b\":{\"label\":\"M2 패자\",\"short\":\"DCG\",\"score\":0,\"elim\":true}}]},{\"title\":\"3라운드\",\"matches\":[{\"title\":\"3라운드 · Match 5 (6/30 17:00)\",\"startRow\":2,\"a\":{\"label\":\"M3 패자\",\"short\":\"KC\",\"score\":0,\"elim\":true},\"b\":{\"label\":\"M4 승자\",\"short\":\"TLAW\",\"score\":3,\"win\":true}}]}]}]},\"br\":{\"desc\":\"8팀(브래킷 직행 7 + 플레이-인 통과 1) 더블 엘리미네이션 · 전 경기 Bo5\",\"crossConnectors\":[[0,0,0,\"mid\",1,1,0,\"a\"],[0,0,1,\"mid\",1,1,0,\"b\"],[0,0,2,\"mid\",1,1,1,\"a\"],[0,0,3,\"mid\",1,1,1,\"b\"],[0,1,0,\"mid\",1,2,0,\"a\"],[0,1,1,\"mid\",1,2,1,\"a\"],[0,2,0,\"mid\",1,4,0,\"a\"],[1,4,0,\"mid\",0,5,0,\"b\"]],\"legend\":[{\"color\":\"rgba(232,199,126,0.7)\",\"label\":\"MSI 우승\"}],\"sections\":[{\"name\":\"상위권 대진표\",\"totalRows\":8,\"connectors\":[[0,0,\"mid\",1,0,\"a\"],[0,1,\"mid\",1,0,\"b\"],[0,2,\"mid\",1,1,\"a\"],[0,3,\"mid\",1,1,\"b\"],[1,0,\"mid\",2,0,\"a\"],[1,1,\"mid\",2,0,\"b\"],[2,0,\"mid\",5,0,\"a\"]],\"rounds\":[{\"title\":\"1라운드\",\"matches\":[{\"title\":\"1라운드 · Match 1 (7/3 12:00)\",\"startRow\":0,\"a\":{\"seed\":\"LCK #1\",\"short\":\"HLE\",\"score\":3,\"win\":true},\"b\":{\"seed\":\"LCP #1\",\"short\":\"TSW\",\"score\":0}},{\"title\":\"1라운드 · Match 2 (7/3 17:00)\",\"startRow\":2,\"a\":{\"seed\":\"LEC #1\",\"short\":\"G2\",\"score\":3,\"win\":true},\"b\":{\"seed\":\"LPL #2\",\"short\":\"TES\",\"score\":2}},{\"title\":\"1라운드 · Match 3 (7/4 12:00)\",\"startRow\":4,\"a\":{\"seed\":\"LCS #1\",\"short\":\"LYON\",\"score\":3,\"win\":true},\"b\":{\"seed\":\"CBLOL #1\",\"short\":\"FUR\",\"score\":0}},{\"title\":\"1라운드 · Match 4 (7/4 17:00)\",\"startRow\":6,\"a\":{\"seed\":\"LPL #1\",\"short\":\"BLG\",\"score\":3,\"win\":true},\"b\":{\"short\":\"T1\",\"score\":2,\"seed\":\"플레이-인\"}}]},{\"title\":\"2라운드\",\"matches\":[{\"title\":\"2라운드 · Match 5 (7/5 17:00)\",\"startRow\":1,\"a\":{\"label\":\"M1 승자\",\"short\":\"HLE\",\"seed\":\"LCK #1\",\"score\":3,\"win\":true},\"b\":{\"label\":\"M2 승자\",\"short\":\"G2\",\"seed\":\"LEC #1\",\"score\":0}},{\"title\":\"2라운드 · Match 6 (7/6 12:00)\",\"startRow\":5,\"a\":{\"label\":\"M3 승자\",\"short\":\"LYON\",\"seed\":\"LCS #1\",\"score\":0},\"b\":{\"label\":\"M4 승자\",\"short\":\"BLG\",\"seed\":\"LPL #1\",\"score\":3,\"win\":true}}]},{\"title\":\"3라운드\",\"matches\":[{\"title\":\"3라운드 · Match 11 (7/9 17:00)\",\"startRow\":3,\"a\":{\"label\":\"M5 승자\",\"short\":\"HLE\",\"seed\":\"LCK #1\"},\"b\":{\"label\":\"M6 승자\",\"short\":\"BLG\",\"seed\":\"LPL #1\"}}]},{\"title\":\"\",\"matches\":[]},{\"title\":\"\",\"matches\":[]},{\"title\":\"결승\",\"matches\":[{\"title\":\"결승 · Grand Finals (7/12 15:00)\",\"startRow\":3,\"a\":{\"label\":\"M11 승자\"},\"b\":{\"label\":\"M13 승자\"}}]}]},{\"name\":\"하위권 대진표\",\"totalRows\":4,\"connectors\":[[1,0,\"mid\",2,1,\"b\"],[1,1,\"mid\",2,0,\"b\"],[2,0,\"mid\",3,0,\"a\"],[2,1,\"mid\",3,0,\"b\"],[3,0,\"mid\",4,0,\"b\"]],\"rounds\":[{\"title\":\"\",\"matches\":[]},{\"title\":\"1라운드\",\"matches\":[{\"title\":\"1라운드 · Match 7 (7/5 12:00)\",\"startRow\":0,\"a\":{\"label\":\"M1 패자\",\"short\":\"TSW\",\"seed\":\"LCP #1\",\"score\":3,\"win\":true},\"b\":{\"label\":\"M2 패자\",\"short\":\"TES\",\"seed\":\"LPL #2\",\"score\":1,\"elim\":true}},{\"title\":\"1라운드 · Match 8 (7/6 17:00)\",\"startRow\":2,\"a\":{\"label\":\"M3 패자\",\"short\":\"FUR\",\"seed\":\"CBLOL #1\",\"score\":0,\"elim\":true},\"b\":{\"label\":\"M4 패자\",\"short\":\"T1\",\"seed\":\"플레이-인\",\"score\":3,\"win\":true}}]},{\"title\":\"2라운드\",\"matches\":[{\"title\":\"2라운드 · Match 9 (7/8 17:00)\",\"startRow\":2,\"a\":{\"label\":\"M5 패자\",\"short\":\"G2\",\"seed\":\"LEC #1\",\"score\":3,\"win\":true},\"b\":{\"label\":\"M8 승자\",\"short\":\"T1\",\"seed\":\"플레이-인\",\"score\":1,\"elim\":true}},{\"title\":\"2라운드 · Match 10 (7/8 12:00)\",\"startRow\":0,\"a\":{\"label\":\"M6 패자\",\"short\":\"LYON\",\"seed\":\"LCS #1\",\"score\":3,\"win\":true},\"b\":{\"label\":\"M7 승자\",\"short\":\"TSW\",\"seed\":\"LCP #1\",\"score\":0,\"elim\":true}}]},{\"title\":\"3라운드\",\"matches\":[{\"title\":\"3라운드 · Match 12 (7/10 17:00)\",\"startRow\":1,\"a\":{\"label\":\"M9 승자\",\"short\":\"G2\",\"seed\":\"LEC #1\"},\"b\":{\"label\":\"M10 승자\",\"short\":\"LYON\",\"seed\":\"LCS #1\"}}]},{\"title\":\"4라운드\",\"matches\":[{\"title\":\"4라운드 · Match 13 (7/11 17:00)\",\"startRow\":1,\"a\":{\"label\":\"M11 패자\"},\"b\":{\"label\":\"M12 승자\"}}]}]}]}}"
 }
