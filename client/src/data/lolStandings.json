@@ -563,12 +563,15 @@
                       "a": {
                         "label": "M5 승자",
                         "short": "HLE",
-                        "seed": "LCK #1"
+                        "seed": "LCK #1",
+                        "score": 1
                       },
                       "b": {
                         "label": "M6 승자",
                         "short": "BLG",
-                        "seed": "LPL #1"
+                        "seed": "LPL #1",
+                        "score": 3,
+                        "win": true
                       }
                     }
                   ]
