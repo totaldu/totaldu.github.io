@@ -294,7 +294,7 @@
           },
           {
             "short": "T1",
-            "seed": "플레이-인"
+            "seed": "LCK #2"
           }
         ],
         "bracket": {
@@ -510,7 +510,7 @@
                       "b": {
                         "short": "T1",
                         "score": 2,
-                        "seed": "플레이-인"
+                        "seed": "LCK #2"
                       }
                     }
                   ]
@@ -682,7 +682,7 @@
                       "b": {
                         "label": "M4 패자",
                         "short": "T1",
-                        "seed": "플레이-인",
+                        "seed": "LCK #2",
                         "score": 3,
                         "win": true
                       }
@@ -705,7 +705,7 @@
                       "b": {
                         "label": "M8 승자",
                         "short": "T1",
-                        "seed": "플레이-인",
+                        "seed": "LCK #2",
                         "score": 1,
                         "elim": true
                       }

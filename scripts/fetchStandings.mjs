@@ -802,13 +802,14 @@ async function applyMsiScheduleTimes(prevMsi) {
   return changed;
 }
 
-// 플레이-인 생존팀(최종 진출전 승자)을 브래킷 스테이지 참가팀 목록의 "생존팀" 슬롯에 반영
+// 플레이-인 생존팀(최종 진출전 승자)을 브래킷 스테이지 참가팀 목록의 "생존팀" 슬롯에 반영.
+// 시드는 생존팀의 플레이-인 시드(예: LCK #2)를 그대로 표기한다.
 function fillMsiSurvivorQualifier(prevMsi) {
-  const pi = prevMsi['플레이-인 스테이지']?.bracket;
+  const pi = prevMsi['플레이-인 스테이지'];
   const br = prevMsi['브래킷 스테이지'];
-  if (!pi?.sections || !br?.qualifiers) return false;
+  if (!pi?.bracket?.sections || !br?.qualifiers) return false;
   let survivor = null;
-  for (const sec of pi.sections)
+  for (const sec of pi.bracket.sections)
     for (const r of sec.rounds || [])
       for (const m of r.matches || [])
         if (/최종\s*진출전/.test(m.title || '')) {
@@ -816,20 +817,24 @@ function fillMsiSurvivorQualifier(prevMsi) {
           if (m.b?.msi && m.b?.short) survivor = m.b.short;
         }
   if (!survivor) return false;
-  const slot = br.qualifiers.find((q) => !q.short && /생존팀/.test(q.label || ''));
+  const piSeed = (pi.qualifiers || []).find((q) => q.short === survivor)?.seed || '플레이-인';
+  // 아직 라벨 상태이거나 이미 생존팀으로 채워진 슬롯 모두 대상
+  const slot = br.qualifiers.find((q) => q.short === survivor || (!q.short && /생존팀/.test(q.label || '')));
   if (!slot) return false;
-  delete slot.label;
-  slot.short = survivor;
-  slot.seed = '플레이-인';
-  return true;
+  let changed = false;
+  if (slot.label) { delete slot.label; changed = true; }
+  if (slot.short !== survivor) { slot.short = survivor; changed = true; }
+  if (slot.seed !== piSeed) { slot.seed = piSeed; changed = true; }
+  return changed;
 }
 
 // 3단계: MSI 플레이-인 + 브래킷 스테이지 대진·결과(점수·승패) 자동 반영
 try {
   const prevMsi = data.standings.msi || {};
   const piChanged = await fillMsiPlayinResults(prevMsi);
-  const brChanged = await fillMsiBracketResults(prevMsi);
+  // 생존팀 시드를 먼저 확정해야 브래킷 대진 슬롯에도 같은 시드(LCK #2 등)가 반영된다
   const survChanged = fillMsiSurvivorQualifier(prevMsi);
+  const brChanged = await fillMsiBracketResults(prevMsi);
   const timeChanged = await applyMsiScheduleTimes(prevMsi);
   const changed = piChanged || brChanged || survChanged || timeChanged;
   if (changed) {
