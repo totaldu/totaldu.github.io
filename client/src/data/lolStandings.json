@@ -591,10 +591,14 @@
                       "title": "결승 · Grand Finals (7/12 15:00)",
                       "startRow": 3,
                       "a": {
-                        "label": "M11 승자"
+                        "label": "M11 승자",
+                        "short": "BLG",
+                        "seed": "LPL #1"
                       },
                       "b": {
-                        "label": "M13 승자"
+                        "label": "M13 승자",
+                        "short": "HLE",
+                        "seed": "LCK #1"
                       }
                     }
                   ]
@@ -765,12 +769,16 @@
                       "a": {
                         "label": "M11 패자",
                         "short": "HLE",
-                        "seed": "LCK #1"
+                        "seed": "LCK #1",
+                        "score": 3,
+                        "win": true
                       },
                       "b": {
                         "label": "M12 승자",
                         "short": "LYON",
-                        "seed": "LCS #1"
+                        "seed": "LCS #1",
+                        "score": 2,
+                        "elim": true
                       }
                     }
                   ]
