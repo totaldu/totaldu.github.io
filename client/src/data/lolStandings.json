@@ -593,12 +593,16 @@
                       "a": {
                         "label": "M11 승자",
                         "short": "BLG",
-                        "seed": "LPL #1"
+                        "seed": "LPL #1",
+                        "score": 2,
+                        "elim": true
                       },
                       "b": {
                         "label": "M13 승자",
                         "short": "HLE",
-                        "seed": "LCK #1"
+                        "seed": "LCK #1",
+                        "score": 3,
+                        "msi": true
                       }
                     }
                   ]
