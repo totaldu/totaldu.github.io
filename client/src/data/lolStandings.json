@@ -993,27 +993,27 @@
             "rank": 1,
             "team": "BFX",
             "w": 7,
-            "l": 12,
-            "gw": 16,
-            "gl": 25,
-            "group": "라이즈 그룹"
+            "l": 13,
+            "group": "라이즈 그룹",
+            "gw": 14,
+            "gl": 25
           },
           {
             "rank": 2,
+            "team": "NS",
+            "w": 7,
+            "l": 13,
+            "group": "라이즈 그룹",
+            "gw": 13,
+            "gl": 28
+          },
+          {
+            "rank": 3,
             "team": "BRO",
             "w": 6,
             "l": 13,
             "gw": 17,
             "gl": 26,
-            "group": "라이즈 그룹"
-          },
-          {
-            "rank": 3,
-            "team": "NS",
-            "w": 6,
-            "l": 13,
-            "gw": 15,
-            "gl": 28,
             "group": "라이즈 그룹"
           },
           {
@@ -1637,16 +1637,14 @@
             "team": "BLG",
             "w": 5,
             "l": 0,
-            "gw": 10,
-            "gl": 4,
             "group": "Group Ascend"
           },
           {
             "rank": 2,
             "team": "AL",
-            "w": 4,
+            "w": 5,
             "l": 1,
-            "gw": 9,
+            "gw": 11,
             "gl": 3,
             "group": "Group Ascend"
           },
@@ -1664,8 +1662,6 @@
             "team": "TES",
             "w": 2,
             "l": 1,
-            "gw": 4,
-            "gl": 3,
             "group": "Group Ascend"
           },
           {
@@ -1673,17 +1669,6 @@
             "team": "JDG",
             "w": 1,
             "l": 2,
-            "gw": 4,
-            "gl": 5,
-            "group": "Group Ascend"
-          },
-          {
-            "rank": 6,
-            "team": "TT",
-            "w": 1,
-            "l": 3,
-            "gw": 5,
-            "gl": 6,
             "group": "Group Ascend"
           },
           {
@@ -1691,8 +1676,15 @@
             "team": "LGD",
             "w": 1,
             "l": 3,
-            "gw": 3,
-            "gl": 6,
+            "group": "Group Ascend"
+          },
+          {
+            "rank": 7,
+            "team": "TT",
+            "w": 1,
+            "l": 4,
+            "gw": 5,
+            "gl": 8,
             "group": "Group Ascend"
           },
           {
@@ -2139,11 +2131,11 @@
                   "title": "1승 1패",
                   "a": {
                     "seed": "",
-                    "short": "DCG"
+                    "short": "DFM"
                   },
                   "b": {
                     "seed": "",
-                    "short": "DFM"
+                    "short": "DCG"
                   },
                   "recordKey": "1-1"
                 },
