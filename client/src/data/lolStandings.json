@@ -1635,8 +1635,10 @@
           {
             "rank": 1,
             "team": "BLG",
-            "w": 5,
+            "w": 6,
             "l": 0,
+            "gw": 12,
+            "gl": 4,
             "group": "Group Ascend"
           },
           {
@@ -1670,7 +1672,9 @@
             "rank": 5,
             "team": "JDG",
             "w": 1,
-            "l": 2,
+            "l": 3,
+            "gw": 4,
+            "gl": 7,
             "group": "Group Ascend"
           },
           {
@@ -2150,11 +2154,14 @@
                   "title": "1승 1패",
                   "a": {
                     "seed": "",
-                    "short": "MVK"
+                    "short": "MVK",
+                    "score": 2,
+                    "win": true
                   },
                   "b": {
                     "seed": "",
-                    "short": "GAM"
+                    "short": "GAM",
+                    "score": 0
                   },
                   "recordKey": "1-1"
                 },
