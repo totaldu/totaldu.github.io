@@ -1,18 +1,18 @@
 {
   "source": "https://lolesports.com/ko-KR/gpr/2026/current",
-  "updatedAt": "2026-09-03",
+  "updatedAt": "2026-09-04",
   "note": "GPR 팀별 점수(포인트)와 전적. score를 시뮬레이션 레이팅으로 사용. fst는 2026 First Stand 최종 순위.",
   "teams": [
     {
       "name": "Bilibili Gaming",
       "short": "BLG",
       "league": "LPL",
-      "score": 1530,
-      "w": 46,
+      "score": 1525,
+      "w": 47,
       "l": 10,
       "fst": 1,
-      "gw": 115,
-      "gl": 46,
+      "gw": 118,
+      "gl": 47,
       "logo": "https://static.lolesports.com/teams/1682322954525_Bilibili_Gaming_logo_20211.png"
     },
     {
@@ -132,11 +132,11 @@
       "name": "Dplus KIA",
       "short": "DK",
       "league": "LCK",
-      "score": 1412,
-      "w": 25,
+      "score": 1409,
+      "w": 26,
       "l": 15,
-      "gw": 59,
-      "gl": 49,
+      "gw": 62,
+      "gl": 51,
       "logo": "https://static.lolesports.com/teams/1673260049703_DPlusKIALOGO11.png"
     },
     {
@@ -243,23 +243,23 @@
       "name": "Xi'an Team WE",
       "short": "WE",
       "league": "LPL",
-      "score": 1298,
+      "score": 1303,
       "w": 17,
-      "l": 28,
-      "gw": 50,
-      "gl": 71,
+      "l": 29,
+      "gw": 51,
+      "gl": 74,
       "logo": "https://static.lolesports.com/teams/1634763008788_220px-Team_WE_logo.png"
     },
     {
       "name": "BNK FEARX",
       "short": "BFX",
       "league": "LCK",
-      "score": 1251,
+      "score": 1254,
       "w": 19,
-      "l": 23,
+      "l": 24,
       "fst": 5,
-      "gw": 55,
-      "gl": 62,
+      "gw": 57,
+      "gl": 65,
       "logo": "https://static.lolesports.com/teams/1734691810721_BFXfullcolorfordarkbg.png"
     },
     {
