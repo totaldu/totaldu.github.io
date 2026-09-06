@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-09-04",
+  "updatedAt": "2026-09-06",
   "note": "리그별 → 세부대회별 공식 현재 순위표(정규시즌만, 토너먼트/플레이오프 제외). 있으면 우선 사용, 없으면 GPR 전적으로 대체. gw/gl은 세트(게임) 승-패.",
   "source": {
     "lck": "https://lolesports.com/ko-KR/leagues/lck",
@@ -1298,11 +1298,14 @@
                   "title": "UB R3",
                   "a": {
                     "seed": "UB R2 승자",
-                    "short": "GEN"
+                    "short": "HLE",
+                    "score": 1
                   },
                   "b": {
                     "seed": "UB R2 승자",
-                    "short": "HLE"
+                    "short": "GEN",
+                    "score": 3,
+                    "win": true
                   },
                   "time": "9/5 (토) 17:00",
                   "startRow": 2
@@ -1333,7 +1336,8 @@
                     "seed": "UB R3 패자"
                   },
                   "b": {
-                    "seed": "LB R3 승자"
+                    "seed": "LB R3 승자",
+                    "short": "HLE"
                   },
                   "time": "9/12 (토) 14:00",
                   "startRow": 8
@@ -1350,7 +1354,8 @@
                     "seed": "UB R3 승자"
                   },
                   "b": {
-                    "seed": "결승 진출전 승자"
+                    "seed": "결승 진출전 승자",
+                    "short": "GEN"
                   },
                   "time": "9/13 (일) 14:00",
                   "startRow": 5
@@ -1645,11 +1650,15 @@
                   "title": "MATCH 5",
                   "a": {
                     "seed": "M1 패자",
-                    "short": "IG"
+                    "short": "IG",
+                    "score": 3,
+                    "win": true
                   },
                   "b": {
                     "seed": "기사의 길 1 승자",
-                    "short": "TES"
+                    "short": "TES",
+                    "score": 2,
+                    "elim": true
                   },
                   "startRow": 8,
                   "time": "9/5 (토) 15:00"
@@ -1659,11 +1668,15 @@
                   "title": "MATCH 6",
                   "a": {
                     "seed": "M2 패자",
-                    "short": "NIP"
+                    "short": "NIP",
+                    "score": 3,
+                    "win": true
                   },
                   "b": {
                     "seed": "기사의 길 2 승자",
-                    "short": "JDG"
+                    "short": "JDG",
+                    "score": 0,
+                    "elim": true
                   },
                   "startRow": 12,
                   "time": "9/5 (토) 18:00"
@@ -1711,11 +1724,12 @@
                   "id": "117155436343202178",
                   "title": "MATCH 7",
                   "a": {
-                    "seed": "M5 승자"
+                    "seed": "M5 승자",
+                    "short": "WE"
                   },
                   "b": {
                     "seed": "M4 패자",
-                    "short": "WE"
+                    "short": "IG"
                   },
                   "startRow": 8,
                   "time": "9/6 (일) 15:00"
@@ -1724,11 +1738,12 @@
                   "id": "117155436343202184",
                   "title": "MATCH 8",
                   "a": {
-                    "seed": "M6 승자"
+                    "seed": "M6 승자",
+                    "short": "LGD"
                   },
                   "b": {
                     "seed": "M3 패자",
-                    "short": "LGD"
+                    "short": "NIP"
                   },
                   "startRow": 12,
                   "time": "9/6 (일) 18:00"
@@ -3039,13 +3054,13 @@
           {
             "rank": 1,
             "team": "TLAW",
-            "w": 5,
+            "w": 6,
             "l": 1,
-            "gw": 10,
+            "gw": 12,
             "gl": 3
           },
           {
-            "rank": 1,
+            "rank": 2,
             "team": "LYON",
             "w": 5,
             "l": 1,
@@ -3054,19 +3069,19 @@
           },
           {
             "rank": 3,
-            "team": "SEN",
-            "w": 4,
+            "team": "C9",
+            "w": 5,
             "l": 2,
-            "gw": 9,
-            "gl": 6
+            "gw": 10,
+            "gl": 7
           },
           {
-            "rank": 3,
-            "team": "C9",
+            "rank": 4,
+            "team": "SEN",
             "w": 4,
-            "l": 2,
-            "gw": 8,
-            "gl": 7
+            "l": 3,
+            "gw": 9,
+            "gl": 8
           },
           {
             "rank": 5,
@@ -3096,9 +3111,9 @@
             "rank": 8,
             "team": "DIG",
             "w": 0,
-            "l": 6,
+            "l": 7,
             "gw": 3,
-            "gl": 12
+            "gl": 14
           }
         ]
       }
