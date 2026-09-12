@@ -10,6 +10,7 @@ import GprTable, { TeamLogo } from '../components/GprTable';
 import TeamPanel from '../components/TeamPanel';
 import { textOn, lighten } from '../utils/colorContrast';
 import demaciaLogo from '../assets/demacia.svg';
+import asiangamesLogo from '../assets/asiangames.svg';
 
 const statusMeta = {
   finished: { label: '종료', color: '#34D399', bg: 'rgba(52,211,153,0.15)' },
@@ -865,7 +866,10 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
   // 현재 순위 — 해당 세부대회 공식 순위표가 있으면 우선, 없으면 GPR 전적으로 산출
   const leagueStd = officialStandings.standings[comp.key];
   // 서브탭이 있는 대회는 leagueStd[sub], 서브탭 없는 대회(예: DEMACIA)는 leagueStd 자체를 official로 사용
-  const official = leagueStd ? (sub ? leagueStd[sub] : leagueStd) : null;
+  // MSI는 서브탭 대신 스테이지 탭(플레이-인/브래킷)을 쓰므로 stage로 해당 스테이지 객체를 선택.
+  const official = leagueStd
+    ? (sub ? leagueStd[sub] : (comp.key === 'msi' && stage ? leagueStd[stage] : leagueStd))
+    : null;
   const setDiff = (gw, gl) => (gw != null && gl != null ? gw - gl : null);
   const current = official?.rows?.length
     ? official.rows.map((r) => {
@@ -1170,7 +1174,9 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
             </div>
           );
           const eliminated = q.short && eliminatedSet.has(q.short);
-          const showAdvance = !isBracketStage && p?.advance != null;
+          // 종료된 대회는 확률(진출·우승) 표기를 숨긴다.
+          const finished = comp.status === 'finished';
+          const showAdvance = !finished && !isBracketStage && p?.advance != null;
           return (
             <div key={i} className="flex flex-col gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 text-sm">
               {q.short ? (
@@ -1182,10 +1188,10 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
                     <span className={`font-bold truncate ${eliminated ? 'text-white/35' : 'text-white/90'}`}>{nameByShort[q.short] || q.short}</span>
                     {q.seed && <span className="text-[10px] text-white/40 shrink-0 ml-auto">{q.seed}</span>}
                   </div>
-                  {(showAdvance || p?.champ != null) && (
+                  {(showAdvance || (!finished && p?.champ != null)) && (
                     <div className="flex flex-col gap-1">
                       {showAdvance && probRow('진출', p.advance, comp.color)}
-                      {p?.champ != null && probRow('우승', p.champ, '#E8C77E', true)}
+                      {!finished && p?.champ != null && probRow('우승', p.champ, '#E8C77E', true)}
                     </div>
                   )}
                 </>
@@ -1428,6 +1434,143 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
         return null;
       })()}
 
+      {/* Asian Games — 국가 대항전. A조/B조 순위표+대진, 녹아웃 브래킷. */}
+      {(() => {
+        if (comp.key !== 'asiangames') return null;
+        const teams = official?.teams || [];
+        const nameOf = (code) => (teams.find((t) => t.code === code)?.name || code);
+        const eloOf = (code) => teams.find((t) => t.code === code)?.elo;
+        const legend = (
+          <div className="mt-3 flex items-center gap-4 text-xs text-white/60 flex-wrap">
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(232,199,126,0.7)' }} /> 우승</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(96,165,250,0.6)' }} /> 라운드 승리</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(248,113,113,0.6)' }} /> 탈락</span>
+          </div>
+        );
+        const matchCard = (m) => {
+          const done = m.scoreA != null && m.scoreB != null && m.scoreA !== m.scoreB;
+          const aWin = done && m.scoreA > m.scoreB;
+          const bWin = done && m.scoreB > m.scoreA;
+          const slot = (code, score, win) => (
+            <div className={`flex items-center gap-2 px-2.5 py-2 ${win ? 'bg-[rgba(96,165,250,0.14)]' : ''}`}>
+              <span className={`text-xs truncate flex-1 ${win ? 'font-bold text-white' : 'text-white/70'}`}>{code ? nameOf(code) : 'TBD'}</span>
+              {score != null && <span className={`font-mono tabular-nums text-sm shrink-0 ${win ? 'text-[#60A5FA] font-black' : 'text-white/45'}`}>{score}</span>}
+            </div>
+          );
+          return (
+            <div key={m.id} className="flex flex-col">
+              <span className="text-[10px] font-bold text-white/40 uppercase tracking-wider px-0.5 mb-1 flex items-baseline gap-1.5">
+                <span>{m.id}</span><span className="ml-auto text-white/30 normal-case font-normal">{m.format}</span>
+              </span>
+              <div className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
+                {slot(m.a, m.scoreA, aWin)}
+                <div className="h-px bg-white/10" />
+                {slot(m.b, m.scoreB, bWin)}
+              </div>
+            </div>
+          );
+        };
+        // 참가 팀 — 8개국을 A조/B조로 나눠 Elo와 함께 대진표 위에 표기.
+        const participants = teams.length > 0 && (
+          <section className="flex flex-col gap-3">
+            <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">참가 팀</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {['A', 'B'].map((gk) => (
+                <div key={gk} className="flex flex-col gap-2">
+                  <h4 className="text-xs font-bold text-white/60">{gk}조</h4>
+                  <div className="flex flex-col gap-2">
+                    {teams.filter((t) => t.group === gk).map((t) => (
+                      <div key={t.code} className="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/10 text-sm">
+                        <span className="font-bold truncate text-white/90">{t.name}</span>
+                        {t.elo != null && <span className="text-[11px] text-white/40 shrink-0 ml-auto font-mono">Elo {t.elo}</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+        const wrap = (body) => <>{participants}{body}</>;
+        if (stage === '그룹 스테이지') {
+          const groupBlock = (gk) => {
+            const grp = official?.groups?.[gk];
+            const rows = grp?.standings?.length ? grp.standings : teams.filter((t) => t.group === gk).map((t) => ({ code: t.code, w: 0, l: 0, sw: 0, sl: 0 }));
+            return (
+              <div key={gk} className="flex flex-col gap-4">
+                <div>
+                  <div className="flex items-baseline gap-2 flex-wrap mb-3">
+                    <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">{gk}조 순위</h3>
+                    <span className="text-xs text-white/40">싱글 라운드로빈 · Bo3 · 상위 2팀 4강 진출</span>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border-collapse">
+                      <thead><tr className="text-white/40 text-xs border-b border-white/10">
+                        <th className="text-center font-bold py-2 px-2 w-10">#</th>
+                        <th className="text-left font-bold py-2 pr-2">국가</th>
+                        <th className="text-center font-bold py-2 px-2">Elo</th>
+                        <th className="text-center font-bold py-2 px-2">승-패</th>
+                        <th className="text-center font-bold py-2 px-2">세트</th>
+                      </tr></thead>
+                      <tbody>
+                        {rows.map((r, i) => (
+                          <tr key={r.code} className="border-b border-white/5" style={i < 2 ? { backgroundColor: 'rgba(96,165,250,0.10)' } : undefined}>
+                            <td className="py-2 px-2 text-center text-white/50 font-mono">{i + 1}</td>
+                            <td className="py-2 pr-2 font-bold text-white/90">{nameOf(r.code)}</td>
+                            <td className="py-2 px-2 text-center text-white/50 font-mono">{eloOf(r.code) ?? '-'}</td>
+                            <td className="py-2 px-2 text-center font-mono">{r.w}-{r.l}</td>
+                            <td className="py-2 px-2 text-center font-mono text-white/50">{r.sw}-{r.sl}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider mb-3">{gk}조 대진</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {(grp?.matches || []).map(matchCard)}
+                  </div>
+                </div>
+              </div>
+            );
+          };
+          if (!official?.groups) return wrap(<section className="rounded-xl bg-white/5 border border-white/10 p-4 text-center text-sm text-white/50">조별 정보가 아직 확정되지 않았습니다.</section>);
+          return wrap(
+            <section className="flex flex-col gap-8">
+              {groupBlock('A')}
+              {groupBlock('B')}
+            </section>
+          );
+        }
+        if (stage === '녹아웃 스테이지') {
+          const ko = official?.knockout?.matches || [];
+          if (!ko.length) return wrap(<section className="rounded-xl bg-white/5 border border-white/10 p-4 text-center text-sm text-white/50">녹아웃 대진이 아직 확정되지 않았습니다.</section>);
+          const byId = Object.fromEntries(ko.map((m) => [m.id, m]));
+          const col = (title, ids) => (
+            <div className="flex flex-col gap-4 shrink-0 justify-center" style={{ width: 220 }}>
+              <div className="text-[11px] text-white/50 font-black tracking-wider px-1">{title}</div>
+              {ids.map((id) => byId[id] && matchCard(byId[id]))}
+            </div>
+          );
+          return wrap(
+            <section>
+              <div className="flex items-baseline gap-2 flex-wrap mb-4">
+                <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">녹아웃 스테이지</h3>
+                <span className="text-xs text-white/40">4강 Bo3 · 3·4위전·결승 Bo5</span>
+              </div>
+              <div className="flex gap-6 overflow-x-auto pb-3 items-stretch w-fit">
+                {col('4강', ['SF1', 'SF2'])}
+                {col('결승', ['FINAL'])}
+                {col('3·4위전', ['BRONZE'])}
+              </div>
+              {legend}
+            </section>
+          );
+        }
+        return null;
+      })()}
+
       {/* LPL 대표 선발전 — 대진 탭 */}
       {lplQualifier && stage === '대진' && official?.qualifier?.rounds?.length > 0 && (
         <section>
@@ -1629,6 +1772,7 @@ const COMP_LOGO = {
   msi: 'https://static.lolesports.com/leagues/1592594634248_MSIDarkBG.png',
   demacia: demaciaLogo,
   worlds: 'https://static.lolesports.com/leagues/1592594612171_WorldsDarkBG.png',
+  asiangames: asiangamesLogo,
 };
 const tabLogo = (key) => (key === 'gpr' ? LOLESPORTS_LOGO : COMP_LOGO[key]);
 
@@ -1640,10 +1784,9 @@ const SUBTABS = {
   lcp: ['Split 1', 'Split 2', 'Split 3'],
   lcs: ['Lock-In', 'Spring', 'Summer'],
   cblol: ['Copa', 'Split 1', 'Split 2'],
-  msi: ['플레이-인 스테이지', '브래킷 스테이지'],
 };
 // 세부 대회 기본 선택(현재 진행/직전 완료된 대회)
-const SUBTAB_DEFAULT = { lck: 'LCK', lpl: 'Split 3', lec: 'Summer', lcp: 'Split 3', lcs: 'Summer', cblol: 'Split 2', msi: '브래킷 스테이지' };
+const SUBTAB_DEFAULT = { lck: 'LCK', lpl: 'Split 3', lec: 'Summer', lcp: 'Split 3', lcs: 'Summer', cblol: 'Split 2' };
 // 아직 시작하지 않은 세부 대회 → "예정" 표시
 const SUB_UPCOMING = {
   lec: ['Summer'],
@@ -1678,11 +1821,14 @@ const STAGE_TABS = {
   demacia: ['그룹 스테이지', '녹아웃 스테이지'],
   'lcp|Split 3': ['스위스 스테이지', '플레이-인 스테이지', '플레이오프'],
   worlds: ['플레이-인', '스위스 스테이지', '녹아웃 스테이지'],
+  asiangames: ['그룹 스테이지', '녹아웃 스테이지'],
+  msi: ['플레이-인 스테이지', '브래킷 스테이지'],
 };
 // 기본 선택 단계(탭 순서와 별개로 진입 시 표시할 단계) — 없으면 첫 단계
 const STAGE_DEFAULT = {
   'lck|LCK': '플레이오프',
   'lpl|Split 3': '플레이오프',
+  msi: '브래킷 스테이지',
 };
 
 const PredictionPage = () => {
@@ -1746,7 +1892,7 @@ const PredictionPage = () => {
   // stage 목록: 서브탭이 있으면 `key|sub`으로, 서브탭이 없는 대회는 key만으로도 조회
   const stageList = comp ? (STAGE_TABS[`${comp.key}|${activeSub}`] || (!subTabs && STAGE_TABS[comp.key])) : null;
   const showStages = !!stageList;
-  const defaultStage = (comp && STAGE_DEFAULT[`${comp.key}|${activeSub}`]) || (stageList ? stageList[0] : null);
+  const defaultStage = (comp && (STAGE_DEFAULT[`${comp.key}|${activeSub}`] || (!subTabs && STAGE_DEFAULT[comp.key]))) || (stageList ? stageList[0] : null);
   const activeStage = showStages
     ? (stageList.includes(searchParams.get('stage')) ? searchParams.get('stage') : defaultStage)
     : null;
