@@ -11,6 +11,7 @@ import TeamPanel from '../components/TeamPanel';
 import { textOn, lighten } from '../utils/colorContrast';
 import demaciaLogo from '../assets/demacia.svg';
 import asiangamesLogo from '../assets/asiangames.svg';
+import asiangames2026Logo from '../assets/asiangames2026.svg';
 
 const statusMeta = {
   finished: { label: '종료', color: '#34D399', bg: 'rgba(52,211,153,0.15)' },
@@ -21,7 +22,6 @@ const statusMeta = {
 // 본문 추후 제공 대회 (정보 미준비)
 const CONTENT_TBD = new Set([
   'fst',
-  'lck|LCK CUP',
   'lpl|Split 1', 'lpl|Split 2',
   'lec|Versus', 'lec|Spring',
   'lcp|Split 1', 'lcp|Split 2',
@@ -641,11 +641,12 @@ const BracketGroup = ({ sections, crossConnectors, onTeamClick }) => {
 // 현재 순위 표 (그룹 단위로 재사용) — 승률 대신 예측 확률(PI+/PO/Worlds/우승)을 표기
 // cols 가 주어지면 그 컬럼만 표시(단계별 뷰), 없으면 데이터 유무로 자동 판단
 const StandingsTable = ({ rows, color, hasDiff, cols, onTeamClick }) => {
-  const showDiff = cols ? !!cols.diff : hasDiff;
-  const hasPiPlus = cols ? !!cols.piPlus : rows.some((r) => r.prob?.piPlus != null);
-  const hasAdvance = cols ? !!cols.advance : rows.some((r) => r.prob);
-  const hasChamp = cols ? !!cols.champ : rows.some((r) => r.prob);
-  const hasWorlds = cols ? !!cols.worlds : rows.some((r) => r.prob?.worlds != null);
+  const minimal = !!cols?.minimal; // 최종 순위 등: 순위 + 팀 로고/이름만 (승-패·득실차·확률 숨김)
+  const showDiff = minimal ? false : (cols ? !!cols.diff : hasDiff);
+  const hasPiPlus = minimal ? false : (cols ? !!cols.piPlus : rows.some((r) => r.prob?.piPlus != null));
+  const hasAdvance = minimal ? false : (cols ? !!cols.advance : rows.some((r) => r.prob));
+  const hasChamp = minimal ? false : (cols ? !!cols.champ : rows.some((r) => r.prob));
+  const hasWorlds = minimal ? false : (cols ? !!cols.worlds : rows.some((r) => r.prob?.worlds != null));
   // 확률 셀 (소수 2자리) — 값 + 막대 바
   const prob = (v, c, strong) => (
     <td className="py-2 px-2">
@@ -669,7 +670,7 @@ const StandingsTable = ({ rows, color, hasDiff, cols, onTeamClick }) => {
           <tr className="text-white/40 text-xs border-b border-white/10">
             <th className="text-center font-bold py-2 px-2 w-10">#</th>
             <th className="text-left font-bold py-2 pr-2">팀</th>
-            <th className="text-center font-bold py-2 px-2">승-패</th>
+            {!minimal && <th className="text-center font-bold py-2 px-2">승-패</th>}
             {showDiff && <th className="text-center font-bold py-2 px-2">득실차</th>}
             {hasPiPlus && <th className="text-right font-bold py-2 px-2">{cols?.labels?.piPlus || 'PI+ 진출'}</th>}
             {hasAdvance && <th className="text-right font-bold py-2 px-2">{cols?.labels?.advance || 'PO 진출'}</th>}
@@ -706,7 +707,7 @@ const StandingsTable = ({ rows, color, hasDiff, cols, onTeamClick }) => {
                     </div>
                   )}
                 </td>
-                <td className="py-2 px-2 text-center text-white/70 font-mono">{t.games ? `${t.w}-${t.l}` : '-'}</td>
+                {!minimal && <td className="py-2 px-2 text-center text-white/70 font-mono">{t.games ? `${t.w}-${t.l}` : '-'}</td>}
                 {showDiff && (
                   <td className="py-2 px-2 text-center font-mono"
                     style={{ color: t.gd > 0 ? '#34D399' : t.gd < 0 ? '#F87171' : '#9CA3AF' }}>
@@ -898,7 +899,7 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
   const lplCfg = lplSplit3 && stage ? LPL_STAGE_CFG[stage] : null;
   const lplQualifier = comp.key === 'lpl' && sub === '대표 선발전';
   // 자체 대진표(토너먼트 포맷)가 있는 세부대회는 시즌 예측 확률 컬럼을 표기하지 않음 (LPL/LCP Split 3는 전용 확률을 표기하므로 예외)
-  const noPredict = roadToMsi || (!!official?.bracket && !lplSplit3);
+  const noPredict = roadToMsi || (comp.key === 'lck' && sub === 'LCK CUP') || (!!official?.bracket && !lplSplit3);
   // 팀 약칭 → 시뮬 예측 확률 (현재 순위표에 합쳐 표기) — LPL·LCP Split 3는 전용 시뮬 결과(comp.split3) 사용
   const probByShort = (lplSplit3 || lcpSplit3)
     ? Object.fromEntries((comp.split3 || []).map((s) => [s.team, s]))
@@ -938,9 +939,13 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
   // LCK 플레이-인/플레이오프: MSI/LCP처럼 API 대진표(연결선)로 표기하고,
   //   참가 팀은 정규시즌 순위표로 대진표 위에 표기한다.
   let groups;
+  // LCK CUP(별도 토너먼트: 그룹+플레이-인+플레이오프) — 정규 LCK 전용 로직과 분리
+  const isLckCup = comp.key === 'lck' && sub === 'LCK CUP';
+  const lckCupBracket = isLckCup && (stage === '플레이-인' || stage === '플레이오프');
+  const lckCupFinalStage = isLckCup && stage === '최종 순위';
   // LCK 최종 순위: 전체 팀을 우승 → Worlds → PO 진출 순으로 정렬한 단일 표
-  const lckFinalStage = comp.key === 'lck' && grouped && stage === '최종 순위';
-  const lckBracketStage = comp.key === 'lck' && grouped && (stage === '플레이-인' || stage === '플레이오프');
+  const lckFinalStage = comp.key === 'lck' && !isLckCup && grouped && stage === '최종 순위';
+  const lckBracketStage = comp.key === 'lck' && !isLckCup && grouped && (stage === '플레이-인' || stage === '플레이오프');
   const lckBracket = lckBracketStage ? buildLckBracket(official?.[stage === '플레이-인' ? 'playin' : 'playoffs'], stage, current) : null;
   if (lckFinalStage) {
     // 실제 대진 결과가 확정되면 그 순위를 표기 (미확정이면 groups=[] → 안내만 표시).
@@ -1034,7 +1039,8 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
 
   // LPL Split 3 단계별 표시: 럼블=조 순위만, 기사의 길/녹아웃=해당 대진표만
   // MSI는 별개 토너먼트라 지역 리그 전적(현재순위) 표는 숨긴다 (참가팀·대진표만 표기)
-  const hideStandings = (lplSplit3 && stage && stage !== '럼블 스테이지') || (lcpSplit3 && !lcpCfg?.pred) || comp.key === 'msi' || lplQualifier;
+  const hideStandings = (lplSplit3 && stage && stage !== '럼블 스테이지') || (lcpSplit3 && !lcpCfg?.pred) || comp.key === 'msi' || lplQualifier
+    || (isLckCup && stage !== '그룹 스테이지'); // CUP: 그룹 스테이지에서만 조 순위표, 나머지는 대진/최종순위
   // 참가 팀 카드(MSI 전용). LCK 플레이-인/플레이오프는 정규시즌 순위표를 참가 팀으로 표기.
   const qualifiers = official?.qualifiers?.length ? official.qualifiers : null;
   // LPL Split 3는 이제 API 자동 대진(knights/playoffs)을 쓰므로 섹션형 bracket을 사용하지 않는다.
@@ -1044,12 +1050,14 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
     <div className="flex flex-col gap-8">
       {/* 메타 */}
       <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-        {(lplSplit3 || comp.stage || comp.format) && !lcpSplit3 && (
+        {(lplSplit3 || isLckCup || comp.stage || comp.format) && !lcpSplit3 && (
           <span className="text-white/50">형식: <strong className="text-white/80">{lplSplit3
             ? '그룹별 더블 라운드로빈 (Bo3) → 기사의 길 (Bo5) → 플레이오프 (Bo5)'
+            : isLckCup
+            ? (official?.format || '10팀 · 2개조 그룹 스테이지 → 플레이-인 → 플레이오프')
             : [comp.stage, comp.format].filter(Boolean).join(' · ')}</strong></span>
         )}
-        {comp.iterations > 0 && <span className="text-white/50">반복: <strong className="text-white/80">{comp.iterations.toLocaleString()}회</strong></span>}
+        {!isLckCup && comp.iterations > 0 && <span className="text-white/50">반복: <strong className="text-white/80">{comp.iterations.toLocaleString()}회</strong></span>}
         {comp.generatedAt && <span className="text-white/50">생성: <strong className="text-white/80">{fmtUpdated(comp.generatedAt)}</strong></span>}
       </div>
 
@@ -1097,7 +1105,7 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
                   {grp.name}
                 </span>
               )}
-              <StandingsTable rows={grp.rows} color={comp.color} hasDiff={hasDiff} cols={lckBracketStage ? (stage === '플레이-인' ? { diff: true, advance: true, worlds: true, champ: true } : { diff: true, worlds: true, champ: true }) : cfg?.cols} onTeamClick={onTeamClick} />
+              <StandingsTable rows={grp.rows} color={comp.color} hasDiff={hasDiff} cols={lckFinalStage || lckCupFinalStage ? { minimal: true } : lckBracketStage ? (stage === '플레이-인' ? { diff: true, advance: true, worlds: true, champ: true } : { diff: true, worlds: true, champ: true }) : cfg?.cols} onTeamClick={onTeamClick} />
             </div>
           ))}
         </section>
@@ -1646,6 +1654,42 @@ const SimulationView = ({ comp, sub, stage, onTeamClick }) => {
         </section>
       )}
 
+      {/* LCK CUP 플레이-인/플레이오프 대진표 — API 실제 결과 (연결선) */}
+      {lckCupBracket && official?.[stage === '플레이-인' ? 'playin' : 'playoffs']?.rounds?.length > 0 && (() => {
+        const br = official[stage === '플레이-인' ? 'playin' : 'playoffs'];
+        return (
+          <section>
+            <div className="flex items-baseline gap-2 flex-wrap mb-4">
+              <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">{stage} 대진</h3>
+              <span className="text-xs text-white/40">2026 LCK CUP · 실제 경기 결과</span>
+            </div>
+            <MsiBracket rounds={br.rounds} totalRows={br.totalRows} connectors={br.connectors} onTeamClick={onTeamClick} />
+            <div className="flex flex-wrap gap-4 mt-4 text-[11px] text-white/50">
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(232,199,126,0.7)' }} /> 우승/진출</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(96,165,250,0.6)' }} /> 라운드 승리</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(248,113,113,0.6)' }} /> 탈락</span>
+            </div>
+          </section>
+        );
+      })()}
+
+      {/* LCK CUP 최종 순위 */}
+      {lckCupFinalStage && official?.finalStandings?.length > 0 && (
+        <section className="flex flex-col gap-4">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">최종 순위</h3>
+            <span className="text-xs text-white/40">그룹 스테이지 → 플레이-인 → 플레이오프 · 우승 {official.finalStandings[0]?.team}</span>
+          </div>
+          <StandingsTable
+            rows={official.finalStandings.map((f) => ({ short: f.team, rank: f.rank }))}
+            color={comp.color}
+            cols={{ minimal: true }}
+            onTeamClick={onTeamClick}
+          />
+          <p className="text-[11px] text-white/40">플레이오프 미진출 팀(8위 이하)은 도달 단계·조별 성적 기준입니다.</p>
+        </section>
+      )}
+
       {/* Road to MSI(선발전) 대진표 — 실제 결과 */}
       {roadToMsi && official?.bracket && (
         <section>
@@ -1774,6 +1818,11 @@ const COMP_LOGO = {
   worlds: 'https://static.lolesports.com/leagues/1592594612171_WorldsDarkBG.png',
   asiangames: asiangamesLogo,
 };
+// 대회 상세(헤더)에서 탭 기본 로고 대신 쓸 에디션별 로고. 없으면 COMP_LOGO 사용.
+//   AG는 탭에는 기본 아시안게임 로고, 상세에는 해당 에디션(2026 Aichi-Nagoya) 로고를 표기.
+const COMP_DETAIL_LOGO = {
+  asiangames: asiangames2026Logo,
+};
 const tabLogo = (key) => (key === 'gpr' ? LOLESPORTS_LOGO : COMP_LOGO[key]);
 
 // 지역 리그별 세부 대회 (2026 기준)
@@ -1812,9 +1861,11 @@ const SUB_STATUS = {
   'cblol|Split 1': 'finished',
   'cblol|Split 2': 'upcoming',
   'lck|Road to MSI': 'finished',
+  'lck|LCK CUP': 'finished',
 };
 // 세부대회 안에서 단계(스테이지) 선택 — `${comp.key}|${sub}` → 단계 목록
 const STAGE_TABS = {
+  'lck|LCK CUP': ['그룹 스테이지', '플레이-인', '플레이오프', '최종 순위'],
   'lck|LCK': ['정규시즌', '플레이-인', '플레이오프', '최종 순위'],
   'lpl|Split 3': ['럼블 스테이지', '기사의 길', '플레이오프'],
   'lpl|대표 선발전': ['대진', '챔피언십 포인트'],
@@ -1826,10 +1877,36 @@ const STAGE_TABS = {
 };
 // 기본 선택 단계(탭 순서와 별개로 진입 시 표시할 단계) — 없으면 첫 단계
 const STAGE_DEFAULT = {
-  'lck|LCK': '플레이오프',
+  'lck|LCK CUP': '최종 순위',
+  'lck|LCK': '최종 순위',
   'lpl|Split 3': '플레이오프',
   msi: '브래킷 스테이지',
 };
+
+// ── 대회 연도(에디션) 선택 ─────────────────────────────────────────────
+// 현재 시즌 연도. lolSim.json 의 대회명에 이 연도가 들어있다(예: "2026 LCK").
+const CURRENT_YEAR = 2026;
+// 대회별 선택 가능한 연도(내림차순, 첫 항목 = 현재 시즌).
+// 현재 연도 외에는 아직 결과 데이터가 없어 '준비 중'으로 표시된다.
+// 과거 결과는 PAST_EDITIONS 에 등록하면 자동으로 최종 순위가 노출된다.
+// AG는 에디션별 명칭/로고가 달라 단일 연도만 두어 드롭다운을 숨긴다.
+const COMP_EDITIONS = {
+  lck: [2026, 2025],
+  lpl: [2026, 2025],
+  lec: [2026, 2025],
+  lcs: [2026, 2025],
+  lcp: [2026, 2025],
+  cblol: [2026, 2025],
+  fst: [2026, 2025],
+  msi: [2026, 2025],
+  demacia: [2026, 2025],
+  worlds: [2026, 2025],
+};
+const editionYears = (key) => COMP_EDITIONS[key] || [CURRENT_YEAR];
+// 과거 연도 결과: `${key}|${year}` → { finalResult: { champion, runnerUp, standings:[{rank,team,note}] } }
+// 여기에 항목을 추가하면 해당 연도 선택 시 ResultView 로 최종 순위가 자동 표시된다.
+// 예) 'worlds|2025': { finalResult: { champion: 'T1', runnerUp: 'BLG', standings: [{ rank: 1, team: 'T1' }] } },
+const PAST_EDITIONS = {};
 
 const PredictionPage = () => {
   const comps = sim.competitions;
@@ -1899,6 +1976,24 @@ const PredictionPage = () => {
   const setActiveStage = (s) =>
     setSearchParams((p) => { const n = new URLSearchParams(p); n.set('stage', s); return n; }, { replace: true });
 
+  // 대회 연도(에디션) 선택 — 대회명 오른쪽 드롭다운. `?year=` 로 유지(현재 연도는 파라미터 생략)
+  const years = comp ? editionYears(comp.key) : [CURRENT_YEAR];
+  const yearParam = Number(searchParams.get('year'));
+  const activeYear = years.includes(yearParam) ? yearParam : CURRENT_YEAR;
+  const isCurrentYear = activeYear === CURRENT_YEAR;
+  const setActiveYear = (y) =>
+    setSearchParams((p) => {
+      const n = new URLSearchParams(p);
+      if (y === CURRENT_YEAR) n.delete('year'); else n.set('year', String(y));
+      return n;
+    }, { replace: true });
+  // 과거 연도 결과 데이터(있으면 ResultView, 없으면 준비 중 안내)
+  const pastEdition = comp && !isCurrentYear ? PAST_EDITIONS[`${comp.key}|${activeYear}`] : null;
+  // 과거 연도 선택 시 제목의 연도 토큰을 교체(예: "2026 LCK" → "2024 LCK")
+  const displayTitle = isCurrentYear ? title : title.replace(String(CURRENT_YEAR), String(activeYear));
+  // 과거 연도는 이미 종료된 대회이므로 상태 배지를 '종료'로 표기
+  const stDisplay = !isCurrentYear ? statusMeta.finished : st;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1428] via-[#1e2328] to-[#0a1428] p-6 md:p-12 text-white">
       <div className="max-w-[1600px] mx-auto">
@@ -1952,22 +2047,36 @@ const PredictionPage = () => {
               <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: comp.color }}>
-                    <img src={COMP_LOGO[comp.key]} alt={comp.name} width={24} height={24} className="object-contain"
+                    <img src={COMP_DETAIL_LOGO[comp.key] || COMP_LOGO[comp.key]} alt={comp.name} width={24} height={24} className="object-contain"
                       style={{ filter: textOn(comp.color) === '#1e2328' ? 'brightness(0)' : 'brightness(0) invert(1)' }}
                       onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-white">{title}</h2>
+                    <h2 className="text-xl font-black text-white">{displayTitle}</h2>
                     <p className="text-xs text-white/40">{comp.scope === 'intl' ? '국제 대회' : '지역 리그'}</p>
                   </div>
+                  {years.length > 1 && (
+                    <select
+                      value={activeYear}
+                      onChange={(e) => setActiveYear(Number(e.target.value))}
+                      aria-label="대회 연도 선택"
+                      className="ml-1 px-2.5 py-1.5 rounded-lg text-sm font-black bg-white/10 border border-white/20 text-white hover:border-white/40 focus:outline-none focus:border-[#C8963E] cursor-pointer"
+                    >
+                      {years.map((y) => (
+                        <option key={y} value={y} className="bg-[#1e2328] text-white">
+                          {y}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
-                <span className="px-3 py-1 rounded-lg text-xs font-black" style={{ color: st.color, backgroundColor: st.bg }}>
-                  {st.label}
+                <span className="px-3 py-1 rounded-lg text-xs font-black" style={{ color: stDisplay.color, backgroundColor: stDisplay.bg }}>
+                  {stDisplay.label}
                 </span>
               </div>
 
-              {/* 세부 대회 선택 */}
-              {subTabs && (
+              {/* 세부 대회 선택 (현재 시즌에만; 과거 연도는 최종 결과만 표시) */}
+              {isCurrentYear && subTabs && (
                 <div className="flex flex-wrap gap-2 mb-6">
                   {subTabs.map((s) => {
                     const on = s === activeSub;
@@ -1987,7 +2096,7 @@ const PredictionPage = () => {
               )}
 
               {/* 단계 선택 (LCK→LCK 전용) */}
-              {showStages && (
+              {isCurrentYear && showStages && (
                 <div className="inline-flex bg-white/5 rounded-xl p-1 mb-6 border border-white/10">
                   {stageList.map((s) => {
                     const on = s === activeStage;
@@ -2006,7 +2115,17 @@ const PredictionPage = () => {
                 </div>
               )}
 
-              {isContentTbd(comp.key, activeSub) ? (
+              {!isCurrentYear ? (
+                pastEdition ? (
+                  <ResultView comp={{ ...comp, ...pastEdition }} />
+                ) : (
+                  <div className="py-16 text-center border-2 border-dashed border-white/10 rounded-3xl">
+                    <Hourglass size={28} className="mx-auto text-white/30 mb-3" />
+                    <p className="text-white/50 font-bold mb-1">{activeYear} 결과 준비 중</p>
+                    <p className="text-white/30 text-sm">이전 연도 대회 결과를 곧 게재합니다.</p>
+                  </div>
+                )
+              ) : isContentTbd(comp.key, activeSub) ? (
                 <div className="py-20 text-center border-2 border-dashed border-white/10 rounded-3xl">
                   <Hourglass size={32} className="mx-auto text-white/30 mb-4" />
                   <p className="text-white/60 font-black text-lg mb-2">추후 제공 예정</p>
@@ -2020,10 +2139,11 @@ const PredictionPage = () => {
                 </div>
               ) : !comp.ready ? (
                 <NotReady comp={comp} />
-              ) : comp.status === 'finished' && comp.key !== 'msi' ? (
+              ) : comp.status === 'finished' && !SUBTABS[comp.key] && !STAGE_TABS[comp.key] ? (
                 <ResultView comp={comp} />
               ) : (
-                // MSI는 종료 상태여도 브래킷·참가팀·시뮬 결과를 그대로 표시.
+                // 종료 상태여도 세부탭·스테이지(브래킷·참가팀·시뮬 결과)가 있는 대회
+                //   (리그·MSI·Worlds 등)는 그대로 표시. finalResult만 있는 대회(FST)만 ResultView.
                 <SimulationView comp={comp} sub={activeSub} stage={activeStage} onTeamClick={handleTeamClick} />
               )}
             </>

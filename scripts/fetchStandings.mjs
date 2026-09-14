@@ -170,6 +170,54 @@ function apply4TeamDELayout(bracket) {
   };
 }
 
+// 6팀 더블 엘리미네이션(LCK 플레이오프형)을 LCK PO 대진표 모양으로 재배치.
+//   LCK PO 기준 그리드: totalRows=10 · UB 3라운드(상단) / LB 3라운드+로어파이널(하단) / 그랜드파이널(우측 중앙).
+//   col0: UB R1 M1(sr0)·UB R1 M2(sr4)·LB R1(sr8)
+//   col1: UB R2 M1(sr0)·UB R2 M2(sr4)·LB R2(sr8)
+//   col2: UB R3(sr2)·LB R3(sr8)   col3: Lower Finals(sr8)   col4: Grand Finals(sr5)
+//   LCK CUP PO(상위권/하위권 대진)의 매치 제목을 UB/LB 라운드로 매핑해 같은 모양을 만든다.
+//   제목이 이 스킴과 맞지 않으면 원본(흐름 배치)을 그대로 반환한다.
+function lckPoStyleLayout(bracket) {
+  if (!bracket?.rounds?.length) return bracket;
+  // 제목(+동일 제목 내 순서 k) → [목표 col, startRow]
+  const targetFor = (title, k) => {
+    const t = title || '';
+    if (/상위권.*8강|UB\s*R1/i.test(t)) return [0, k === 0 ? 0 : 4];
+    if (/상위권.*4강|UB\s*R2/i.test(t)) return [1, k === 0 ? 0 : 4];
+    if (/상위권.*결승|UB\s*R3|결승\s*진출전/i.test(t)) return [2, 2];
+    if (/하위권.*(1라운드|1R)|LB\s*R1/i.test(t)) return [0, 8];
+    if (/하위권.*8강|LB\s*R2/i.test(t)) return [1, 8];
+    if (/하위권.*4강|LB\s*R3/i.test(t)) return [2, 8];
+    if (/하위권.*결승|Lower\s*Final/i.test(t)) return [3, 8];
+    if (/^결승$|Grand\s*Final|그랜드/i.test(t)) return [4, 5];
+    return null;
+  };
+  const cols = [[], [], [], [], []];
+  const seen = {};
+  const origPos = {}; // `${ci}-${mi}` → id
+  let ok = true;
+  bracket.rounds.forEach((r, ci) => r.matches.forEach((m, mi) => {
+    origPos[`${ci}-${mi}`] = m.id;
+    const k = seen[m.title] || 0; seen[m.title] = k + 1;
+    const tgt = targetFor(m.title, k);
+    if (!tgt) { ok = false; return; }
+    cols[tgt[0]].push({ m, startRow: tgt[1] });
+  }));
+  if (!ok || cols.some((c, i) => (i < 3 ? c.length === 0 : false))) return bracket; // 구조 불일치 → 원본 유지
+  const idPos = {};
+  const rounds2 = cols.filter((c) => c.length).map((arr, ci) => ({
+    title: '',
+    matches: arr.map((x, mi) => { idPos[x.m.id] = [ci, mi]; return { ...x.m, startRow: x.startRow }; }),
+  }));
+  const connectors = [];
+  for (const c of bracket.connectors || []) {
+    const [sci, smi, mid, dci, dmi, slot] = c;
+    const sp = idPos[origPos[`${sci}-${smi}`]], dp = idPos[origPos[`${dci}-${dmi}`]];
+    if (sp && dp) connectors.push([sp[0], sp[1], mid, dp[0], dp[1], slot]);
+  }
+  return { totalRows: 10, rounds: rounds2, connectors };
+}
+
 // 결승(마지막 매치)이 아닌 매치의 승자 msi 플래그를 win으로 강등.
 //   bracketFromColumns 는 승자가 이후 매치에서 참조되지 않으면 msi(진출/우승)로 표시하지만,
 //   자동 채움 후 참조 매칭이 안 될 수 있어 오탐이 발생. 최종 결승 승자만 우승(msi)로 남긴다.
@@ -412,6 +460,91 @@ async function buildLeague(lg) {
   return { tour, rows, mismatches, stage, road, roadMsiTeam };
 }
 
+// 2026 LCK CUP (= lck_split_1_2026) — 별도 토너먼트(그룹 스테이지 2개조 + 플레이-인 + 플레이오프).
+//   이미 종료된 대회. 그룹 순위표 + 플레이-인/플레이오프 대진표 + 최종순위를 구성해 반환한다.
+async function buildLckCup(leagueId) {
+  const tjson = await api('getTournamentsForLeague', { leagueId });
+  const tours = tjson.data.leagues[0].tournaments || [];
+  const cup = tours.find((t) => /split_1_2026/.test(t.slug));
+  if (!cup) return null;
+  const st = (await api('getStandingsV3', { tournamentId: cup.id })).data?.standings?.[0];
+  if (!st) return null;
+  // 그룹 스테이지 순위 (알파조/오메가조) — API 공식 ordinal 사용(타이브레이크 반영)
+  const gs = st.stages.find((s) => s.slug === 'group_stage');
+  const rows = [];
+  for (const sec of gs?.sections || [])
+    for (const r of sec.rankings || [])
+      for (const t of r.teams)
+        rows.push({ rank: r.ordinal, team: t.code, w: t.record.wins, l: t.record.losses, group: sec.name });
+  // 플레이-인 / 플레이오프 대진표
+  const colsOf = (slug) => st.stages.find((s) => s.slug === slug)?.sections?.[0]?.columns;
+  const piCols = colsOf('play_ins'), poCols = colsOf('playoffs');
+  const playin = piCols?.length ? bracketFromColumns(piCols) : null;
+  // 플레이오프(6팀 더블 엘리)는 LCK PO 대진표 모양(그리드)으로 재배치
+  const playoffs = poCols?.length ? lckPoStyleLayout(bracketFromColumns(poCols)) : null;
+  const finalStandings = cupFinalStandings(rows, playin, playoffs);
+  const champ = finalStandings[0]?.team;
+  return {
+    stage: `2026 LCK CUP · 종료${champ ? ` · 우승 ${champ}` : ''}`,
+    format: '10팀 · 2개조 그룹 스테이지 → 플레이-인 → 플레이오프',
+    rows,
+    playin,
+    playoffs,
+    finalStandings,
+  };
+}
+
+// LCK CUP 최종순위: 플레이오프 도달 단계(패배 라운드)로 상위 6팀, 이어서 플레이-인,
+//   마지막으로 그룹 성적 순. 플레이오프 결승 승자가 우승.
+function cupFinalStandings(rows, playin, playoffs) {
+  const wl = (m) => {
+    const a = m.a, b = m.b;
+    if (a?.win || a?.msi) return { w: a.short, l: b?.short };
+    if (b?.win || b?.msi) return { w: b.short, l: a?.short };
+    if (a && b && a.score != null && b.score != null && a.score !== b.score) {
+      const A = a.score > b.score;
+      return { w: A ? a.short : b.short, l: A ? b.short : a.short };
+    }
+    return {};
+  };
+  // 각 팀이 마지막으로 등장한(=가장 깊은) 라운드와 그 경기 승패
+  const lastOf = (bracket) => {
+    const info = {};
+    bracket?.rounds?.forEach((r, ri) =>
+      r.matches.forEach((m) => {
+        for (const slot of [m.a, m.b]) {
+          if (slot?.short && (!info[slot.short] || info[slot.short].ri <= ri)) info[slot.short] = { ri, won: null };
+        }
+        const { w, l } = wl(m);
+        if (w && info[w]?.ri === ri) info[w].won = true;
+        if (l && info[l]?.ri === ri) info[l].won = false;
+      })
+    );
+    return info;
+  };
+  const po = lastOf(playoffs), pi = lastOf(playin);
+  const rec = Object.fromEntries(rows.map((r) => [r.team, r]));
+  const gd = (t) => (rec[t] ? rec[t].w - rec[t].l : -99);
+  // tier: 3=플레이오프, 2=플레이-인, 1=그룹만. 정렬 키 [tier, depth, won]
+  const key = (t) => {
+    if (po[t]) return [3, po[t].ri, po[t].won ? 1 : 0];
+    if (pi[t]) return [2, pi[t].ri, pi[t].won ? 1 : 0];
+    return [1, 0, 0];
+  };
+  const order = rows
+    .map((r) => r.team)
+    .sort((x, y) => {
+      const kx = key(x), ky = key(y);
+      for (let i = 0; i < 3; i++) if (kx[i] !== ky[i]) return ky[i] - kx[i];
+      return gd(y) - gd(x) || rec[x].rank - rec[y].rank;
+    });
+  return order.map((team, i) => ({
+    rank: i + 1,
+    team,
+    note: i === 0 ? '우승' : i === 1 ? '준우승' : i === 2 ? '3위' : '',
+  }));
+}
+
 // MSI 진출팀 갱신: getStandingsV3로 각 스테이지의 확정 팀을 가져와
 // lolStandings.json 의 msi[stage].qualifiers 를 업데이트한다.
 // 미확정(TBD) 슬롯은 기존 label 표기를 유지한다.
@@ -516,6 +649,18 @@ for (const lg of LEAGUES) {
   } catch (e) {
     console.warn(`${lg.label} 실패 — 기존 값 유지: ${e.message}`);
   }
+}
+
+// 2026 LCK CUP (Split 1) — LCK 세부탭 'LCK CUP'에 그룹/대진/최종순위 저장
+try {
+  const cup = await buildLckCup('98767991310872058');
+  if (cup) {
+    data.standings.lck = data.standings.lck || {};
+    data.standings.lck['LCK CUP'] = cup;
+    console.log(`LCK CUP: ${cup.rows.length}팀 · 우승 ${cup.finalStandings[0]?.team} · 대진 PI ${cup.playin?.rounds?.length || 0}R / PO ${cup.playoffs?.rounds?.length || 0}R`);
+  }
+} catch (e) {
+  console.warn(`LCK CUP 실패 — 기존 값 유지: ${e.message}`);
 }
 
 // MSI 진출팀 갱신 — 두 단계로 시도:
@@ -1552,29 +1697,54 @@ try {
         return {};
       };
       const s3Rank = [null, null, null, null, null, null, null, null]; // 1~8위
-      // po.rounds[5]=결승, [4]=하위결승, [3]=하위4강, ...
-      const gfM = po?.rounds?.[5]?.matches?.[0];
+      // LPL Split 3 플레이오프 5라운드 구조 (MATCH 1~12):
+      //   r4m0=MATCH 12(결승) / r3m0=MATCH 11 / r2m1=MATCH 10 / r1m2=MATCH 7·r1m3=MATCH 8 / r0m2=MATCH 5·r0m3=MATCH 6
+      const gfM = po?.rounds?.[4]?.matches?.[0];
       const gf = winnerOf(gfM);
       if (gf.w) {
-        s3Rank[0] = gf.w; s3Rank[1] = gf.l;
-        s3Rank[2] = winnerOf(po?.rounds?.[4]?.matches?.[0]).l;      // 하위 결승 패자 = 3위
-        s3Rank[3] = winnerOf(po?.rounds?.[3]?.matches?.[0]).l;      // 하위 4강 패자 = 4위
-        s3Rank[4] = winnerOf(po?.rounds?.[2]?.matches?.[1]).l;      // 하위 8강 M1 패자
-        s3Rank[5] = winnerOf(po?.rounds?.[2]?.matches?.[2]).l;      // 하위 8강 M2 패자
-        s3Rank[6] = winnerOf(po?.rounds?.[1]?.matches?.[2]).l;      // 하위 1R M1 패자
-        s3Rank[7] = winnerOf(po?.rounds?.[1]?.matches?.[3]).l;      // 하위 1R M2 패자
+        s3Rank[0] = gf.w; s3Rank[1] = gf.l;                          // 우승·준우승
+        s3Rank[2] = winnerOf(po?.rounds?.[3]?.matches?.[0]).l;      // MATCH 11 패자 = 3위
+        s3Rank[3] = winnerOf(po?.rounds?.[2]?.matches?.[1]).l;      // MATCH 10 패자 = 4위
+        s3Rank[4] = winnerOf(po?.rounds?.[1]?.matches?.[2]).l;      // MATCH 7 패자 = 5위
+        s3Rank[5] = winnerOf(po?.rounds?.[1]?.matches?.[3]).l;      // MATCH 8 패자 = 6위
+        s3Rank[6] = winnerOf(po?.rounds?.[0]?.matches?.[2]).l;      // MATCH 5 패자 = 7위
+        s3Rank[7] = winnerOf(po?.rounds?.[0]?.matches?.[3]).l;      // MATCH 6 패자 = 8위
       }
       s3Rank.forEach((t, i) => { if (t && S3_PT[i] != null) bump(t, 'split3', S3_PT[i]); });
       const points = Object.values(pointsMap).map((p) => ({
         team: p.team, split1: p.split1 || 0, split2: p.split2 || 0, split3: p.split3 || 0,
         total: (p.split1 || 0) + (p.split2 || 0) + (p.split3 || 0),
       })).sort((a, b) => b.total - a.total);
+      // 대표 선발전 대진: Split 3 우승(LPL #1)·챔피언십 포인트 1위(LPL #2)를 제외한 총점 상위 4팀.
+      //   시드 1~4. 1R M1 = 시드1 vs 시드2(승자 LPL #3), 1R M2 = 시드3 vs 시드4(패자 LPL #6),
+      //   2R = 1R M1 패자 vs 1R M2 승자(승자 LPL #4, 패자 LPL #5). 경기 결과가 있으면 반영.
+      const lplChamp = gf.w; // Split 3 우승 = LPL #1
+      const seed4 = points.filter((p) => p.team !== lplChamp).slice(1, 5).map((p) => p.team); // 포인트 1위(LPL #2) 제외 다음 4팀
+      const qualifier = byKind.qualifier;
+      if (qualifier?.rounds?.length >= 2 && seed4.length === 4) {
+        const [s1, s2, s3, s4] = seed4;
+        const m1 = qualifier.rounds[0].matches[0];
+        const m2 = qualifier.rounds[0].matches[1];
+        const r2 = qualifier.rounds[1].matches[0];
+        const outcome = (m) => winnerOf(m);
+        const setSlot = (slot, short, seed) => { if (slot) { slot.seed = seed; if (short && !slot.short) slot.short = short; } };
+        // 1R 팀 시드 배치 (경기 결과의 short가 이미 있으면 유지)
+        if (m1) { setSlot(m1.a, s1, `챔프포인트 2위`); setSlot(m1.b, s2, `챔프포인트 3위`); m1.title = '1라운드 M1'; }
+        if (m2) { setSlot(m2.a, s3, `챔프포인트 4위`); setSlot(m2.b, s4, `챔프포인트 5위`); m2.title = '1라운드 M2'; }
+        // 2R 슬롯: 1R M1 패자 vs 1R M2 승자
+        if (r2) {
+          r2.title = '2라운드';
+          const m1o = outcome(m1), m2o = outcome(m2);
+          r2.a = { seed: '1R M1 패자', ...(m1o.l ? { short: m1o.l } : {}) };
+          r2.b = { seed: '1R M2 승자', ...(m2o.w ? { short: m2o.w } : {}) };
+        }
+      }
       data.standings.lpl['대표 선발전'] = {
         stage: '2026 LPL 대표 선발전',
         rows: [],
-        qualifier: byKind.qualifier,
+        qualifier,
         points,
-        pointsNote: 'LPL 1시드=Split 3 우승 / 2시드=(1시드 제외) 포인트 합산 1등 / 대표 선발전 진출=합산 2~5등',
+        pointsNote: 'LPL 1시드=Split 3 우승 / 2시드=(1시드 제외) 포인트 합산 1등 / 대표 선발전=우승·포인트1위 제외 총점 상위 4팀. 1R M1 승자=3시드, 2R 승자=4시드, 2R 패자=5시드(DCGI), 1R M2 패자=6시드(DCGI)',
       };
     }
     const cnt = (b) => (b ? b.rounds.reduce((n, r) => n + r.matches.length, 0) : 0);
