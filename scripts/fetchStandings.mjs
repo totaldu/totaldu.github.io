@@ -296,13 +296,32 @@ function lecPoLayout(bracket) {
     title: '',
     matches: arr.map((x, mi) => { idPos[x.m.id] = [ci, mi]; return { ...x.m, startRow: x.startRow }; }),
   }));
-  const connectors = [];
+  // 원본(origin 기반) 연결선을 새 좌표로 재매핑 — 슬롯 파악용
+  const myConn = [];
   for (const c of bracket.connectors || []) {
     const [sci, smi, mid, dci, dmi, slot] = c;
     const sp = idPos[origPos[`${sci}-${smi}`]], dp = idPos[origPos[`${dci}-${dmi}`]];
-    if (sp && dp) connectors.push([sp[0], sp[1], mid, dp[0], dp[1], slot]);
+    if (sp && dp) myConn.push([sp[0], sp[1], mid, dp[0], dp[1], slot]);
   }
-  return fixDropElim({ totalRows: 8, rounds: rounds2, connectors });
+  // LEC 표준 연결선 템플릿(같은 라운드=같은 컬럼) — 승자 진출선 + 상위결승 패자→하위결승 강등선.
+  //   패자 강등선(상위1R→하위1R)은 LEC Spring과 동일하게 생략한다.
+  const TMPL = [
+    [0, 0, 'mid', 1, 0, 'a'], [0, 1, 'mid', 1, 0, 'b'], [0, 2, 'mid', 1, 1, 'a'], [0, 3, 'mid', 1, 1, 'b'],
+    [1, 1, 'mid', 2, 0, 'a'], [1, 0, 'mid', 2, 0, 'b'], [1, 0, 'mid', 3, 0, 'a'], [2, 0, 'mid', 3, 0, 'b'],
+  ];
+  const collect = (arr) => { const out = {}; for (const [sci, smi, , dci, dmi, slot] of arr) { const k = `${dci}-${dmi}`; (out[k] = out[k] || {})[`${sci}-${smi}`] = slot; } return out; };
+  const desired = collect(TMPL), current = collect(myConn);
+  for (const k of Object.keys(desired)) {
+    const des = desired[k], cur = current[k] || {};
+    const shared = Object.keys(des).filter((s) => cur[s] != null);
+    if (shared.length && shared.every((s) => cur[s] !== des[s])) {
+      const [ci, mi] = k.split('-').map(Number);
+      const m = rounds2[ci]?.matches[mi];
+      if (m) { const t = m.a; m.a = m.b; m.b = t; }
+    }
+  }
+  const valid = TMPL.filter(([sci, smi, , dci, dmi]) => rounds2[sci]?.matches[smi] && rounds2[dci]?.matches[dmi]);
+  return fixDropElim({ totalRows: 8, rounds: rounds2, connectors: valid });
 }
 
 // LPL 기사의 길(Knights Rivals) — 1·2라운드를 같은 컬럼(1R 상단, 2R 하단), 3라운드를 다음 컬럼에.
@@ -390,6 +409,47 @@ function msi8DELayout(bracket) {
   }
   fixDropElim({ rounds: sections.flatMap((s) => s.rounds) });
   return { sections, crossConnectors };
+}
+
+// FST 그룹 스테이지(2개 그룹 · 각 4팀 더블 엘리) — 하위권 4강을 1라운드와 같은 컬럼(아래)에 배치.
+//   각 그룹: col(g*3)= 1라운드 2 + 하위권 4강 / col(g*3+1)= 상위권 결승 / col(g*3+2)= 하위권 결승.
+function fstGroupLayout(bracket) {
+  if (!bracket?.rounds?.length) return bracket;
+  const flat = [];
+  bracket.rounds.forEach((r, ci) => r.matches.forEach((m, mi) => flat.push({ m, key: `${ci}-${mi}` })));
+  const origPos = {}; flat.forEach((x) => { origPos[x.key] = x.m.id; });
+  // 하위권 결승에서 그룹 종료 → 그룹 분할
+  const groups = []; let cur = [];
+  for (const x of flat) { cur.push(x); if (/하위권.*결승/.test(x.m.title || '')) { groups.push(cur); cur = []; } }
+  if (cur.length) groups.push(cur);
+  const colMatches = {};
+  let ok = true;
+  groups.forEach((grp, g) => {
+    const base = g * 2; const gseen = {};
+    for (const { m } of grp) {
+      const t = m.title || ''; let col, sr;
+      if (/1라운드/.test(t)) { const k = gseen.r1 || 0; gseen.r1 = k + 1; col = base; sr = k === 0 ? 0 : 2; }
+      else if (/하위권.*4강/.test(t)) { col = base; sr = 4; }
+      else if (/상위권.*결승/.test(t)) { col = base + 1; sr = 1; }   // 상위 결승
+      else if (/하위권.*결승/.test(t)) { col = base + 1; sr = 4; }   // 하위 결승 (상위 결승과 같은 컬럼)
+      else { ok = false; continue; }
+      (colMatches[col] = colMatches[col] || []).push({ m, startRow: sr });
+    }
+  });
+  if (!ok) return bracket;
+  const maxCol = Math.max(...Object.keys(colMatches).map(Number));
+  const idPos = {}; const rounds2 = [];
+  for (let ci = 0; ci <= maxCol; ci++) {
+    const arr = (colMatches[ci] || []).sort((a, b) => a.startRow - b.startRow);
+    rounds2.push({ title: '', matches: arr.map((x, mi) => { idPos[x.m.id] = [ci, mi]; return { ...x.m, startRow: x.startRow }; }) });
+  }
+  const connectors = [];
+  for (const c of bracket.connectors || []) {
+    const [sci, smi, mid, dci, dmi, slot] = c;
+    const sp = idPos[origPos[`${sci}-${smi}`]], dp = idPos[origPos[`${dci}-${dmi}`]];
+    if (sp && dp) connectors.push([sp[0], sp[1], mid, dp[0], dp[1], slot]);
+  }
+  return fixDropElim({ totalRows: 6, rounds: rounds2, connectors });
 }
 
 // 더블 엘리미네이션 탈락(elim) 보정 — 상위 대진 패배팀은 하위 대진으로 강등되므로 탈락이 아니다.
@@ -790,30 +850,49 @@ function splitFinalStandings(rows, bracketsOrdered) {
     }
     return {};
   };
+  // 브래킷의 모든 매치(rounds 또는 sections 구조 모두 지원)
+  const allMatches = (br) => (Array.isArray(br?.sections) ? br.sections.flatMap((s) => s.rounds || []) : (br?.rounds || [])).flatMap((r) => r.matches || []);
+  // 각 팀의 '최종 진출 깊이(depth)'와 그 매치 승패를 산출. sections(더블 엘리 등)는
+  //   같은 섹션 내 라운드 순서 + crossConnectors 방향으로 최장경로 depth를 계산해 탈락 순서를 정한다.
   const lastOf = (bracket) => {
+    const nodes = [];
+    const push = (si, ri, mi, m) => { if (m && (m.a || m.b)) nodes.push({ id: `${si}-${ri}-${mi}`, si, ri, m }); };
+    if (Array.isArray(bracket?.sections)) bracket.sections.forEach((s, si) => (s.rounds || []).forEach((r, ri) => r.matches.forEach((m, mi) => push(si, ri, mi, m))));
+    else (bracket?.rounds || []).forEach((r, ri) => r.matches.forEach((m, mi) => push(0, ri, mi, m)));
+    const ids = new Set(nodes.map((n) => n.id));
+    const preds = {}; nodes.forEach((n) => (preds[n.id] = []));
+    const addEdge = (f, t) => { if (ids.has(f) && ids.has(t)) preds[t].push(f); };
+    // 같은 섹션 내: 라운드 ri의 모든 매치 → 다음(존재하는) 라운드의 모든 매치
+    const bySec = {}; nodes.forEach((n) => { (bySec[n.si] = bySec[n.si] || {}); (bySec[n.si][n.ri] = bySec[n.si][n.ri] || []).push(n.id); });
+    for (const si of Object.keys(bySec)) { const rs = Object.keys(bySec[si]).map(Number).sort((a, b) => a - b); for (let i = 0; i < rs.length - 1; i++) for (const f of bySec[si][rs[i]]) for (const t of bySec[si][rs[i + 1]]) addEdge(f, t); }
+    // 섹션 간: crossConnectors 방향
+    for (const c of bracket?.crossConnectors || []) addEdge(`${c[0]}-${c[1]}-${c[2]}`, `${c[4]}-${c[5]}-${c[6]}`);
+    // 최장경로 depth (DAG · 메모 DFS)
+    const depth = {}; const calc = (id) => { if (depth[id] != null) return depth[id]; depth[id] = 0; let mx = 0; for (const p of preds[id]) mx = Math.max(mx, calc(p) + 1); return (depth[id] = mx); };
+    nodes.forEach((n) => calc(n.id));
     const info = {};
-    bracket?.rounds?.forEach((r, ri) => r.matches.forEach((m) => {
-      for (const slot of [m.a, m.b]) if (slot?.short && (!info[slot.short] || info[slot.short].ri <= ri)) info[slot.short] = { ri, won: null };
-      const { w, l } = wl(m);
-      if (w && info[w]?.ri === ri) info[w].won = true;
-      if (l && info[l]?.ri === ri) info[l].won = false;
-    }));
-    return info;
+    for (const n of nodes) {
+      const dep = depth[n.id]; const { w, l } = wl(n.m);
+      for (const slot of [n.m.a, n.m.b]) { const t = slot?.short; if (!t) continue; if (!info[t] || info[t].depth < dep) info[t] = { depth: dep, won: t === w ? true : t === l ? false : null }; }
+    }
+    const maxDepth = nodes.reduce((mx, n) => Math.max(mx, depth[n.id]), -1);
+    return { info, finalMatch: nodes.find((n) => depth[n.id] === maxDepth)?.m };
   };
-  const infos = (bracketsOrdered || []).map(lastOf);
+  const results = (bracketsOrdered || []).map(lastOf);
+  const infos = results.map((r) => r.info);
   // 정규 순위가 없는 포맷(스위스 등)은 대진 참가팀으로 팀 목록을 만든다.
   let teamRows = rows;
   if (!teamRows.length) {
     const seen = new Set();
     teamRows = [];
-    for (const b of bracketsOrdered || []) for (const r of b?.rounds || []) for (const m of r.matches) for (const s of [m.a, m.b]) {
+    for (const b of bracketsOrdered || []) for (const m of allMatches(b)) for (const s of [m.a, m.b]) {
       if (s?.short && !seen.has(s.short)) { seen.add(s.short); teamRows.push({ rank: teamRows.length + 1, team: s.short, w: 0, l: 0 }); }
     }
   }
   const rec = Object.fromEntries(teamRows.map((r) => [r.team, r]));
   const gd = (t) => (rec[t] ? (rec[t].w || 0) - (rec[t].l || 0) : -99);
   const key = (t) => {
-    for (let i = infos.length - 1; i >= 0; i--) if (infos[i][t]) return [i + 2, infos[i][t].ri, infos[i][t].won ? 1 : 0];
+    for (let i = infos.length - 1; i >= 0; i--) if (infos[i][t]) return [i + 2, infos[i][t].depth, infos[i][t].won ? 1 : 0];
     return [1, 0, 0];
   };
   const order = teamRows.map((r) => r.team).sort((x, y) => {
@@ -822,14 +901,13 @@ function splitFinalStandings(rows, bracketsOrdered) {
     return gd(y) - gd(x) || (rec[x].rank - rec[y].rank);
   });
   const full = order.map((team, i) => ({ rank: i + 1, team, note: i === 0 ? '우승' : i === 1 ? '준우승' : i === 2 ? '3위' : '' }));
-  // 대회 종료 여부: 마지막 대진의 최종 경기 승자가 결정됐으면 종료.
-  const lastBr = (bracketsOrdered || []).at(-1);
-  const finalMatch = lastBr?.rounds?.at(-1)?.matches?.at(-1);
+  // 대회 종료 여부: 마지막 대진의 최종(최장경로) 경기 승자가 결정됐으면 종료.
+  const finalMatch = results.at(-1)?.finalMatch;
   const done = !!(finalMatch && wl(finalMatch).w);
   if (done) return full;
   // 진행 중: 아직 탈락하지 않은(=최종순위 미확정) 대진 생존팀은 제외하고, 확정된 팀만 반환.
   const eliminated = new Set(), inBracket = new Set();
-  for (const b of bracketsOrdered || []) for (const r of b?.rounds || []) for (const m of r.matches) for (const s of [m.a, m.b]) {
+  for (const b of bracketsOrdered || []) for (const m of allMatches(b)) for (const s of [m.a, m.b]) {
     if (s?.short) { inBracket.add(s.short); if (s.elim) eliminated.add(s.short); }
   }
   const aliveSet = new Set([...inBracket].filter((t) => !eliminated.has(t)));
@@ -1039,6 +1117,18 @@ try {
       rank: t.fst, team: t.short,
       note: t.fst === 1 ? '우승' : t.fst === 2 ? '준우승' : t.fst === 3 ? '3위' : '',
     }));
+    // 그룹 스테이지: 하위권 4강을 1라운드 컬럼으로 / 플레이오프: '녹아웃 스테이지'로 표기 + 4강 시드 라벨
+    const FST_SEED = { GEN: 'B조 1위', G2: 'A조 2위', BLG: 'A조 1위', JDG: 'B조 2위' };
+    for (const br of fstSplit.brackets) {
+      if (br.slug === 'group_stage') br.bracket = fstGroupLayout(br.bracket);
+      if (br.slug === 'playoffs') {
+        br.label = '녹아웃 스테이지';
+        for (const r of br.bracket.rounds || []) for (const m of r.matches || []) {
+          if (!/4강/.test(m.title || '')) continue;
+          for (const s of [m.a, m.b]) if (s?.short && FST_SEED[s.short]) s.seed = FST_SEED[s.short];
+        }
+      }
+    }
     data.standings.fst = { name: fstSplit.name || '2026 First Stand', brackets: fstSplit.brackets, finalStandings };
     console.log(`FST: 대진 ${fstSplit.brackets.length}개 · 우승 ${finalStandings[0]?.team}`);
   }
@@ -2250,18 +2340,106 @@ try {
 } catch (e) {
   console.warn(`Asian Games API 갱신 실패 — 기존 값 유지: ${e.message}`);
 }
-// AG 참가팀 기본값 — 리포지토리 데이터가 아직 없을 때 8개국 참가팀을 표시(조 배정·Elo는 추후 제공).
+// AG 참가팀 기본값 — 리포지토리 데이터가 아직 없을 때 8개국 참가팀 + 임시 대진표를 표시.
+//   (Worlds/DCGI처럼 실제 대진이 들어오기 전이라도 브래킷 구조를 TBD 슬롯으로 노출)
 {
   const ag = data.standings.asiangames || (data.standings.asiangames = {});
-  if (!Array.isArray(ag.teams) || ag.teams.length === 0) {
+  if (!ag.groups) { // API가 실제 조·대진 데이터를 제공하지 않은 경우 → 임시 대진표 생성
+    // 조 배정은 잠정(placeholder) — 실제 배정은 리포지토리 데이터로 대체된다.
     ag.teams = [
-      { code: 'KOR', name: '대한민국' }, { code: 'TPE', name: '대만' },
-      { code: 'VIE', name: '베트남' }, { code: 'HKG', name: '홍콩' },
-      { code: 'SAU', name: '사우디아라비아' }, { code: 'IND', name: '인도' },
-      { code: 'UAE', name: '아랍에미리트' }, { code: 'MYS', name: '말레이시아' },
+      { code: 'KOR', name: '대한민국', group: 'A' }, { code: 'VIE', name: '베트남', group: 'A' },
+      { code: 'SAU', name: '사우디아라비아', group: 'A' }, { code: 'MYS', name: '말레이시아', group: 'A' },
+      { code: 'TPE', name: '대만', group: 'B' }, { code: 'HKG', name: '홍콩', group: 'B' },
+      { code: 'IND', name: '인도', group: 'B' }, { code: 'UAE', name: '아랍에미리트', group: 'B' },
     ];
-    console.log('Asian Games: 기본 참가팀 8개국 표시(조 배정·Elo 미정)');
+    ag.placeholder = true; // 임시 대진표임을 표시
+    // 조별 싱글 라운드로빈(4팀 → 6경기, Bo3). 팀 코드는 잠정 배정이나 결과는 미정(TBD 슬롯).
+    const rrPairs = [[0, 1], [2, 3], [0, 2], [1, 3], [0, 3], [1, 2]];
+    const groupBlock = (gk) => {
+      const codes = ag.teams.filter((t) => t.group === gk).map((t) => t.code);
+      const matches = rrPairs.map(([i, j], n) => ({ id: `${gk}${n + 1}`, a: codes[i], b: codes[j], format: 'Bo3' }));
+      return { matches };
+    };
+    ag.groups = { A: groupBlock('A'), B: groupBlock('B') };
+    // 녹아웃: 4강(Bo3) · 결승/동메달(Bo5) — 팀 미정(각 조 순위 확정 후 채워짐).
+    ag.knockout = {
+      matches: [
+        { id: 'SF1', a: null, b: null, format: 'Bo3', prev: { a: 'A:1', b: 'B:2' } },
+        { id: 'SF2', a: null, b: null, format: 'Bo3', prev: { a: 'B:1', b: 'A:2' } },
+        { id: 'FINAL', a: null, b: null, format: 'Bo5', prev: { a: 'SF1:W', b: 'SF2:W' } },
+        { id: 'BRONZE', a: null, b: null, format: 'Bo5', prev: { a: 'SF1:L', b: 'SF2:L' } },
+      ],
+    };
+    console.log('Asian Games: 기본 참가팀 8개국 + 임시 대진표(조별 라운드로빈·녹아웃) 표시(조 배정·Elo 잠정)');
   }
+}
+
+// 2026 LoL KeSPA CUP — lolesports API 미제공 종료 대회(수기 관리).
+//   예선(A·B조 라운드로빈) → 결선 스테이지 1(사다리) → 결선 스테이지 2. MsiBracket 그리드/플로우로 표기.
+{
+  // 슬롯 헬퍼: flag = 'msi'(진출/우승·금색) | 'win'(라운드 승리·파랑) | 'elim'(탈락·빨강)
+  const S = (short, seed, score, flag) => {
+    const s = { short }; if (seed) s.seed = seed; if (score != null) s.score = score;
+    if (flag) s[flag] = true; return s;
+  };
+  // 결선 스테이지 1 — 사다리(라운드당 매치 4→3→2→1). 각 라운드 최상위 매치 승자는 결선 스테이지 2로 이탈(연결선 없음).
+  const fs1 = {
+    totalRows: 7,
+    rounds: [
+      { matches: [
+        { title: 'R1 Q', time: '8/3', startRow: 0, a: S('NS', 'A조 1위', 2, 'msi'), b: S('T1', 'B조 1위', 1) },
+        { title: 'R1 M2', time: '8/3', startRow: 2, a: S('GEN', 'A조 2위', 0), b: S('HLE', 'B조 2위', 2, 'win') },
+        { title: 'R1 M3', time: '7/28', startRow: 4, a: S('DNS', 'A조 3위', 2, 'win'), b: S('BRO', 'B조 3위', 1) },
+        { title: 'R1 E', time: '7/28', startRow: 6, a: S('KRX', 'A조 4위', 2, 'win'), b: S('KT', 'B조 4위', 0, 'elim') },
+      ] },
+      { matches: [
+        { title: 'R2 Q', time: '8/4', startRow: 1, a: S('T1', 'R1 Q 패자', 2, 'msi'), b: S('HLE', 'R1 M2 승자', 1) },
+        { title: 'R2 M', time: '8/4', startRow: 3, a: S('GEN', 'R1 M2 패자', 2, 'win'), b: S('DNS', 'R1 M3 승자', 0) },
+        { title: 'R2 E', time: '8/4', startRow: 5, a: S('BRO', 'R1 M3 패자', 1, 'elim'), b: S('KRX', 'R1 E 승자', 2, 'win') },
+      ] },
+      { matches: [
+        { title: 'R3 Q', time: '8/10', startRow: 2, a: S('HLE', 'R2 Q 패자', 2, 'msi'), b: S('GEN', 'R2 M 승자', 1) },
+        { title: 'R3 E', time: '8/10', startRow: 4, a: S('DNS', 'R2 M 패자', 2, 'win'), b: S('KRX', 'R2 E 승자', 1, 'elim') },
+      ] },
+      { matches: [
+        { title: 'R4', time: '8/10', startRow: 3, a: S('GEN', 'R3 Q 패자', 0, 'elim'), b: S('DNS', 'R3 E 승자', 2, 'msi') },
+      ] },
+    ],
+    // [fromRound, fromMatch, fromSlot, toRound, toMatch, toSlot] — 같은 컬럼은 자동 무시.
+    connectors: [
+      [0, 0, 'b', 1, 0, 'a'], [0, 1, 'b', 1, 0, 'b'], [0, 1, 'a', 1, 1, 'a'], [0, 2, 'a', 1, 1, 'b'], [0, 2, 'b', 1, 2, 'a'], [0, 3, 'a', 1, 2, 'b'],
+      [1, 0, 'b', 2, 0, 'a'], [1, 1, 'a', 2, 0, 'b'], [1, 1, 'b', 2, 1, 'a'], [1, 2, 'b', 2, 1, 'b'],
+      [2, 0, 'b', 3, 0, 'a'], [2, 1, 'a', 3, 0, 'b'],
+    ],
+  };
+  // 결선 스테이지 2 — 3라운드(플로우). S1 R3·R4 진출팀이 1R, R2 진출팀이 2R, R1 진출팀이 결승.
+  const fs2 = {
+    rounds: [
+      { title: '1라운드', matches: [{ time: '8/11', a: S('HLE', 'S1 R3', 0), b: S('DNS', 'S1 R4', 3, 'win') }] },
+      { title: '2라운드', matches: [{ time: '8/17', a: S('T1', 'S1 R2', 1), b: S('DNS', '', 3, 'win') }] },
+      { title: '결승', matches: [{ time: '8/18', a: S('NS', 'S1 R1', 0), b: S('DNS', '', 3, 'msi') }] },
+    ],
+    connectors: [[0, 0, 'b', 1, 0, 'b'], [1, 0, 'b', 2, 0, 'b']],
+  };
+  // 예선 A·B조 순위(세트 승-패 · 세트 평균 승리 시간). 각 조 5위 탈락.
+  const qual = {
+    A: [
+      { code: 'NS', w: 4, l: 1 }, { code: 'GEN', w: 2, l: 3, time: '25:37' }, { code: 'DNS', w: 2, l: 3, time: '27:17' },
+      { code: 'KRX', w: 2, l: 3, time: '36:12' }, { code: 'DK', w: 0, l: 5 },
+    ],
+    B: [
+      { code: 'T1', w: 4, l: 1, time: '25:58' }, { code: 'HLE', w: 4, l: 1, time: '34:12' }, { code: 'BRO', w: 3, l: 2 },
+      { code: 'KT', w: 2, l: 3, time: '33:01' }, { code: 'BFX', w: 2, l: 3, time: '42:13' },
+    ],
+  };
+  data.standings.lck = data.standings.lck || {};
+  delete data.standings.lck['KeSPA']; // 이전 약칭 키 제거(약칭 KeSPA → KeSPA CUP 변경)
+  data.standings.lck['KeSPA CUP'] = {
+    name: 'LoL KeSPA CUP', year: 2026,
+    format: '10팀 · 2개조 예선 → 결선 스테이지 1(사다리) → 결선 스테이지 2',
+    champion: 'DNS', qual, fs1, fs2,
+  };
+  console.log('LCK KeSPA CUP: 예선 2개조 + 결선 스테이지 1(사다리)·2 대진표 수기 반영 (우승 DNS)');
 }
 
 // Worlds 참가팀 시드 재계산 — LCK PO·LPL Split 3 블록이 Worlds 블록보다 뒤에 실행되므로,
