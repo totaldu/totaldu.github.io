@@ -6,6 +6,7 @@ import sim from '../data/lolSim.json';
 import gpr from '../data/lolGpr.json';
 import gprTeams from '../data/gprTeams.json';
 import officialStandings from '../data/lolStandings.json';
+import pastEditionsData from '../data/lolPastEditions.json';
 import GprTable, { TeamLogo } from '../components/GprTable';
 import TeamPanel from '../components/TeamPanel';
 import { textOn, lighten } from '../utils/colorContrast';
@@ -13,8 +14,19 @@ import demaciaLogo from '../assets/demacia.svg';
 import asiangamesLogo from '../assets/asiangames.svg';
 import asiangames2026Logo from '../assets/asiangames2026.svg';
 import kespa2026Logo from '../assets/kespa2026.webp';
+import ltaNorthLogo from '../assets/lta-north.svg';
+import ltaSulLogo from '../assets/lta-sul.svg';
+import ltaLogo from '../assets/lta.svg';
+import asiLogo from '../assets/asi.svg';
+import demaciaCupLogo from '../assets/demacia-cup.webp';
 import drxLogo from '../assets/drx.svg';
 import gengSimpleLogo from '../assets/geng-simple.svg';
+import dnFreecsLogo from '../assets/dn-freecs.svg';
+import brionLogo from '../assets/brion.svg';
+import brionOkLogo from '../assets/brion-ok.svg';
+import fpxLogo from '../assets/fpx.svg';
+import rngLogo from '../assets/rng.svg';
+import rogueLogo from '../assets/rogue.svg';
 
 const statusMeta = {
   finished: { label: '종료', color: '#34D399', bg: 'rgba(52,211,153,0.15)' },
@@ -53,10 +65,14 @@ const GroupSymbol = ({ group, size = 16 }) => (
 );
 
 // 팀 short → 로고 / 풀네임
-const logoByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.logo]));
-const nameByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.name]));
+// GPR에 없는 팀(과거 참가팀 등)의 로고 보강 — 표시용. 클릭(팀 페이지)은 knownTeam(GPR 기준)으로 별도 판단.
+const EXTRA_LOGOS = { FPX: fpxLogo, RNG: rngLogo, RGE: rogueLogo };
+const baseLogoByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.logo]));
+const logoByShort = { ...EXTRA_LOGOS, ...baseLogoByShort };
+const EXTRA_NAMES = { FPX: 'FunPlus Phoenix', RNG: 'Royal Never Give Up', RGE: 'Rogue' };
+const nameByShort = { ...EXTRA_NAMES, ...Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.name])) };
 // 팀 페이지가 있는(=GPR에 존재하는) 팀만 클릭 가능. 과거 대회의 강등/해체 팀(LR·KCB 등)은 클릭 차단.
-const knownTeam = (short) => short != null && logoByShort[short] != null;
+const knownTeam = (short) => short != null && baseLogoByShort[short] != null;
 // AG 참가국 → ISO 3166-1 alpha-2 (flagcdn 국기 이미지용)
 const AG_FLAG = { KOR: 'kr', TPE: 'tw', VIE: 'vn', HKG: 'hk', SAU: 'sa', IND: 'in', UAE: 'ae', MYS: 'my' };
 
@@ -65,6 +81,15 @@ const AG_FLAG = { KOR: 'kr', TPE: 'tw', VIE: 'vn', HKG: 'hk', SAU: 'sa', IND: 'i
 const LCKCUP_TEAM_OVERRIDE = {
   KRX: { tag: 'DRX', name: 'DRX', logo: drxLogo },
   GEN: { logo: gengSimpleLogo },
+  BRO: { name: 'BRION', logo: brionLogo },
+};
+// 2025 팀 표기(2026과 다른 부분): KRX→DRX, GEN 옛 로고, DNS→DN FREECS(DNF).
+const TEAM_OVERRIDE_2025 = {
+  KRX: { tag: 'DRX', name: 'DRX', logo: drxLogo },
+  GEN: { logo: gengSimpleLogo },
+  DNS: { tag: 'DNF', name: 'DN FREECS', logo: dnFreecsLogo },
+  WBG: { name: 'Weibo Gaming TapTap' },
+  BRO: { name: 'OKSavingsBank BRION', logo: brionOkLogo },
 };
 // 팀 short → GPR 점수 (대진 확정·미진행 경기의 승부예측에 사용)
 const gprScoreByShort = Object.fromEntries(gprTeams.teams.map((t) => [t.short, t.score]));
@@ -517,7 +542,7 @@ const MsiBracket = ({ rounds, totalRows, connectors: connData, cardPrefix = '', 
   }, [useGrid, rounds, connData]);
 
   return (
-    <div className={`pb-1${useGrid && wrapScroll ? ' msi-scroll' : ''}`} style={useGrid && wrapScroll ? { overflowX: 'auto' } : {}}>
+    <div className={`pb-1${useGrid && wrapScroll ? ' msi-scroll' : ''}`} style={useGrid && wrapScroll ? { overflowX: 'auto', overflowY: 'hidden' } : {}}>
       <div ref={wrapRef} style={{
         position: 'relative',
         display: 'flex',
@@ -1605,14 +1630,33 @@ const SimulationView = ({ comp, sub, stage, finished: finishedProp, onTeamClick 
             <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded" style={{ backgroundColor: 'rgba(248,113,113,0.6)' }} /> 탈락</span>
           </div>
         );
+        // 국가 레이팅(소속팀 GPR 평균) — 로스터가 있는 국가만. 없으면 예측 생략.
+        const ratingOf = (code) => teams.find((t) => t.code === code)?.rating;
+        // 시리즈(BoN) 승률: 게임 승률 p로 먼저 ceil(N/2)승 확률.
+        const seriesWin = (p, need) => {
+          const other = need; let prob = 0;
+          const C = (n, k) => { let r = 1; for (let i = 0; i < k; i++) r = r * (n - i) / (i + 1); return r; };
+          for (let l = 0; l < other; l++) prob += C(need - 1 + l, l) * Math.pow(p, need) * Math.pow(1 - p, l);
+          return prob;
+        };
         const matchCard = (m) => {
           const done = m.scoreA != null && m.scoreB != null && m.scoreA !== m.scoreB;
           const aWin = done && m.scoreA > m.scoreB;
           const bWin = done && m.scoreB > m.scoreA;
-          const slot = (code, score, win) => (
+          // 예측: 양 팀 모두 레이팅 보유(=KOR/TPE/VIE) & 미종료일 때만.
+          const ra = ratingOf(m.a), rb = ratingOf(m.b);
+          const predict = !done && m.a && m.b && ra != null && rb != null;
+          let pA = null, pB = null;
+          if (predict) {
+            const need = m.format === 'Bo5' ? 3 : 2;
+            const g = 1 / (1 + Math.pow(10, (rb - ra) / 400));
+            pA = Math.round(seriesWin(g, need) * 100); pB = 100 - pA;
+          }
+          const slot = (code, score, win, pct) => (
             <div className={`flex items-center gap-2 px-2.5 py-2 ${win ? 'bg-[rgba(96,165,250,0.14)]' : ''}`}>
               <span className={`text-xs truncate flex-1 ${win ? 'font-bold text-white' : 'text-white/70'}`}>{code ? nameOf(code) : 'TBD'}</span>
-              {score != null && <span className={`font-mono tabular-nums text-sm shrink-0 ${win ? 'text-[#60A5FA] font-black' : 'text-white/45'}`}>{score}</span>}
+              {score != null ? <span className={`font-mono tabular-nums text-sm shrink-0 ${win ? 'text-[#60A5FA] font-black' : 'text-white/45'}`}>{score}</span>
+                : pct != null ? <span className="font-mono tabular-nums text-xs shrink-0 text-white/55 font-black">{pct}%</span> : null}
             </div>
           );
           return (
@@ -1621,9 +1665,9 @@ const SimulationView = ({ comp, sub, stage, finished: finishedProp, onTeamClick 
                 <span>{m.id}</span><span className="ml-auto text-white/30 normal-case font-normal">{m.format}</span>
               </span>
               <div className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
-                {slot(m.a, m.scoreA, aWin)}
+                {slot(m.a, m.scoreA, aWin, pA)}
                 <div className="h-px bg-white/10" />
-                {slot(m.b, m.scoreB, bWin)}
+                {slot(m.b, m.scoreB, bWin, pB)}
               </div>
             </div>
           );
@@ -1645,7 +1689,7 @@ const SimulationView = ({ comp, sub, stage, finished: finishedProp, onTeamClick 
           <section className="flex flex-col gap-3">
             <div className="flex items-baseline gap-2 flex-wrap">
               <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider">참가 팀</h3>
-              <span className="text-xs text-white/40">{teams.length}개국{official?.placeholder ? ' · 조 배정·Elo 잠정(임시 대진표)' : hasGroups ? '' : ' · 조 배정·Elo 추후 반영'}</span>
+              <span className="text-xs text-white/40">{teams.length}개국{official?.placeholder ? ' · 조 편성 미정' : hasGroups ? '' : ' · 조 배정·Elo 추후 반영'}</span>
             </div>
             {hasGroups ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1678,28 +1722,22 @@ const SimulationView = ({ comp, sub, stage, finished: finishedProp, onTeamClick 
                       <thead><tr className="text-white/40 text-xs border-b border-white/10">
                         <th className="text-center font-bold py-2 px-2 w-10">#</th>
                         <th className="text-left font-bold py-2 pr-2">국가</th>
-                        <th className="text-center font-bold py-2 px-2">Elo</th>
                         <th className="text-center font-bold py-2 px-2">승-패</th>
                         <th className="text-center font-bold py-2 px-2">세트</th>
                       </tr></thead>
                       <tbody>
-                        {rows.map((r, i) => (
-                          <tr key={r.code} className="border-b border-white/5" style={i < 2 ? { backgroundColor: 'rgba(96,165,250,0.10)' } : undefined}>
+                        {rows.length ? rows.map((r, i) => (
+                          <tr key={r.code} className="border-b border-white/5">
                             <td className="py-2 px-2 text-center text-white/50 font-mono">{i + 1}</td>
                             <td className="py-2 pr-2 font-bold text-white/90">{nameOf(r.code)}</td>
-                            <td className="py-2 px-2 text-center text-white/50 font-mono">{eloOf(r.code) ?? '-'}</td>
                             <td className="py-2 px-2 text-center font-mono">{r.w}-{r.l}</td>
                             <td className="py-2 px-2 text-center font-mono text-white/50">{r.sw}-{r.sl}</td>
                           </tr>
-                        ))}
+                        )) : (
+                          <tr><td colSpan={4} className="py-4 text-center text-white/30 text-xs">조 편성 미정</td></tr>
+                        )}
                       </tbody>
                     </table>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-sm font-black text-[#E8C77E] uppercase tracking-wider mb-3">{gk}조 대진</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {(grp?.matches || []).map(matchCard)}
                   </div>
                 </div>
               </div>
@@ -1731,8 +1769,16 @@ const SimulationView = ({ comp, sub, stage, finished: finishedProp, onTeamClick 
               </div>
               <div className="flex gap-6 overflow-x-auto pb-3 items-stretch w-fit">
                 {col('4강', ['SF1', 'SF2'])}
-                {col('결승', ['FINAL'])}
-                {col('3·4위전', ['BRONZE'])}
+                <div className="flex flex-col gap-6 shrink-0 justify-center" style={{ width: 220 }}>
+                  <div>
+                    <div className="text-[11px] text-white/50 font-black tracking-wider px-1 mb-4">결승</div>
+                    {byId['FINAL'] && matchCard(byId['FINAL'])}
+                  </div>
+                  <div>
+                    <div className="text-[11px] text-white/50 font-black tracking-wider px-1 mb-4">3·4위전</div>
+                    {byId['BRONZE'] && matchCard(byId['BRONZE'])}
+                  </div>
+                </div>
               </div>
               {legend}
             </section>
@@ -2064,8 +2110,8 @@ const bracketLabel = (b) => {
   return b.name || '대진';
 };
 // 과거 스플릿의 스테이지 탭 목록(정규/그룹 → 각 대진 → 최종 순위)
-const pastSplitStages = (key, sub) => {
-  const d = sub ? officialStandings.standings[key]?.[sub] : officialStandings.standings[key];
+// 완료된 스플릿의 단계 목록 — 데이터 객체({rows,brackets,finalStandings})에서 산출.
+const pastSplitStagesFromData = (d) => {
   if (!d) return null;
   const stages = [];
   if (d.rows?.length) stages.push(d.rows.some((r) => r.group) ? '그룹 순위' : '정규시즌');
@@ -2073,15 +2119,14 @@ const pastSplitStages = (key, sub) => {
   if (d.finalStandings?.length) stages.push('최종 순위');
   return stages.length ? stages : null;
 };
-const PastSplitView = ({ comp, sub, stage, onTeamClick }) => {
-  const data = sub ? officialStandings.standings[comp.key]?.[sub] : officialStandings.standings[comp.key];
+const PastSplitView = ({ comp, data, stage, onTeamClick, teamOverride: teamOverrideProp }) => {
   if (!data) return <NotReady comp={comp} />;
   const rows = data.rows || [];
   const grouped = rows.some((r) => r.group);
   const regLabel = grouped ? '그룹 순위' : '정규시즌';
   const groupNames = grouped ? [...new Set(rows.map((r) => r.group))] : [null];
   const bracketForStage = (data.brackets || []).find((b) => (b.bracket?.rounds?.length || b.bracket?.sections?.length) && bracketLabel(b) === stage);
-  const teamOverride = PAST_TEAM_OVERRIDE[comp.key];
+  const teamOverride = teamOverrideProp || PAST_TEAM_OVERRIDE[comp.key];
 
   return (
     <div className="flex flex-col gap-8">
@@ -2164,7 +2209,20 @@ const COMP_DETAIL_LOGO = {
 const SUBTAB_DETAIL = {
   'lck|KeSPA CUP': { color: '#072148', logo: kespa2026Logo },
 };
+// 과거 연도 대회의 상세 헤더 로고·상징색 오버라이드 (`key|year`). 예: 2025 LCS = LTA North.
+// 과거 연도 상세 헤더 로고·상징색. bySub로 스플릿별 오버라이드(통합 스플릿=LTA).
+const PAST_DETAIL = {
+  'lcs|2025': { color: '#3483F0', logo: ltaNorthLogo, bySub: { 'Split 1': { color: '#b2a27e', logo: ltaLogo } } },
+  'cblol|2025': { color: '#D94F30', logo: ltaSulLogo, bySub: { 'Etapa 1': { color: '#b2a27e', logo: ltaLogo } } },
+};
+// 연도 내 세부 대회(event)별 상세 헤더 로고·상징색 (`key|year|event`).
+const EVENT_DETAIL = {
+  'demacia|2025|ASI': { color: '#7927ff', logo: asiLogo },
+  'demacia|2025|Demacia Cup': { color: '#D32F2F', logo: demaciaCupLogo, invert: true }, // 검은 로고 → 흰색 반전
+};
 const tabLogo = (key) => (key === 'gpr' ? LOLESPORTS_LOGO : COMP_LOGO[key]);
+// 탭 상징색 오버라이드 — 에디션 상세 색(comp.color)과 별개로 탭에만 적용. AG 일반 색은 #ffb732(2026 상세는 유지).
+const TAB_COLOR = { asiangames: '#ffb732' };
 
 // 지역 리그별 세부 대회 (2026 기준)
 const SUBTABS = {
@@ -2252,8 +2310,19 @@ const editionYears = (key) => COMP_EDITIONS[key] || [CURRENT_YEAR];
 // 과거 연도 결과: `${key}|${year}` → { finalResult: { champion, runnerUp, standings:[{rank,team,note}] } }
 // 여기에 항목을 추가하면 해당 연도 선택 시 ResultView 로 최종 순위가 자동 표시된다.
 // 예) 'worlds|2025': { finalResult: { champion: 'T1', runnerUp: 'BLG', standings: [{ rank: 1, team: 'T1' }] } },
-const PAST_EDITIONS = {};
-// 특정 대회·연도에 세부 대회 선택(연도 오른쪽 드롭다운). DCGI 2025 = ASI / Demacia Cup(합쳐지기 전 두 대회).
+// 과거 연도 전체 데이터(순위표·대진·최종순위) — lolPastEditions.json(API로 생성).
+// 연도 → 리그 → (서브탭 있으면) 서브탭별 데이터 / (없으면) 단일 데이터.
+const PAST_STANDINGS = pastEditionsData.standings || {};
+const PAST_SUBTABS = pastEditionsData.subtabs || {};
+// 과거 연도의 리그 서브탭 목록(없으면 단일 대회).
+const pastSubTabs = (key, year) => PAST_SUBTABS[String(year)]?.[key] || null;
+// 과거 연도의 리그 데이터 해석. 서브탭이 있으면 sub별, 없으면 단일.
+const resolvePastData = (key, sub, year) => {
+  const lg = PAST_STANDINGS[String(year)]?.[key];
+  if (!lg) return null;
+  return sub ? lg[sub] : lg;
+};
+// 연도 옆 '대회 선택'(통합/분리 시 사용) — DCGI 2025는 통합 전 ASI / Demacia Cup 두 대회.
 const YEAR_SUBEVENTS = { 'demacia|2025': ['ASI', 'Demacia Cup'] };
 // 세부 대회 선택 시 헤더에 표기할 대회 정식 명칭
 const SUBEVENT_NAMES = { ASI: 'Asia Invitational', 'Demacia Cup': 'Demacia Cup' };
@@ -2286,20 +2355,57 @@ const PredictionPage = () => {
 
   const isGpr = activeKey === 'gpr';
   const comp = useMemo(() => comps.find((c) => c.key === activeKey), [comps, activeKey]);
-  const subTabs = comp ? SUBTABS[comp.key] : null;
+  // 대회 연도(에디션) 선택 — 서브탭/데이터 해석보다 먼저 필요. `?year=` 로 유지(현재 연도는 생략)
+  const years = comp ? editionYears(comp.key) : [CURRENT_YEAR];
+  const yearParam = Number(searchParams.get('year'));
+  const activeYear = years.includes(yearParam) ? yearParam : CURRENT_YEAR;
+  const isCurrentYear = activeYear === CURRENT_YEAR;
+  const setActiveYear = (y) =>
+    setSearchParams((p) => {
+      const n = new URLSearchParams(p);
+      if (y === CURRENT_YEAR) n.delete('year'); else n.set('year', String(y));
+      n.delete('sub'); n.delete('stage'); // 연도마다 서브탭 구성이 달라 초기화
+      return n;
+    }, { replace: true });
+  // 연도 옆 '대회 선택'(통합/분리 시 사용) — DCGI 2025 = ASI/Demacia Cup. 지정 케이스에만 노출.
+  const subEvents = comp && !isCurrentYear ? YEAR_SUBEVENTS[`${comp.key}|${activeYear}`] : null;
+  const eventParam = searchParams.get('event');
+  const activeEvent = subEvents ? (subEvents.includes(eventParam) ? eventParam : subEvents[0]) : null;
+  const setActiveEvent = (e) => setSearchParams((p) => { const n = new URLSearchParams(p); n.set('event', e); return n; }, { replace: true });
+
+  // 서브탭 — 연도별. 현재 연도는 SUBTABS, 과거 연도는 생성된 목록(없으면 단일 대회).
+  const subTabs = comp ? (isCurrentYear ? SUBTABS[comp.key] : pastSubTabs(comp.key, activeYear)) : null;
   const subParam = searchParams.get('sub');
-  const activeSub = subTabs
-    ? (subParam && subTabs.includes(subParam) ? subParam : (SUBTAB_DEFAULT[comp.key] || subTabs[0]))
-    : null;
-  const setActiveSub = (s) => setSearchParams({ sub: s }, { replace: true });
-  const subUpcoming = !!(comp && activeSub && SUB_UPCOMING[comp.key]?.includes(activeSub));
-  // 세부 대회별 상태 오버라이드가 있으면 리그 전체 상태(comp.status) 대신 그 값으로 배지를 표시
-  const subStatus = comp && activeSub ? SUB_STATUS[`${comp.key}|${activeSub}`] : null;
+  const defaultSub = comp && subTabs ? (isCurrentYear ? (SUBTAB_DEFAULT[comp.key] || subTabs[0]) : subTabs[0]) : null;
+  const activeSub = subTabs ? (subParam && subTabs.includes(subParam) ? subParam : defaultSub) : null;
+  const setActiveSub = (s) => setSearchParams((p) => { const n = new URLSearchParams(p); n.set('sub', s); n.delete('stage'); return n; }, { replace: true });
+  const subUpcoming = !!(comp && activeSub && isCurrentYear && SUB_UPCOMING[comp.key]?.includes(activeSub));
+  // 세부 대회별 상태 오버라이드(현재 연도만). 과거 연도는 '종료'.
+  const subStatus = comp && activeSub && isCurrentYear ? SUB_STATUS[`${comp.key}|${activeSub}`] : null;
   const st = comp ? (statusMeta[subStatus || comp.status] || statusMeta.upcoming) : null;
-  // 서브탭별 상세 헤더 오버라이드(로고·상징색)
-  const subDetail = comp && activeSub ? SUBTAB_DETAIL[`${comp.key}|${activeSub}`] : null;
-  // 제목 접미사: 점(·) 없이 공백으로 이어붙이되, 리그명이 sub에 중복되면 제거
-  // 예) LPL+'Split 2' → "Split 2", LCK+'LCK' → "", LCK+'LCK CUP' → "CUP"
+  // 서브탭별 상세 헤더 오버라이드(로고·상징색) — 현재 연도만
+  const subDetail = comp && activeSub && isCurrentYear ? SUBTAB_DETAIL[`${comp.key}|${activeSub}`] : null;
+  // 상세 헤더 로고·상징색: 현재 연도는 서브탭 오버라이드, 과거 연도는 연도별 오버라이드(예: 2025 LTA)
+  const pastDetailRaw = comp && !isCurrentYear ? PAST_DETAIL[`${comp.key}|${activeYear}`] : null;
+  const pastDetail = pastDetailRaw ? { ...pastDetailRaw, ...(pastDetailRaw.bySub?.[activeSub] || {}) } : null;
+  const eventDetail = comp && !isCurrentYear && activeEvent ? EVENT_DETAIL[`${comp.key}|${activeYear}|${activeEvent}`] : null;
+  const headerDetail = subDetail || eventDetail || pastDetail;
+
+  // 과거 연도 전체 데이터(순위표·대진·최종순위). 단일 대회는 sub=null.
+  const pastData = comp && !isCurrentYear ? resolvePastData(comp.key, activeSub, activeYear) : null;
+  const pastFull = !isCurrentYear && !!pastData;
+  // 2025 팀 표기 오버라이드: KRX→DRX(명칭·로고), GEN→옛 로고, DNS→DN FREECS. + LPL Split 1·2는 BLG→풀네임.
+  const pastTeamOverride = (() => {
+    if (activeYear !== 2025) return undefined;
+    const ov = { ...TEAM_OVERRIDE_2025 };
+    if (comp?.key === 'lpl') {
+      if (activeSub === 'Split 1' || activeSub === 'Split 2') ov.BLG = { name: 'Bilibili Gaming DreamSmart' };
+      if (activeSub === 'Split 1') ov.JDG = { name: 'Beijing JDG Intel Esports' };
+    }
+    return ov;
+  })();
+
+  // 제목 접미사: 리그명이 sub에 중복되면 제거 (예: LPL+'Split 2' → "Split 2")
   const subSuffix = (() => {
     if (!subTabs || !activeSub) return '';
     const lg = comp.name.replace('2026 ', '');
@@ -2307,7 +2413,6 @@ const PredictionPage = () => {
     const t = activeSub.startsWith(lg + ' ') ? activeSub.slice(lg.length + 1) : activeSub;
     return ` ${t}`;
   })();
-  // CBLOL 예외 표기: "CBLOL 2026" 기준, Copa는 앞에 → "Copa CBLOL 2026", 그 외 세부는 뒤에
   const title = (() => {
     if (comp?.key === 'lck' && activeSub === 'KeSPA CUP') return '2026 LoL KeSPA CUP';
     if (comp?.key === 'cblol') {
@@ -2318,52 +2423,46 @@ const PredictionPage = () => {
     }
     return `${comp?.name ?? ''}${subSuffix}`;
   })();
-  // 세부대회 내 단계 선택(LCK→LCK, LPL→Split 3 등)
-  // stage 목록: 서브탭이 있으면 `key|sub`으로, 서브탭이 없는 대회는 key만으로도 조회
-  const isPastComp = comp && comp.key === 'fst'; // 서브탭 없는 종료 대회(대진+최종순위)
-  const isPastSplit = comp && (PAST_SPLIT_SUBS.has(`${comp.key}|${activeSub}`) || isPastComp);
+
+  // 단계(스테이지) 목록 — 과거 연도는 pastData 기반, 현재 연도는 기존 로직.
+  const isPastComp = comp && comp.key === 'fst' && isCurrentYear; // 현재연도 FST(서브탭 없는 종료 대회)
+  const isPastSplit = comp && isCurrentYear && (PAST_SPLIT_SUBS.has(`${comp.key}|${activeSub}`) || isPastComp);
+  const curSplitData = isPastSplit ? (isPastComp ? officialStandings.standings[comp.key] : officialStandings.standings[comp.key]?.[activeSub]) : null;
   const stageList = comp
-    ? (isPastSplit ? pastSplitStages(comp.key, isPastComp ? null : activeSub) : (STAGE_TABS[`${comp.key}|${activeSub}`] || (!subTabs && STAGE_TABS[comp.key])))
+    ? (pastFull ? pastSplitStagesFromData(pastData)
+      : isPastSplit ? pastSplitStagesFromData(curSplitData)
+        : (STAGE_TABS[`${comp.key}|${activeSub}`] || (!subTabs && STAGE_TABS[comp.key])))
     : null;
   const showStages = !!stageList;
-  // 종료된 대회(세부탭 종료 상태)는 최종 순위 단계를 기본으로 노출
   const effFinished = !!(comp && (subStatus || comp.status) === 'finished');
-  const defaultStage = (comp && (
-    isPastSplit ? '최종 순위'
+  const rawDefaultStage = comp && (
+    (pastFull || isPastSplit) ? '최종 순위'
       : (effFinished && Array.isArray(stageList) && stageList.includes('최종 순위')) ? '최종 순위'
         : (STAGE_DEFAULT[`${comp.key}|${activeSub}`] || (!subTabs && STAGE_DEFAULT[comp.key]))
-  )) || (stageList ? stageList[0] : null);
+  );
+  // 기본 스테이지가 실제 목록에 없으면 첫 스테이지로 (예: 최종순위 없는 대표 선발전)
+  const defaultStage = (rawDefaultStage && stageList?.includes(rawDefaultStage)) ? rawDefaultStage : (stageList ? stageList[0] : null);
   const activeStage = showStages
     ? (stageList.includes(searchParams.get('stage')) ? searchParams.get('stage') : defaultStage)
     : null;
   const setActiveStage = (s) =>
     setSearchParams((p) => { const n = new URLSearchParams(p); n.set('stage', s); return n; }, { replace: true });
 
-  // 대회 연도(에디션) 선택 — 대회명 오른쪽 드롭다운. `?year=` 로 유지(현재 연도는 파라미터 생략)
-  const years = comp ? editionYears(comp.key) : [CURRENT_YEAR];
-  const yearParam = Number(searchParams.get('year'));
-  const activeYear = years.includes(yearParam) ? yearParam : CURRENT_YEAR;
-  const isCurrentYear = activeYear === CURRENT_YEAR;
-  const setActiveYear = (y) =>
-    setSearchParams((p) => {
-      const n = new URLSearchParams(p);
-      if (y === CURRENT_YEAR) n.delete('year'); else n.set('year', String(y));
-      return n;
-    }, { replace: true });
-  // 특정 대회·연도의 세부 대회 선택(예: DCGI 2025 = ASI / Demacia Cup) — 연도 오른쪽 드롭다운
-  const subEvents = comp && !isCurrentYear ? YEAR_SUBEVENTS[`${comp.key}|${activeYear}`] : null;
-  const eventParam = searchParams.get('event');
-  const activeEvent = subEvents ? (subEvents.includes(eventParam) ? eventParam : subEvents[0]) : null;
-  const setActiveEvent = (e) =>
-    setSearchParams((p) => { const n = new URLSearchParams(p); n.set('event', e); return n; }, { replace: true });
-  // 과거 연도 결과 데이터(있으면 ResultView, 없으면 준비 중 안내). 세부 대회가 있으면 그 키로 조회.
-  const pastEdition = comp && !isCurrentYear
-    ? PAST_EDITIONS[activeEvent ? `${comp.key}|${activeYear}|${activeEvent}` : `${comp.key}|${activeYear}`]
-    : null;
-  // 과거 연도 선택 시 제목의 연도 토큰을 교체(예: "2026 LCK" → "2024 LCK")
-  const displayTitle = isCurrentYear
-    ? title
-    : (activeEvent ? `${activeYear} ${SUBEVENT_NAMES[activeEvent] || activeEvent}` : title.replace(String(CURRENT_YEAR), String(activeYear)));
+  // 과거 연도의 대회 명칭 오버라이드 — 2025 LCS/CBLOL은 LTA North/LTA Sul(단, Split 1은 통합 'LTA').
+  const PAST_COMP_NAME = {
+    'lcs|2025': { default: 'LTA North', 'Split 1': 'LTA' },
+    'cblol|2025': { default: 'LTA Sul', 'Etapa 1': 'LTA' },
+  };
+  const displayTitle = (() => {
+    if (isCurrentYear) return title;
+    if (activeEvent) return `${activeYear} ${SUBEVENT_NAMES[activeEvent] || activeEvent}`;
+    const ov = PAST_COMP_NAME[`${comp?.key}|${activeYear}`];
+    if (ov) {
+      const lg = ov[activeSub] || ov.default;
+      return `${activeYear} ${lg}${activeSub && activeSub !== lg ? ` ${activeSub}` : ''}`;
+    }
+    return title.replace(String(CURRENT_YEAR), String(activeYear));
+  })();
   // 과거 연도는 이미 종료된 대회이므로 상태 배지를 '종료'로 표기
   const stDisplay = !isCurrentYear ? statusMeta.finished : st;
 
@@ -2381,6 +2480,8 @@ const PredictionPage = () => {
         <div className="flex flex-wrap gap-2 mb-8">
           {tabs.map((c) => {
             const active = c.key === activeKey;
+            // 탭(일반 대회) 상징색 — 에디션별 색과 별개로 탭에 쓸 색. (예: AG 탭은 #ffb732, 2026 상세는 유지)
+            const tabColor = TAB_COLOR[c.key] || c.color;
             return (
               <button
                 key={c.key}
@@ -2388,11 +2489,11 @@ const PredictionPage = () => {
                 className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-sm font-black border transition-all ${
                   active ? '' : 'text-white/60 border-white/15 hover:border-white/40 bg-transparent'
                 }`}
-                style={active ? { backgroundColor: c.color, borderColor: c.color, color: textOn(c.color) } : {}}
+                style={active ? { backgroundColor: tabColor, borderColor: tabColor, color: textOn(tabColor) } : {}}
               >
                 <img src={tabLogo(c.key)} alt="" width={18} height={18}
                   className="object-contain shrink-0"
-                  style={{ width: 18, height: 18, filter: active ? (textOn(c.color) === '#1e2328' ? 'brightness(0)' : 'brightness(0) invert(1)') : 'none', opacity: active ? 0.9 : 1 }}
+                  style={{ width: 18, height: 18, filter: active ? (textOn(tabColor) === '#1e2328' ? 'brightness(0)' : 'brightness(0) invert(1)') : 'none', opacity: active ? 0.9 : 1 }}
                   onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
                 {c.tabName || c.name.replace('2026 ', '')}
               </button>
@@ -2419,11 +2520,27 @@ const PredictionPage = () => {
             <>
               <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: subDetail?.color || comp.color }}>
-                    <img src={subDetail?.logo || COMP_DETAIL_LOGO[comp.key] || COMP_LOGO[comp.key]} alt={comp.name} width={24} height={24} className="object-contain"
-                      style={{ filter: subDetail?.logo ? 'none' : (textOn(subDetail?.color || comp.color) === '#1e2328' ? 'brightness(0)' : 'brightness(0) invert(1)') }}
+                  {(() => {
+                    const hd = headerDetail;
+                    // LTA 등 tint 로고: 상징색을 로고 색으로 사용(어두워 안 보이면 흰색), 배경은 상징색을 옅게.
+                    if (hd?.tint && hd.logo) {
+                      const c = (hd.color || '#888').replace('#', '');
+                      const lum = (parseInt(c.slice(0, 2), 16) * 0.299 + parseInt(c.slice(2, 4), 16) * 0.587 + parseInt(c.slice(4, 6), 16) * 0.114) / 255;
+                      const logoColor = lum > 0.22 ? hd.color : '#fff';
+                      return (
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: `${hd.color}2e` }}>
+                          <span aria-hidden style={{ width: 24, height: 24, display: 'block', backgroundColor: logoColor, WebkitMaskImage: `url("${hd.logo}")`, maskImage: `url("${hd.logo}")`, WebkitMaskRepeat: 'no-repeat', maskRepeat: 'no-repeat', WebkitMaskPosition: 'center', maskPosition: 'center', WebkitMaskSize: 'contain', maskSize: 'contain' }} />
+                        </div>
+                      );
+                    }
+                    return (
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ backgroundColor: hd?.color || comp.color }}>
+                    <img src={hd?.logo || COMP_DETAIL_LOGO[comp.key] || COMP_LOGO[comp.key]} alt={comp.name} width={24} height={24} className="object-contain"
+                      style={{ filter: hd?.logo ? (hd.invert ? 'brightness(0) invert(1)' : 'none') : (textOn(hd?.color || comp.color) === '#1e2328' ? 'brightness(0)' : 'brightness(0) invert(1)') }}
                       onError={e => { e.currentTarget.style.visibility = 'hidden'; }} />
                   </div>
+                    );
+                  })()}
                   <div>
                     <h2 className="text-xl font-black text-white">{displayTitle}</h2>
                     <p className="text-xs text-white/40">{comp.scope === 'intl' ? '국제 대회' : '지역 리그'}</p>
@@ -2462,8 +2579,8 @@ const PredictionPage = () => {
                 </span>
               </div>
 
-              {/* 세부 대회 선택 (현재 시즌에만; 과거 연도는 최종 결과만 표시) */}
-              {isCurrentYear && subTabs && (
+              {/* 세부 대회(서브탭) 선택 — 현재·과거 연도 모두 */}
+              {subTabs && (
                 <div className="flex flex-wrap gap-2 mb-6">
                   {subTabs.map((s) => {
                     const on = s === activeSub;
@@ -2482,8 +2599,8 @@ const PredictionPage = () => {
                 </div>
               )}
 
-              {/* 단계 선택 (LCK→LCK 전용) */}
-              {isCurrentYear && showStages && (
+              {/* 단계 선택 */}
+              {showStages && (
                 <div className="inline-flex bg-white/5 rounded-xl p-1 mb-6 border border-white/10">
                   {stageList.map((s) => {
                     const on = s === activeStage;
@@ -2503,17 +2620,17 @@ const PredictionPage = () => {
               )}
 
               {!isCurrentYear ? (
-                pastEdition ? (
-                  <ResultView comp={{ ...comp, ...pastEdition }} />
+                pastFull ? (
+                  <PastSplitView comp={comp} data={pastData} stage={activeStage} onTeamClick={handleTeamClick} teamOverride={pastTeamOverride} />
                 ) : (
                   <div className="py-16 text-center border-2 border-dashed border-white/10 rounded-3xl">
                     <Hourglass size={28} className="mx-auto text-white/30 mb-3" />
-                    <p className="text-white/50 font-bold mb-1">{activeYear}{activeEvent ? ` ${activeEvent}` : ''} 결과 준비 중</p>
+                    <p className="text-white/50 font-bold mb-1">{activeYear} 결과 준비 중</p>
                     <p className="text-white/30 text-sm">이전 연도 대회 결과를 곧 게재합니다.</p>
                   </div>
                 )
               ) : isPastSplit ? (
-                <PastSplitView comp={comp} sub={isPastComp ? null : activeSub} stage={activeStage} onTeamClick={handleTeamClick} />
+                <PastSplitView comp={comp} data={curSplitData} stage={activeStage} onTeamClick={handleTeamClick} />
               ) : isContentTbd(comp.key, activeSub) ? (
                 <div className="py-20 text-center border-2 border-dashed border-white/10 rounded-3xl">
                   <Hourglass size={32} className="mx-auto text-white/30 mb-4" />
