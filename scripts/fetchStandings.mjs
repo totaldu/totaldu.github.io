@@ -2745,3 +2745,61 @@ console.log('lolStandings.json 갱신 완료');
     console.log('과거 에디션 전체 확장: 추가 없음');
   }
 }
+
+// ── 팀별 우승 경력 자동 산출 ──────────────────────────────────────────────
+//   앱이 추적하는 2026 대회의 우승팀(finalStandings 1위 · champion)을 모아 팀 상세 페이지용 lolTitles.json 생성.
+{
+  const LEAGUE_LABEL = { lck: 'LCK', lpl: 'LPL', lec: 'LEC', lcs: 'LCS', lcp: 'LCP', cblol: 'CBLOL' };
+  const titleFor = (segs) => {
+    const [lg, sub] = segs;
+    if (lg === 'fst') return '2026 First Stand';
+    if (lg === 'msi') return '2026 Mid-Season Invitational';
+    if (lg === 'worlds') return '2026 Worlds';
+    if (!sub) return null;
+    if (lg === 'lck' && sub === 'LCK CUP') return '2026 LCK CUP';
+    if (lg === 'lck' && sub === 'KeSPA CUP') return '2026 LoL KeSPA CUP';
+    if (lg === 'cblol' && sub === 'Copa') return 'Copa CBLOL 2026'; // 앱 표기와 동일
+    if (lg === 'cblol') return `CBLOL 2026 ${sub}`;
+    return `2026 ${LEAGUE_LABEL[lg] || lg.toUpperCase()} ${sub}`;
+  };
+  const titles = {};
+  const add = (short, name) => {
+    if (!short || !name) return;
+    (titles[short] = titles[short] || []);
+    if (!titles[short].some((t) => t.name === name)) titles[short].push({ name, detail: '우승' });
+  };
+  // 섹션/라운드 브래킷의 결승(마지막 섹션·마지막 라운드·마지막 매치) 승자 = 우승자.
+  const bracketChampion = (br) => {
+    if (!br) return null;
+    const rounds = (Array.isArray(br.sections) && br.sections.length)
+      ? br.sections[br.sections.length - 1].rounds
+      : br.rounds;
+    if (!Array.isArray(rounds) || !rounds.length) return null;
+    const lm = rounds[rounds.length - 1]?.matches?.slice(-1)[0];
+    if (!lm || lm.a?.score == null || lm.b?.score == null || lm.a.score === lm.b.score) return null;
+    return lm.a.score > lm.b.score ? lm.a.short : lm.b.short;
+  };
+  const SKIP_KEYS = ['rows', 'players', 'teams', 'rounds', 'sections', 'connectors', 'qual', 'fs1', 'fs2', 'finalStandings', 'standings', 'knockout', 'groups', 'playin', 'playoffs', 'swiss', 'bracket', 'qualifier'];
+  const walk = (obj, segs) => {
+    if (!obj || typeof obj !== 'object') return;
+    if (Array.isArray(obj.finalStandings) && obj.finalStandings[0]?.team) add(obj.finalStandings[0].team, titleFor(segs));
+    if (typeof obj.champion === 'string') add(obj.champion, titleFor(segs));
+    // MSI/Worlds는 최종 순위 대신 결승 대진 결과로 우승자 판정 (플레이-인·스위스 제외).
+    const seg = segs[segs.length - 1];
+    if ((segs[0] === 'msi' && seg === '브래킷 스테이지') || (segs[0] === 'worlds' && seg === '녹아웃 스테이지')) {
+      add(bracketChampion(obj.bracket), titleFor(segs));
+    }
+    for (const k of Object.keys(obj)) {
+      if (SKIP_KEYS.includes(k)) continue;
+      if (obj[k] && typeof obj[k] === 'object' && !Array.isArray(obj[k])) walk(obj[k], segs.concat(k));
+    }
+  };
+  for (const lg of Object.keys(data.standings)) walk(data.standings[lg], [lg]);
+  // 최신 대회를 위에 표시 — 2026 대회 개최 순서(대략)의 역순으로 정렬.
+  const TITLE_ORDER = ['First Stand', 'LCK CUP', 'Lock-In', 'Copa', 'Versus', 'Split 1', 'Spring', 'Mid-Season', 'Split 2', 'Summer', 'KeSPA', 'Split 3', 'Worlds'];
+  const ord = (name) => { const i = TITLE_ORDER.findIndex((k) => name.includes(k)); return i < 0 ? 99 : i; };
+  for (const short of Object.keys(titles)) titles[short].sort((a, b) => ord(b.name) - ord(a.name));
+  const titlesFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolTitles.json');
+  fs.writeFileSync(titlesFile, JSON.stringify({ updatedAt: data.updatedAt, titles }, null, 2) + '\n');
+  console.log(`우승 경력 자동 산출: ${Object.keys(titles).length}개 팀 (${Object.values(titles).reduce((n, a) => n + a.length, 0)}개 타이틀)`);
+}

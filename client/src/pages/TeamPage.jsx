@@ -5,6 +5,7 @@ import { ChevronLeft } from 'lucide-react';
 import rosters from '../data/lolRosters.json';
 import gprTeamsData from '../data/gprTeams.json';
 import gpr from '../data/lolGpr.json';
+import teamTitles from '../data/lolTitles.json';
 import { textOn } from '../utils/colorContrast';
 
 const gprTeamMap = Object.fromEntries(gprTeamsData.teams.map(t => [t.short, t]));
@@ -35,6 +36,8 @@ const TeamPage = () => {
   const starters = ROLE_ORDER
     .map((role) => (roster?.players ?? []).find((p) => p.role === role && p.starter !== false))
     .filter(Boolean);
+  // 우승 경력 — API에 없어 수기 관리(lolTitles.json). 팀 약칭 → [{ name, detail }].
+  const titles = teamTitles.titles?.[teamShort] || [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1428] via-[#1e2328] to-[#0a1428] p-6 md:p-12 text-white">
@@ -107,6 +110,24 @@ const TeamPage = () => {
           </div>
         ) : (
           <p className="text-white/30 text-sm text-center py-16">선수 정보 없음</p>
+        )}
+
+        {/* 우승 경력 */}
+        {titles.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-xs font-black text-white/30 uppercase tracking-widest mb-3">우승 경력</h2>
+            <div className="flex flex-col gap-2">
+              {titles.map((t, i) => (
+                <div
+                  key={i}
+                  className="p-3 rounded-xl"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}
+                >
+                  <span className="font-bold text-white/90 text-sm">{t.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         <p className="text-white/20 text-[11px] text-right mt-8">
