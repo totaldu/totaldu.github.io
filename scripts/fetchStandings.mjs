@@ -11,6 +11,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { TEAM_LINK } from '../client/src/utils/teamLink.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const file = path.join(__dirname, '..', 'client', 'src', 'data', 'lolStandings.json');
@@ -3982,6 +3983,49 @@ console.log('lolStandings.json 갱신 완료');
   } catch (e) { console.warn(`2023 LCP 전신 생성 실패(무시): ${e.message}`); }
 }
 
+// ── 2022 LCP 전신(PCS·LCO·LJL·VCS) — 2023과 동일 구조(PCS 플레이오프는 같은 토너먼트에 포함) — 2024와 동일 구조. PCS 2022은 플레이오프가 별도 토너먼트 → 브래킷·최종순위 병합 ──
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    const EV = {
+      PCS: ['104366947889790212', [['Spring', 'pcs_spring_2022'], ['Summer', 'pcs_summer_2022']]],
+      LCO: ['105709090213554609', [['Split 1', 'lco_split_1_2022'], ['Split 2', 'lco_split_2_2022']]],
+      LJL: ['98767991349978712', [['Spring', 'ljl_spring_2022'], ['Summer', 'ljl_summer_2022']]],
+      VCS: ['107213827295848783', [['Spring', 'vcs_spring_2022'], ['Summer', 'vcs_summer_2022']]],
+    };
+    const std = (past.standings['2022'] = past.standings['2022'] || {});
+    const sub = (past.subtabs['2022'] = past.subtabs['2022'] || {});
+    const lcp = std.lcp || {}, subs = sub.lcp || {};
+    let changed = false;
+    for (const [ev, [leagueId, list]] of Object.entries(EV)) {
+      if (lcp[ev]) continue;
+      for (const [label, slug, poSlug] of list) {
+        try {
+          const s = await buildSplit(leagueId, slug);
+          if (!s) continue;
+          const node = { name: s.name, rows: s.rows, brackets: s.brackets || [], finalStandings: s.finalStandings };
+          if (poSlug) {
+            const po = await buildSplit(leagueId, poSlug);
+            if (po) {
+              node.brackets = [...node.brackets, ...(po.brackets || [])];
+              if (po.finalStandings?.length) node.finalStandings = po.finalStandings;
+            }
+          }
+          (lcp[ev] = lcp[ev] || {})[label] = node; (subs[ev] = subs[ev] || []).push(label); changed = true;
+        } catch (e) { console.warn(`2022 ${ev} ${label} 실패: ${e.message}`); }
+      }
+    }
+    if (changed) {
+      const order = Object.keys(EV).filter((k) => lcp[k]);
+      std.lcp = Object.fromEntries(order.map((k) => [k, lcp[k]]));
+      sub.lcp = Object.fromEntries(order.map((k) => [k, subs[k]]));
+      fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n');
+      console.log(`2022 LCP 대회 선택 생성: ${order.map((k) => `${k}[${sub.lcp[k].join(',')}]`).join(' ')}`);
+    }
+  } catch (e) { console.warn(`2022 LCP 전신 생성 실패(무시): ${e.message}`); }
+}
+
 // ── 2023 LCO 'PCS PO' — 플레이오프 다음에 같은 스플릿 PCS 플레이오프 대진(2023 PCS는 스테이지 구분 없이 단일) ──
 {
   const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
@@ -4154,6 +4198,40 @@ console.log('lolStandings.json 갱신 완료');
   } catch (e) { console.warn(`CBLOL/LLA 대회 선택 생성 실패(무시): ${e.message}`); }
 }
 
+// ── LEC ~2022 대회 선택(LEC / TCL) — TCL(튀르키예 챔피언십 리그)이 API에 있는 2022년 이하 연도만 ──
+//   standings[year].lec = { LEC: {Spring, Summer}, TCL: {Winter, Summer} } · subtabs도 이벤트별.
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    const TCL_ID = '98767991343597634';
+    const tours = (await api('getTournamentsForLeague', { leagueId: TCL_ID })).data.leagues[0].tournaments || [];
+    const lab = (slug) => (/summer/.test(slug) ? 'Summer' : /spring/.test(slug) ? 'Spring' : 'Winter');
+    let changed = false;
+    for (const year of ['2016', '2020', '2021', '2022']) {
+      const cur = past.standings?.[year]?.lec;
+      if (!cur || cur.LEC) continue; // 없음 / 이미 이벤트형
+      const tcl = {}, tclSubs = [];
+      const list = tours.filter((t) => t.slug.includes(year)).sort((a, b) => (a.startDate < b.startDate ? -1 : 1));
+      for (const t of list) {
+        try {
+          const s = await buildSplit(TCL_ID, t.slug);
+          if (!s || !((s.rows || []).length || (s.brackets || []).length)) continue;
+          const l = lab(t.slug);
+          tcl[l] = { name: s.name, rows: s.rows, brackets: s.brackets, finalStandings: s.finalStandings };
+          tclSubs.push(l);
+        } catch (e) { console.warn(`${year} TCL ${t.slug} 실패: ${e.message}`); }
+      }
+      if (!tclSubs.length) continue;
+      past.standings[year].lec = { LEC: cur, TCL: tcl };
+      past.subtabs[year].lec = { LEC: past.subtabs[year].lec, TCL: tclSubs };
+      changed = true;
+      console.log(`${year} LEC 대회 선택: LEC / TCL[${tclSubs.join(',')}]`);
+    }
+    if (changed) fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n');
+  } catch (e) { console.warn(`LEC/TCL 대회 선택 생성 실패(무시): ${e.message}`); }
+}
+
 // ── 2024 LCS Championship — Summer 플레이오프가 곧 LCS Championship → 'Championship' 서브탭으로 분리 ──
 {
   const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
@@ -4178,6 +4256,102 @@ console.log('lolStandings.json 갱신 완료');
       console.log('2024 LCS Championship 서브탭 분리');
     }
   } catch (e) { console.warn(`2024 LCS Championship 분리 실패(무시): ${e.message}`); }
+}
+
+// ── 2022 MSI 럼블 스테이지 — API 'round_2'(6팀 순위형)가 buildSplit에서 누락 → phaseStage로 보강(그룹 스테이지 다음) ──
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    const node = past.standings?.['2022']?.msi;
+    if (node && !(node.phaseStages || []).some((p) => p.label === '럼블 스테이지')) {
+      const tj = await api('getTournamentsForLeague', { leagueId: '98767991325878492' });
+      const tour = (tj.data.leagues[0].tournaments || []).find((t) => t.slug === 'msi_2022');
+      const st = tour && (await api('getStandingsV3', { tournamentId: tour.id })).data?.standings?.[0];
+      const r2 = (st?.stages || []).find((s) => s.slug === 'round_2');
+      const rows = [];
+      for (const sec of r2?.sections || []) for (const r of sec.rankings || []) for (const t of r.teams) rows.push({ rank: r.ordinal, team: t.code, w: t.record.wins, l: t.record.losses });
+      if (rows.length) {
+        node.phaseStages = [...(node.phaseStages || []), { label: '럼블 스테이지', rows }];
+        fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n');
+        console.log(`2022 MSI 럼블 스테이지 반영: ${rows.map((r) => r.team).join(',')}`);
+      }
+    }
+  } catch (e) { console.warn(`2022 MSI 럼블 스테이지 실패(무시): ${e.message}`); }
+}
+
+// ── 2021~2023 LCS Championship — 2024와 동일(Summer 플레이오프 = LCS Championship). Summer는 PO·최종순위 유지, Championship 서브탭에 복제 ──
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    let changed = false;
+    for (const yr of ['2021', '2022', '2023']) {
+      const lcs = past.standings?.[yr]?.lcs;
+      const sm = lcs?.Summer;
+      const po = (sm?.brackets || []).find((b) => b.slug === 'playoffs');
+      if (!sm || !po || lcs.Championship) continue;
+      lcs.Championship = { name: `LCS Championship ${yr}`, rows: [], brackets: [{ ...po, name: 'LCS Championship', label: 'LCS Championship' }], finalStandings: sm.finalStandings || [] };
+      const subs = past.subtabs[yr].lcs;
+      if (!subs.includes('Championship')) subs.push('Championship');
+      changed = true;
+      console.log(`${yr} LCS Championship 서브탭 추가`);
+    }
+    if (changed) fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n');
+  } catch (e) { console.warn(`2021~2023 LCS Championship 추가 실패(무시): ${e.message}`); }
+}
+
+// ── 2021~2023 LCS Summer·Championship 플레이오프 — 2023과 같은 격자(상위 1·2R / 하위 1·2R / 상위 결승·하위 3R / 하위 결승 / 결승) ──
+//   8팀 더블 엘리미네이션(상위 1R 2·2R 2·결승 1 / 하위 1R 2·2R 2·3R 1·결승 1 / 결승). 이미 격자면(4-4-2-1-1) 생략.
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    let changed = 0;
+    const relayout = (bk) => {
+      if (!bk?.rounds) return false;
+      if (bk.rounds.map((r) => r.matches.length).join('-') === '4-4-2-1-1') return false;
+      const all = bk.rounds.flatMap((r) => r.matches);
+      const by = (re) => all.filter((m) => re.test(m.title || ''));
+      const ub1 = by(/^상위권 대진 - 1라운드$/), ub2 = by(/^상위권 대진 - 2라운드$/), ubf = by(/^상위권 대진 - (4강|결승)$/);
+      const lb1 = by(/^하위권 대진 - 1라운드$/), lb2 = by(/^하위권 대진 - 2라운드$/), lb3 = by(/^하위권 대진 - 3라운드$/), lbf = by(/^하위권 대진 - (4강|결승)$/);
+      const gf = by(/^결승$/);
+      if ([ub1, ub2, ubf, lb1, lb2, lb3, lbf, gf].map((a) => a.length).join('') !== '22122111') return false;
+      const winner = (m) => (m.a.win || m.a.msi || m.a.score > m.b.score ? m.a.short : m.b.short);
+      const loser = (m) => (winner(m) === m.a.short ? m.b.short : m.a.short);
+      const slot = (m, t) => (m.a.short === t ? 'a' : m.b.short === t ? 'b' : null);
+      // 2라운드를 1라운드 승자 순서에 맞춰 정렬(직선 연결)
+      const align = (r1, r2) => r1.map((m) => r2.find((x) => slot(x, winner(m)))).filter(Boolean);
+      const ub2s = align(ub1, ub2), lb2s = align(lb1, lb2);
+      if (ub2s.length !== 2 || lb2s.length !== 2) return false;
+      const P = (m, sr) => ({ ...m, startRow: sr });
+      bk.totalRows = 14;
+      bk.rounds = [
+        { title: '', matches: [P(ub1[0], 0), P(ub1[1], 4), P(lb1[0], 8), P(lb1[1], 12)] },
+        { title: '', matches: [P(ub2s[0], 0), P(ub2s[1], 4), P(lb2s[0], 8), P(lb2s[1], 12)] },
+        { title: '', matches: [P(ubf[0], 2), P(lb3[0], 10)] },
+        { title: '', matches: [P(lbf[0], 10)] },
+        { title: '', matches: [P(gf[0], 6)] },
+      ];
+      const C = [];
+      const link = (fc, fi, fm, tc, ti, tm, team) => { const s = slot(tm, team); if (s) C.push([fc, fi, 'mid', tc, ti, s]); };
+      ub1.forEach((m, i) => link(0, i, m, 1, i, ub2s[i], winner(m)));
+      ub2s.forEach((m, i) => link(1, i, m, 2, 0, ubf[0], winner(m)));
+      lb1.forEach((m, i) => link(0, i + 2, m, 1, i + 2, lb2s[i], winner(m)));
+      lb2s.forEach((m, i) => link(1, i + 2, m, 2, 1, lb3[0], winner(m)));
+      link(2, 1, lb3[0], 3, 0, lbf[0], winner(lb3[0]));
+      link(2, 0, ubf[0], 3, 0, lbf[0], loser(ubf[0]));
+      link(3, 0, lbf[0], 4, 0, gf[0], winner(lbf[0]));
+      link(2, 0, ubf[0], 4, 0, gf[0], winner(ubf[0]));
+      bk.connectors = C;
+      return true;
+    };
+    for (const yr of ['2021', '2022', '2023']) for (const sp of ['Summer', 'Championship']) {
+      const po = (past.standings?.[yr]?.lcs?.[sp]?.brackets || []).find((b) => b.slug === 'playoffs');
+      if (po && relayout(po.bracket)) changed++;
+    }
+    if (changed) { fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n'); console.log(`LCS Summer·Championship 더블 엘리 격자 반영: ${changed}개`); }
+  } catch (e) { console.warn(`LCS Championship 격자 반영 실패(무시): ${e.message}`); }
 }
 
 // ── 2024 LEC Season Finals 최종순위 — 대진(더블 엘리) 탈락 시점 기준으로 재산출 ──
@@ -4576,6 +4750,139 @@ console.log('lolStandings.json 갱신 완료');
   } catch (e) { console.warn(`2024 Demacia Cup 주입 실패(무시): ${e.message}`); }
 }
 
+// ── 2023 Demacia Cup (DCGI) — API 미제공 · 수기 ─────────
+//   2024와 동일 방식: 그룹 스테이지(5팀 4개조 싱글RR · 조 1위만 진출) → 녹아웃(직행 4팀 + 조 1위 4팀 = 8팀 싱글 엘리). 우승 BLG.
+//   A조 WSG·D조 WSQ는 경기 없이 제외(0-0). A조 WSG·D조 WSQ 비고 = 실격.
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    const S = (short, seed, score, flag) => { const s = { short }; if (seed) s.seed = seed; if (score != null) s.score = score; if (flag) s[flag] = true; return s; };
+    const R = (rank, team, w, l, group, remark) => ({ rank, team, w, l, group, ...(remark ? { remark } : {}) });
+    const rows = [
+      R(1, 'NIP', 3, 0, 'A조'), R(2, 'TT', 2, 1, 'A조'), R(3, 'AL', 1, 2, 'A조'), R(4, 'EDG', 0, 3, 'A조'), R(5, 'WSG', 0, 0, 'A조', '실격'),
+      R(1, 'RNG', 4, 0, 'B조'), R(2, 'LGD', 3, 1, 'B조'), R(3, 'OMG', 2, 2, 'B조'), R(4, 'MJ', 1, 3, 'B조'), R(5, 'RST', 0, 4, 'B조'),
+      R(1, 'RA', 3, 1, 'C조'), R(2, 'IG', 3, 1, 'C조'), R(3, 'FPX', 2, 2, 'C조'), R(4, 'MAX', 1, 3, 'C조'), R(5, 'BUG', 1, 3, 'C조'),
+      R(1, 'TES', 3, 0, 'D조'), R(2, 'WE', 2, 1, 'D조'), R(3, 'UP', 1, 2, 'D조'), R(4, 'EQX', 0, 3, 'D조'), R(5, 'WSQ', 0, 0, 'D조', '실격'),
+    ];
+    const knockout = applySingleElimLayout({
+      rounds: [
+        { matches: [
+          { title: '8강 1경기', a: S('NIP', 'A조 1위', 3, 'win'), b: S('WBG', '', 2) },
+          { title: '8강 2경기', a: S('RNG', 'B조 1위', 1), b: S('BLG', '', 3, 'win') },
+          { title: '8강 3경기', a: S('RA', 'C조 1위', 3, 'win'), b: S('LNG', '', 1) },
+          { title: '8강 4경기', a: S('TES', 'D조 1위', 2), b: S('JDG', '', 3, 'win') },
+        ] },
+        { matches: [
+          { title: '4강 1경기', a: S('NIP', '8강 승자', 0), b: S('BLG', '8강 승자', 3, 'win') },
+          { title: '4강 2경기', a: S('RA', '8강 승자', 0), b: S('JDG', '8강 승자', 3, 'win') },
+        ] },
+        { matches: [
+          { title: '결승', a: S('BLG', '4강 승자', 3, 'msi'), b: S('JDG', '4강 승자', 0, 'elim') },
+        ] },
+      ],
+      connectors: [
+        [0, 0, 'a', 1, 0, 'a'], [0, 1, 'b', 1, 0, 'b'], [0, 2, 'a', 1, 1, 'a'], [0, 3, 'b', 1, 1, 'b'],
+        [1, 0, 'b', 2, 0, 'a'], [1, 1, 'b', 2, 0, 'b'],
+      ],
+    });
+    (past.standings['2023'] = past.standings['2023'] || {}).demacia = {
+      name: 'Demacia Cup', regLabel: '그룹 스테이지', parallelGroups: true,
+      rows,
+      brackets: [{ slug: 'knockout', name: '녹아웃 스테이지', label: '녹아웃 스테이지', bracket: knockout }],
+      finalStandings: [
+        { rank: 1, team: 'BLG', note: '우승' }, { rank: 2, team: 'JDG', note: '준우승' },
+        { rank: 3, team: 'NIP', note: '4강' }, { rank: 4, team: 'RA', note: '4강' },
+        { rank: 5, team: 'WBG', note: '8강' }, { rank: 6, team: 'RNG', note: '8강' },
+        { rank: 7, team: 'LNG', note: '8강' }, { rank: 8, team: 'TES', note: '8강' },
+      ],
+    };
+    fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n');
+    console.log('2023 Demacia Cup 주입 완료 (그룹 5팀 4개조 → 녹아웃 8강 · 우승 BLG)');
+  } catch (e) { console.warn(`2023 Demacia Cup 주입 실패(무시): ${e.message}`); }
+}
+
+// ── 2022 Demacia Cup (DCGI) — API 미제공 · 수기 ─────────
+//   스테이지 1(16팀 · 팀당 4경기, 진출팀 가리지 못하면 1경기 추가 · 상위 3팀 진출) →
+//   스테이지 2(13팀 + 스테이지 1 진출 3팀 = 16팀 싱글 엘리 2라운드 · 4팀 선발) →
+//   스테이지 3(직행 4팀 + 스테이지 2 선발 4팀 = 8팀 싱글 엘리). 우승 BLG.
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    const S = (short, seed, score, flag) => { const s = { short }; if (seed) s.seed = seed; if (score != null) s.score = score; if (flag) s[flag] = true; return s; };
+    const R = (rank, team, w, l) => ({ rank, team, w, l });
+    const stage1 = [
+      R(1, 'DYU', 4, 0), R(2, 'MOJ', 4, 1), R(2, 'MAX', 4, 1), R(4, 'DHM', 3, 2), R(4, 'LML', 3, 2),
+      R(6, 'BLI', 2, 2), R(6, 'RTL', 2, 2), R(6, 'LCC', 2, 2), R(6, 'LYA', 2, 2), R(6, 'SDX', 2, 2), R(6, 'YM', 2, 2),
+      R(12, 'EQX', 1, 3), R(12, 'Q9', 1, 3), R(12, 'QSG', 1, 3), R(12, 'TP', 1, 3), R(16, 'HHH', 0, 4),
+    ];
+    // 스테이지 2 — 16팀 싱글 엘리 2라운드(4개 소 브래킷 → 각 승자 1팀씩 총 4팀 선발). FF=기권.
+    const stage2 = applySingleElimLayout({
+      rounds: [
+        { matches: [
+          { title: '1라운드', a: S('WBG', '', 'FF'), b: S('IG', '', 'W', 'win') },
+          { title: '1라운드', a: S('LNG', '', 0), b: S('WE', '', 2, 'win') },
+          { title: '1라운드', a: S('AL', '', 2, 'win'), b: S('OMG', '', 1) },
+          { title: '1라운드', a: S('DYU', '스테이지 1', 1), b: S('RA', '', 2, 'win') },
+          { title: '1라운드', a: S('UP', '', 'FF'), b: S('FPX', '', 'W', 'win') },
+          { title: '1라운드', a: S('MOJ', '스테이지 1', 'W', 'win'), b: S('LGD', '', 'FF') },
+          { title: '1라운드', a: S('MAX', '스테이지 1', 0), b: S('BLG', '', 2, 'win') },
+          { title: '1라운드', a: S('V5', '', 1), b: S('TT', '', 2, 'win') },
+        ] },
+        { matches: [
+          { title: '2라운드', a: S('IG', '', 2, 'msi'), b: S('WE', '', 0) },
+          { title: '2라운드', a: S('AL', '', 'W', 'msi'), b: S('RA', '', 'FF') },
+          { title: '2라운드', a: S('FPX', '', 0), b: S('MOJ', '', 2, 'msi') },
+          { title: '2라운드', a: S('BLG', '', 1), b: S('TT', '', 2, 'msi') },
+        ] },
+      ],
+      connectors: [
+        [0, 0, 'b', 1, 0, 'a'], [0, 1, 'b', 1, 0, 'b'], [0, 2, 'a', 1, 1, 'a'], [0, 3, 'b', 1, 1, 'b'],
+        [0, 4, 'b', 1, 2, 'a'], [0, 5, 'a', 1, 2, 'b'], [0, 6, 'b', 1, 3, 'a'], [0, 7, 'b', 1, 3, 'b'],
+      ],
+    });
+    // 스테이지 3 — 8팀 싱글 엘리. 직행 4팀(BLG·RNG·EDG·JDG) + 스테이지 2 선발 4팀.
+    const stage3 = applySingleElimLayout({
+      rounds: [
+        { matches: [
+          { title: '8강 1경기', a: S('IG', '스테이지 2', 0), b: S('BLG', '', 3, 'win') },
+          { title: '8강 2경기', a: S('AL', '스테이지 2', 0), b: S('RNG', '', 3, 'win') },
+          { title: '8강 3경기', a: S('MOJ', '스테이지 2', 1), b: S('EDG', '', 3, 'win') },
+          { title: '8강 4경기', a: S('TT', '스테이지 2', 3, 'win'), b: S('JDG', '', 0) },
+        ] },
+        { matches: [
+          { title: '4강 1경기', a: S('BLG', '8강 승자', 3, 'win'), b: S('RNG', '8강 승자', 0) },
+          { title: '4강 2경기', a: S('EDG', '8강 승자', 1), b: S('TT', '8강 승자', 3, 'win') },
+        ] },
+        { matches: [
+          { title: '결승', a: S('BLG', '4강 승자', 3, 'msi'), b: S('TT', '4강 승자', 2, 'elim') },
+        ] },
+      ],
+      connectors: [
+        [0, 0, 'b', 1, 0, 'a'], [0, 1, 'b', 1, 0, 'b'], [0, 2, 'b', 1, 1, 'a'], [0, 3, 'a', 1, 1, 'b'],
+        [1, 0, 'a', 2, 0, 'a'], [1, 1, 'b', 2, 0, 'b'],
+      ],
+    });
+    (past.standings['2022'] = past.standings['2022'] || {}).demacia = {
+      name: 'Demacia Cup', regLabel: '스테이지 1',
+      rows: stage1,
+      brackets: [
+        { slug: 'stage2', name: '스테이지 2', label: '스테이지 2', bracket: stage2 },
+        { slug: 'stage3', name: '스테이지 3', label: '스테이지 3', bracket: stage3 },
+      ],
+      finalStandings: [
+        { rank: 1, team: 'BLG', note: '우승' }, { rank: 2, team: 'TT', note: '준우승' },
+        { rank: 3, team: 'RNG', note: '4강' }, { rank: 4, team: 'EDG', note: '4강' },
+        { rank: 5, team: 'IG', note: '8강' }, { rank: 6, team: 'AL', note: '8강' },
+        { rank: 7, team: 'MOJ', note: '8강' }, { rank: 8, team: 'JDG', note: '8강' },
+      ],
+    };
+    fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n');
+    console.log('2022 Demacia Cup 주입 완료 (스테이지 1 → 2 → 3 · 우승 BLG)');
+  } catch (e) { console.warn(`2022 Demacia Cup 주입 실패(무시): ${e.message}`); }
+}
+
 // ── 2022 항저우 아시안게임(2023년 개최) LoL — API 미제공 · 수기 → 과거 에디션 '2023'(연도 선택 기준) ─────────
 //   그룹 스테이지(3팀 4개조 싱글RR · D조 2팀 · 조 1위 진출) → 녹아웃(직행 4국 + 조 1위 4국 · 싱글 엘리 + 동메달 결정전). 금 대한민국.
 {
@@ -4655,8 +4962,9 @@ console.log('lolStandings.json 갱신 완료');
   const COMP_COLOR = { lck: '#1c192a', lpl: '#D32F2F', lec: '#00E0B0', lcs: '#eeece7', lcp: '#F08040', cblol: '#0b0718', fst: '#ff5500', msi: '#191919', ewc: '#f74e16', asiangames: '#079a3e', demacia: '#1826a1', worlds: '#dddddd' };
   const compStyle = (year, lg, sub, event) => {
     const y = String(year);
+    if (lg === 'lec' && event === 'TCL') return { color: '#3f567c' }; // TCL(튀르키예 챔피언십 리그)
     if (lg === 'lcp' && event === 'VCS') return { color: '#f0fea6' }; // LCP 전신(2024) 베트남 리그
-    if (lg === 'lcp' && event === 'PCS') return { color: '#101725' }; // LCP 전신(2024) 대만/홍콩/마카오 리그
+    if (lg === 'lcp' && event === 'PCS') return { color: y === '2023' ? '#cb0004' : '#101725' }; // LCP 전신(2024) 대만/홍콩/마카오 리그
     if (lg === 'lcp' && event === 'LJL') return { color: '#ed1b30' }; // LCP 전신(2024) 일본 리그
     if (lg === 'lcp' && event === 'LCO') return { color: '#0f3341' }; // LCP 전신(2024) 오세아니아 리그
     if (lg === 'demacia') return (!sub || sub === 'Demacia Cup') ? { color: '#446aca', gradient: 'linear-gradient(180deg, #446aca, #61a1ea)' } : (sub === 'ASI' ? { color: '#7927ff' } : { color: COMP_COLOR.demacia });
@@ -4667,16 +4975,18 @@ console.log('lolStandings.json 갱신 완료');
       if (sub === 'KeSPA CUP') return { color: '#8f7cf6', gradient: 'linear-gradient(180deg, #8f7cf6, #6176eb)' };
       return { color: COMP_COLOR.lck };
     }
-    if (lg === 'lcs') { if (y === '2025' && (sub === 'Split 1' || sub === 'Playoffs')) return { color: '#b2a27e' }; return { color: y === '2025' ? '#3483F0' : COMP_COLOR.lcs }; }
+    if (lg === 'lcs') { if (y === '2025' && (sub === 'Split 1' || sub === 'Playoffs')) return { color: '#b2a27e' }; return { color: y === '2025' ? '#3483F0' : Number(y) <= 2023 ? '#6460ff' : COMP_COLOR.lcs }; }
     if (lg === 'cblol') {
       if (sub === 'Opening' || sub === 'Closing' || sub === '승강전') return { color: '#ff6528' }; // LLA(라틴 아메리카 리그)
       if (y === '2025' && (sub === 'Etapa 1' || sub === 'Playoffs')) return { color: '#b2a27e' };
       return { color: y === '2025' ? '#D94F30' : COMP_COLOR.cblol };
     }
+    if (lg === 'msi' && y === '2022') return { gradient: 'linear-gradient(90deg, #ef6b5e 1%, #e29e61 20%, #ccc86f 30%, #7be082 55%, #36fae2 90%)' };
     if (lg === 'msi') return { color: (y === '2025' || y === '2023') ? '#fe0000' : y === '2024' ? '#000000' : COMP_COLOR.msi }; // 연도별 상징색
     if (lg === 'worlds' && y === '2023') return { color: '#220401', gradient: 'linear-gradient(90deg, #410602, #220401, #120200)' };
     if (lg === 'worlds' && y === '2025') return { color: '#0e2bf4' };
     if (lg === 'worlds' && y === '2024') return { color: '#010a42' };
+    if (lg === 'worlds' && y === '2022') return { color: '#321bdd' };
     return { color: COMP_COLOR[lg] || '#888' };
   };
   const add = (short, name, style) => {
@@ -4740,7 +5050,7 @@ console.log('lolStandings.json 갱신 완료');
       return `${year} ${disp}${subPart}`;
     };
     for (const [year, lgs] of Object.entries(past.standings || {})) {
-      if (!['2023', '2024', '2025'].includes(year)) continue; // 2023~2026 대회 우승 경력 반영(2026은 라이브 data.standings에서 별도 산출)
+      if (!['2022', '2023', '2024', '2025'].includes(year)) continue; // 2022~2026 대회 우승 경력 반영(2026은 라이브 data.standings에서 별도 산출)
       for (const [lg, v] of Object.entries(lgs || {})) {
         if (lg === 'ewc' && v?.champion) {                    // EWC(그룹+플레이오프 구조) — champion 필드로 우승 반영
           add(v.champion, `${year} Esports World Cup`, compStyle(year, 'ewc', null));
@@ -4749,12 +5059,13 @@ console.log('lolStandings.json 갱신 완료');
         } else if (v && typeof v === 'object') {             // 서브탭형 리그
           for (const [sub, node] of Object.entries(v)) {
             if (isSeonbal(sub) || sub === 'Road to MSI') continue; // 선발전·Road to MSI 제외
-            if ((lg === 'lcp' || lg === 'cblol') && node && !node.finalStandings && !node.rows && !node.brackets) {
+            if (lg === 'lcs' && sub === 'Summer' && v.Championship) continue; // LCS Championship이 있는 연도는 Summer 우승 제외(Championship으로 대체)
+            if ((lg === 'lcp' || lg === 'cblol' || lg === 'lec') && node && !node.finalStandings && !node.rows && !node.brackets) {
               // 대회 선택형(2024 PCS·VCS / ~2024 CBLOL·LLA) — 이벤트 → 스플릿 2단 구조
               for (const [sp, n2] of Object.entries(node)) {
                 if (isSeonbal(sp) || sp === '승강전') continue;
                 if (lg === 'lcp' && ((sub === 'LCO' && (year === '2023' || year === '2024')) || (sub === 'LJL' && year === '2024'))) continue; // 우승 경력 제외(사용자 지정)
-                const nm = sub === 'CBLOL' ? compName(year, lg, sp) : `${year} ${sub} ${sp}`;
+                const nm = (sub === 'CBLOL' || sub === 'LEC') ? compName(year, lg, sp) : `${year} ${sub} ${sp}`;
                 add(champOf(n2), nm, compStyle(year, lg, sp, sub));
               }
               continue;
@@ -4769,11 +5080,170 @@ console.log('lolStandings.json 갱신 완료');
   // 정렬 — 최신 연도 위로, 같은 연도 내에서는 대회 개최 순서(대략)의 역순.
   // 개최 순서(이른 대회 → 늦은 대회). 최신순 정렬 시 뒤쪽(늦은 대회)이 위로 온다.
   //   LCK CUP·첫 스플릿(LPL Split 1 등)은 First Stand보다 먼저 진행 → First Stand 앞에 배치.
-  const TITLE_ORDER = ['LCK CUP', 'Lock-In', 'Lock In', 'Versus', 'Winter', 'Kickoff', 'Split 1', 'Etapa 1', 'First Stand', 'Spring', 'Road to MSI', 'Mid-Season', 'Mid Season', 'Split 2', 'Etapa 2', 'Summer', 'Esports World Cup', '시즌 파이널', 'Season Finals', 'Split 3', 'Etapa 3', 'Playoffs', 'Copa', 'Worlds', 'KeSPA'];
+  const TITLE_ORDER = ['LCK CUP', 'Lock-In', 'Lock In', 'Versus', 'Winter', 'Kickoff', 'Split 1', 'Etapa 1', 'Opening', 'First Stand', 'Spring', 'Road to MSI', 'Mid-Season', 'Mid Season', 'Split 2', 'Etapa 2', 'Summer', 'Closing', 'Esports World Cup', '시즌 파이널', 'Season Finals', 'Split 3', 'Etapa 3', 'Playoffs', 'Copa', 'Worlds', 'KeSPA'];
   const ord = (name) => { const i = TITLE_ORDER.findIndex((k) => name.includes(k)); return i < 0 ? 99 : i; };
   const yearOf = (name) => { const m = name.match(/\b(20\d{2})\b/); return m ? Number(m[1]) : 0; };
+  // 과거 팀 코드의 우승은 현재 팀으로 합산(예: R7·6K → LYON, RGE → NAVI).
+  for (const [old, cur] of Object.entries(TEAM_LINK)) if (titles[old]) { (titles[cur] = titles[cur] || []).push(...titles[old]); delete titles[old]; }
   for (const short of Object.keys(titles)) titles[short].sort((a, b) => (yearOf(b.name) - yearOf(a.name)) || (ord(b.name) - ord(a.name)));
   const titlesFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolTitles.json');
   fs.writeFileSync(titlesFile, JSON.stringify({ updatedAt: data.updatedAt, titles }, null, 2) + '\n');
   console.log(`우승 경력 자동 산출: ${Object.keys(titles).length}개 팀 (${Object.values(titles).reduce((n, a) => n + a.length, 0)}개 타이틀)`);
+}
+
+// ── 과거 대진표 자동 격자화 — totalRows 없는(flow) 대진표를 startRow·연결선 격자형으로 ──
+//   연결선: 각 경기의 팀이 직전에 뛴 경기(이전 라운드)에서 이어지도록 팀 추적으로 생성(기존 연결선과 병합).
+//   행 배치: 승자가 올라온 경기들의 평균 행(없으면 전체 피더 평균)에 두고, 같은 컬럼 내 겹치면 아래로 밀어냄.
+//   첫 컬럼은 다음 경기의 행 순서로 재정렬해 연결선 교차를 줄인다.
+function autoGridBracket(bk) {
+  if (!bk || bk.totalRows != null || !Array.isArray(bk.rounds) || !bk.rounds.length) return false;
+  const rounds = bk.rounds.map((r) => r.matches.map((m) => m));
+  const key = (c, i) => `${c}-${i}`;
+  const teamsOf = (m) => [m.a?.short, m.b?.short];
+  const won = (m, s) => { const x = m[s], y = m[s === 'a' ? 'b' : 'a']; return !!(x?.win || x?.msi || (x?.score != null && y?.score != null && x.score > y.score)); };
+  // feeders[c-i] = [{c,i,slot,winner}]
+  const feeders = {};
+  for (let c = 1; c < rounds.length; c++) rounds[c].forEach((m, i) => {
+    const f = [];
+    for (const slot of ['a', 'b']) {
+      const t = m[slot]?.short; if (!t) continue;
+      let src = null;
+      for (let pc = c - 1; pc >= 0 && !src; pc--) rounds[pc].forEach((pm, pi) => {
+        if (src) return; const s = teamsOf(pm).indexOf(t); if (s >= 0) src = { c: pc, i: pi, winner: won(pm, s ? 'b' : 'a') };
+      });
+      if (src) f.push({ ...src, slot });
+    }
+    feeders[key(c, i)] = f;
+  });
+  // 기존 연결선 보존(팀 추적으로 못 찾은 슬롯만)
+  for (const [fR, fM, , tR, tM, tS] of bk.connectors || []) {
+    const f = feeders[key(tR, tM)] || (feeders[key(tR, tM)] = []);
+    if (!f.some((x) => x.slot === tS) && fR < tR) f.push({ c: fR, i: fM, slot: tS, winner: true });
+  }
+  const layout = (order0) => {
+    const row = {};
+    const cols = [order0];
+    let totalRows = 0;
+    for (let c = 0; c < rounds.length; c++) {
+      const idxs = c === 0 ? order0 : rounds[c].map((_, i) => i);
+      const want = idxs.map((i, k) => {
+        const f = feeders[key(c, i)] || [];
+        const pick = f.filter((x) => x.winner).length ? f.filter((x) => x.winner) : f;
+        const rs = pick.map((x) => row[key(x.c, x.i)]).filter((v) => v != null);
+        return { i, k, w: rs.length ? rs.reduce((a, b) => a + b, 0) / rs.length : null };
+      });
+      // 원래 순서 유지하면서 겹치면 아래로
+      let prev = -2;
+      for (const x of want) {
+        let r = x.w == null ? prev + 2 : Math.round(x.w);
+        if (r < prev + 2) r = prev + 2;
+        row[key(c, x.i)] = r; prev = r; totalRows = Math.max(totalRows, r + 2);
+      }
+      if (c) cols.push(idxs);
+    }
+    return { row, cols, totalRows };
+  };
+  // 첫 컬럼 재정렬: 각 1R 경기가 이어지는 다음 경기 행 기준
+  let base = rounds[0].map((_, i) => i);
+  const first = layout(base);
+  const targetRow = (i) => {
+    let best = null;
+    for (const [k, f] of Object.entries(feeders)) for (const x of f) if (x.c === 0 && x.i === i && x.winner) {
+      const r = first.row[k]; if (best == null || r < best) best = r;
+    }
+    return best;
+  };
+  const tr = base.map((i) => ({ i, r: targetRow(i) }));
+  if (tr.every((x) => x.r != null)) base = tr.slice().sort((a, b) => a.r - b.r || a.i - b.i).map((x) => x.i);
+  const { row, cols, totalRows } = layout(base);
+  // 새 인덱스 매핑(컬럼 내 startRow 순)
+  const newIdx = {};
+  const newRounds = bk.rounds.map((r, c) => {
+    const ordered = cols[c].slice().sort((a, b) => row[key(c, a)] - row[key(c, b)]);
+    ordered.forEach((oi, ni) => { newIdx[key(c, oi)] = ni; });
+    return { ...r, matches: ordered.map((oi) => ({ ...rounds[c][oi], startRow: row[key(c, oi)] })) };
+  });
+  const conns = [];
+  for (const [k, f] of Object.entries(feeders)) {
+    const [tc, ti] = k.split('-').map(Number);
+    for (const x of f) conns.push([x.c, newIdx[key(x.c, x.i)], 'mid', tc, newIdx[k], x.slot]);
+  }
+  bk.totalRows = totalRows;
+  bk.rounds = newRounds;
+  bk.connectors = conns;
+  return true;
+}
+
+function autoGridAll(node) {
+  let n = 0;
+  const walk = (o) => {
+    if (Array.isArray(o)) { o.forEach(walk); return; }
+    if (!o || typeof o !== 'object') return;
+    if (Array.isArray(o.rounds) && o.totalRows == null && o.rounds.every((r) => Array.isArray(r?.matches))) { if (autoGridBracket(o)) n++; return; }
+    for (const k in o) walk(o[k]);
+  };
+  walk(node);
+  return n;
+}
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    const n = autoGridAll(past.standings);
+    // 1라운드 2경기 → 2라운드 1경기(두 1라운드 승자가 맞붙는 형식): 2라운드를 1라운드 두 경기 사이 행에.
+    let centered = 0;
+    const center = (o) => {
+      if (Array.isArray(o)) { o.forEach(center); return; }
+      if (!o || typeof o !== 'object') return;
+      const r = o.rounds;
+      if (o.totalRows != null && Array.isArray(r) && r.length === 2 && r[0].matches?.length === 2 && r[1].matches?.length === 1) {
+        const feeds = (o.connectors || []).filter((c) => c[0] === 0 && c[3] === 1 && c[4] === 0).map((c) => c[1]);
+        const [m0, m1] = r[0].matches, fin = r[1].matches[0];
+        if (feeds.includes(0) && feeds.includes(1) && m0.startRow != null && m1.startRow != null) {
+          const mid = (m0.startRow + m1.startRow) / 2;
+          if (fin.startRow !== mid) { fin.startRow = mid; centered++; }
+        }
+        return;
+      }
+      for (const k in o) center(o[k]);
+    };
+    center(past.standings);
+    if (n || centered) { fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n'); console.log(`과거 대진표 격자형 변환: ${n}개 · 2라운드 중앙 정렬: ${centered}개`); }
+  } catch (e) { console.warn(`과거 대진표 격자형 변환 실패(무시): ${e.message}`); }
+}
+
+// ── 상위권 대진 결승 → 하위권 대진 결승이 연속 단일 컬럼이면 같은 컬럼에 배치(예: 2022 PCS Spring·Summer) ──
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    let merged = 0;
+    const walk = (o) => {
+      if (Array.isArray(o)) { o.forEach(walk); return; }
+      if (!o || typeof o !== 'object') return;
+      if (Array.isArray(o.rounds) && o.totalRows != null) {
+        const R = o.rounds;
+        for (let c = 0; c + 1 < R.length; c++) {
+          const a = R[c].matches, b = R[c + 1].matches;
+          if (a.length !== 1 || b.length !== 1 || a[0].title !== '상위권 대진 - 결승' || b[0].title !== '하위권 대진 - 결승' || a[0].startRow === b[0].startRow) continue;
+          const [ub, lb] = a[0].startRow < b[0].startRow ? [a[0], b[0]] : [b[0], a[0]];
+          const ubIdx = ub === a[0] ? 0 : 1;
+          R[c] = { ...R[c], matches: [ub, lb] };
+          R.splice(c + 1, 1);
+          // 연결선 재매핑: c(상위 결승) → c,ubIdx / c+1(하위 결승) → c,1-ubIdx / 이후 컬럼 -1. 같은 컬럼 간 선은 제거.
+          o.connectors = (o.connectors || []).map(([fR, fM, m, tR, tM, s]) => {
+            const map = (r, i) => (r === c ? [c, ubIdx] : r === c + 1 ? [c, 1 - ubIdx] : r > c + 1 ? [r - 1, i] : [r, i]);
+            const [nfR, nfM] = map(fR, fM), [ntR, ntM] = map(tR, tM);
+            return [nfR, nfM, m, ntR, ntM, s];
+          }).filter((x) => x[0] !== x[3]);
+          merged++;
+          break;
+        }
+        return;
+      }
+      for (const k in o) walk(o[k]);
+    };
+    walk(past.standings);
+    if (merged) { fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n'); console.log(`상위·하위권 결승 같은 컬럼 배치: ${merged}개`); }
+  } catch (e) { console.warn(`상위·하위권 결승 컬럼 병합 실패(무시): ${e.message}`); }
 }
