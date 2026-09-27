@@ -4963,7 +4963,7 @@ console.log('lolStandings.json 갱신 완료');
   const compStyle = (year, lg, sub, event) => {
     const y = String(year);
     if (lg === 'lec' && event === 'TCL') return { color: '#3f567c' }; // TCL(튀르키예 챔피언십 리그)
-    if (lg === 'lcp' && event === 'VCS') return { color: '#f0fea6' }; // LCP 전신(2024) 베트남 리그
+    if (lg === 'lcp' && event === 'VCS') return { color: Number(y) <= 2022 ? '#000' : '#f0fea6' }; // LCP 전신(2024) 베트남 리그
     if (lg === 'lcp' && event === 'PCS') return { color: y === '2023' ? '#cb0004' : '#101725' }; // LCP 전신(2024) 대만/홍콩/마카오 리그
     if (lg === 'lcp' && event === 'LJL') return { color: '#ed1b30' }; // LCP 전신(2024) 일본 리그
     if (lg === 'lcp' && event === 'LCO') return { color: '#0f3341' }; // LCP 전신(2024) 오세아니아 리그
