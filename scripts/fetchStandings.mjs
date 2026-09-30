@@ -4383,6 +4383,54 @@ console.log('lolStandings.json 갱신 완료');
   } catch (e) { console.warn(`2021 MSI GAM 추가 실패(무시): ${e.message}`); }
 }
 
+// ── 2020 LCK 'Split 1' → 'Spring' 서브탭 이름 변경(API 슬러그만 split1, 실제 대회명은 Spring) ──
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    const lck = past.standings?.['2020']?.lck;
+    if (lck?.['Split 1'] && !lck.Spring) {
+      past.standings['2020'].lck = Object.fromEntries(Object.entries(lck).map(([k, v]) => [k === 'Split 1' ? 'Spring' : k, v]));
+      past.subtabs['2020'].lck = past.subtabs['2020'].lck.map((k) => (k === 'Split 1' ? 'Spring' : k));
+      fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n');
+      console.log('2020 LCK Split 1 → Spring');
+    }
+  } catch (e) { console.warn(`2020 LCK Spring 이름 변경 실패(무시): ${e.message}`); }
+}
+
+// ── LCK 2020 이하 최종순위 보정 — 플레이오프 결승 승자와 최종순위 1위가 다르면 플레이오프만으로 재산출 ──
+//   (API 최종순위가 정규시즌·다른 스테이지 기준으로 잘못 들어간 경우: 2012 Spring·2013 Spring·2014 Spring/Summer·2020 Split 1 등)
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    const fixed = [];
+    for (const [yr, lgs] of Object.entries(past.standings || {})) {
+      if (Number(yr) > 2020) continue;
+      for (const [sub, node] of Object.entries(lgs?.lck || {})) {
+        const po = node?.brackets?.find((b) => b.slug === 'playoffs');
+        const ms = (po?.bracket?.rounds || []).flatMap((r) => r.matches || []);
+        const gf = ms.filter((m) => /^결승/.test(m.title || '')).pop();
+        if (!gf || gf.a?.score == null || gf.b?.score == null || gf.a.score === gf.b.score) continue;
+        const champ = gf.a.score > gf.b.score ? gf.a.short : gf.b.short;
+        if (node.finalStandings?.[0]?.team === champ) continue;
+        let fsNew = splitFinalStandings(node.rows || [], [po.bracket], true);
+        if (fsNew[0]?.team !== champ) {
+          // 같은 라운드의 3위 결정전을 결승으로 오인한 경우 → 결승·3위전으로 상위 4팀 직접 구성, 나머지는 기존 순서 유지
+          const tp = ms.find((m) => /3위/.test(m.title || ''));
+          const w = (m) => (m.a.score > m.b.score ? m.a.short : m.b.short), l = (m) => (m.a.score > m.b.score ? m.b.short : m.a.short);
+          const top = [champ, l(gf), ...(tp && tp.a?.score != null ? [w(tp), l(tp)] : [])];
+          const restT = (node.finalStandings || []).map((r) => r.team).filter((t) => !top.includes(t));
+          fsNew = [...top, ...restT].map((team, i) => ({ rank: i + 1, team, note: ['우승', '준우승', '3위'][i] || '' }));
+        }
+        node.finalStandings = fsNew;
+        fixed.push(`${yr} ${sub}=${champ}`);
+      }
+    }
+    if (fixed.length) { fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n'); console.log(`LCK 과거 최종순위 보정: ${fixed.join(', ')}`); }
+  } catch (e) { console.warn(`LCK 과거 최종순위 보정 실패(무시): ${e.message}`); }
+}
+
 // ── 2021~2023 LCS Championship — 2024와 동일(Summer 플레이오프 = LCS Championship). Summer는 PO·최종순위 유지, Championship 서브탭에 복제 ──
 {
   const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
@@ -5069,6 +5117,69 @@ console.log('lolStandings.json 갱신 완료');
   } catch (e) { console.warn(`LCK 승강전 반영 실패(무시): ${e.message}`); }
 }
 
+// ── 2012 LCK(OGN Champions) Winter 2012-13 — API 미제공 · Leaguepedia 기준 수기 ──
+//   (앱의 '2013 Winter'는 Champions Winter 2013-14 → 2012-13 시즌은 '2012 Winter'로)
+//   그룹 스테이지(6팀 2개조 · Bo2 · 승 3점/무 1점, 조 4위까지 진출) → 8강~결승 Bo5(4강은 Bo5 2회) + 3위전 · 시드 결정전. 우승 NaJin Sword.
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    const lck = past.standings?.['2012']?.lck;
+    if (lck && !lck.Winter) {
+      const S = (short, seed, score, flag) => { const s = { short }; if (seed) s.seed = seed; if (score != null) s.score = score; if (flag) s[flag] = true; return s; };
+      // w-l = 세트(게임) 승-패, 비고 = 시리즈 승-무-패 · 승점
+      const R = (rank, team, w, l, group, rec) => ({ rank, team, w, l, group, remark: rec });
+      const rows = [
+        R(1, 'AZF', 8, 4, 'A조', '2승 4무 · 10점'), R(2, 'MVPO', 7, 5, 'A조', '2승 3무 1패 · 9점'), R(3, 'IMI', 7, 5, 'A조', '2승 3무 1패 · 9점'),
+        R(4, 'KTRA', 7, 5, 'A조', '1승 5무 · 8점'), R(5, 'NWS', 5, 7, 'A조', '1승 3무 2패 · 6점'), R(6, 'TOP', 3, 9, 'A조', '3무 3패 · 3점'),
+        R(1, 'KTRB', 11, 1, 'B조', '5승 1무 · 16점'), R(2, 'AZB', 9, 3, 'B조', '4승 1무 1패 · 13점'), R(3, 'NBSW', 7, 5, 'B조', '3승 1무 2패 · 10점'),
+        R(4, 'CJ', 4, 8, 'B조', '2승 4패 · 6점'), R(5, 'MVPB', 2, 10, 'B조', '2무 4패 · 2점'), R(6, 'GSG', 2, 10, 'B조', '2무 4패 · 2점'),
+      ];
+      const ko = applySingleElimLayout({
+        rounds: [
+          { matches: [
+            { title: '8강', a: S('AZF', 'A조 1위', 3, 'win'), b: S('CJ', 'B조 4위', 2) },
+            { title: '8강', a: S('AZB', 'B조 2위', 3, 'win'), b: S('IMI', 'A조 3위', 2) },
+            { title: '8강', a: S('MVPO', 'A조 2위', 0), b: S('NBSW', 'B조 3위', 3, 'win') },
+            { title: '8강', a: S('KTRB', 'B조 1위', 3, 'win'), b: S('KTRA', 'A조 4위', 1) },
+          ] },
+          { matches: [
+            { title: '4강 (Bo5 2회 · 3:2, 3:2)', a: S('AZF', '8강 승자', 2, 'win'), b: S('AZB', '8강 승자', 0) },
+            { title: '4강 (Bo5 2회 · 3:1, 3:0)', a: S('NBSW', '8강 승자', 2, 'win'), b: S('KTRB', '8강 승자', 0) },
+          ] },
+          { matches: [
+            { title: '결승', a: S('AZF', '4강 승자', 0, 'elim'), b: S('NBSW', '4강 승자', 3, 'msi') },
+          ] },
+        ],
+        connectors: [
+          [0, 0, 'a', 1, 0, 'a'], [0, 1, 'a', 1, 0, 'b'], [0, 2, 'b', 1, 1, 'a'], [0, 3, 'a', 1, 1, 'b'],
+          [1, 0, 'a', 2, 0, 'a'], [1, 1, 'a', 2, 0, 'b'],
+        ],
+      });
+      ko.rounds[ko.rounds.length - 1].matches.push({ title: '3위 결정전', startRow: 6, a: S('AZB', '4강 패자', 0), b: S('KTRB', '4강 패자', 3, 'win') });
+      const seedCh = { totalRows: 2, rounds: [{ title: '', matches: [{ title: '시드 결정전 (조 5위)', startRow: 0, a: S('NWS', 'A조 5위', 3, 'win'), b: S('MVPB', 'B조 5위', 1, 'elim') }] }], connectors: [] };
+      lck.Winter = {
+        name: 'Champions Winter 2012-13', regLabel: '그룹 스테이지', parallelGroups: true,
+        rows,
+        brackets: [
+          { slug: 'playoffs', name: '플레이오프', label: '플레이오프', bracket: ko },
+          { slug: 'seed_challenge', name: '시드 결정전', label: '시드 결정전', bracket: seedCh },
+        ],
+        finalStandings: [
+          { rank: 1, team: 'NBSW', note: '우승' }, { rank: 2, team: 'AZF', note: '준우승' },
+          { rank: 3, team: 'KTRB', note: '3위' }, { rank: 4, team: 'AZB', note: '' },
+          { rank: 5, team: 'KTRA', note: '' }, { rank: 5, team: 'MVPO', note: '' }, { rank: 5, team: 'IMI', note: '' }, { rank: 5, team: 'CJ', note: '' },
+          { rank: 9, team: 'NWS', note: '' }, { rank: 9, team: 'TOP', note: '' }, { rank: 9, team: 'GSG', note: '' }, { rank: 9, team: 'MVPB', note: '' },
+        ],
+      };
+      const subs = past.subtabs['2012'].lck;
+      if (!subs.includes('Winter')) subs.push('Winter');
+      fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n');
+      console.log('2012 LCK Winter(Champions Winter 2012-13) 추가 · 우승 NaJin Sword');
+    }
+  } catch (e) { console.warn(`2012 LCK Winter 추가 실패(무시): ${e.message}`); }
+}
+
 // ── 2022 항저우 아시안게임(2023년 개최) LoL — API 미제공 · 수기 → 과거 에디션 '2023'(연도 선택 기준) ─────────
 //   그룹 스테이지(3팀 4개조 싱글RR · D조 2팀 · 조 1위 진출) → 녹아웃(직행 4국 + 조 1위 4국 · 싱글 엘리 + 동메달 결정전). 금 대한민국.
 {
@@ -5228,6 +5339,7 @@ console.log('lolStandings.json 갱신 완료');
       if (lg === 'fst') return `${year} First Stand`;
       if (lg === 'msi') return `${year} Mid-Season Invitational`;
       if (lg === 'worlds') return `${year} Worlds`;
+      if (lg === 'lck' && String(year) === '2020' && sub === 'Split 1') return '2020 LCK Spring'; // API 슬러그는 split1이지만 실제 대회명은 Spring
       if (String(year) === '2025' && (lg === 'lcs' || lg === 'cblol') && sub === 'Playoffs') return `${year} LTA Playoffs`;
       if (String(year) === '2025' && (lg === 'lcs' || lg === 'cblol') && (sub === 'Split 1' || sub === 'Etapa 1')) return `${year} LTA Split 1`; // 통합 스플릿 = 단일 우승
       if (String(year) === '2025' && lg === 'lcs') return sub === 'Split 1' ? `${year} LTA Split 1` : `${year} LTA North ${sub}`;
@@ -5242,7 +5354,7 @@ console.log('lolStandings.json 갱신 완료');
       return `${year} ${disp}${subPart}`;
     };
     for (const [year, lgs] of Object.entries(past.standings || {})) {
-      if (!['2021', '2022', '2023', '2024', '2025'].includes(year)) continue; // 2021~2026 대회 우승 경력 반영(2026은 라이브 data.standings에서 별도 산출)
+      if (Number(year) > 2025) continue; // 과거 전 연도 산출(2026은 라이브 data.standings에서 별도). 2021 미만은 아래에서 LCK 팀만 남김
       for (const [lg, v] of Object.entries(lgs || {})) {
         if (lg === 'ewc' && v?.champion) {                    // EWC(그룹+플레이오프 구조) — champion 필드로 우승 반영
           add(v.champion, `${year} Esports World Cup`, compStyle(year, 'ewc', null), { tab: 'ewc', year });
@@ -5277,6 +5389,14 @@ console.log('lolStandings.json 갱신 완료');
   const yearOf = (name) => { const m = name.match(/\b(20\d{2})\b/); return m ? Number(m[1]) : 0; };
   // 과거 팀 코드의 우승은 현재 팀으로 합산(예: R7·6K → LYON, RGE → NAVI).
   for (const [old, cur] of Object.entries(TEAM_LINK)) if (titles[old]) { (titles[cur] = titles[cur] || []).push(...titles[old]); delete titles[old]; }
+  // API에 없는 과거 국제대회(MSI 2017~2019·Worlds 2012~2013·2017~2019) 중 현 LCK 팀 계보 우승만 수기 보충(대회 페이지 없음 → link 없음).
+  for (const [team, year, lg, nm] of [['T1', '2013', 'worlds', '2013 Worlds'], ['T1', '2017', 'msi', '2017 Mid-Season Invitational'], ['GEN', '2017', 'worlds', '2017 Worlds']]) add(team, nm, compStyle(year, lg, null));
+  // 2020 이하 우승은 현재 LCK 팀에 한정(그 외 팀은 2021~만).
+  const LCK_TEAMS = new Set(JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'client', 'src', 'data', 'gprTeams.json'), 'utf8')).teams.filter((t) => t.league === 'LCK').map((t) => t.short));
+  for (const short of Object.keys(titles)) {
+    if (!LCK_TEAMS.has(short)) titles[short] = titles[short].filter((t) => yearOf(t.name) >= 2021);
+    if (!titles[short].length) delete titles[short];
+  }
   for (const short of Object.keys(titles)) titles[short].sort((a, b) => (yearOf(b.name) - yearOf(a.name)) || (ord(b.name) - ord(a.name)));
   const titlesFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolTitles.json');
   fs.writeFileSync(titlesFile, JSON.stringify({ updatedAt: data.updatedAt, titles }, null, 2) + '\n');
@@ -5474,4 +5594,34 @@ function autoGridAll(node) {
     walk(past.standings);
     if (compacted) { fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n'); console.log(`과거 대진표 세로 간격 압축: ${compacted}개`); }
   } catch (e) { console.warn(`과거 대진표 간격 압축 실패(무시): ${e.message}`); }
+}
+
+// ── 과거 대진표: '4강 패자'끼리 붙는 경기가 '결승'으로 잘못 표기된 3·4위전 수정 ──
+//   제목 → '3위 결정전', 결승과 행 위치를 맞바꿔 결승이 위에 오게, 3위전 승자의 우승 표시(msi) → 라운드 승리(win).
+{
+  const pastFile = path.join(__dirname, '..', 'client', 'src', 'data', 'lolPastEditions.json');
+  try {
+    const past = JSON.parse(fs.readFileSync(pastFile, 'utf8'));
+    let fixed = 0;
+    const walk = (o) => {
+      if (Array.isArray(o)) { o.forEach(walk); return; }
+      if (!o || typeof o !== 'object') return;
+      if (Array.isArray(o.rounds)) {
+        for (const r of o.rounds) {
+          const ms = r.matches || [];
+          const third = ms.find((m) => m.title === '결승' && /4강 패자/.test(m.a?.seed || '') && /4강 패자/.test(m.b?.seed || ''));
+          const fin = ms.find((m) => m !== third && m.title === '결승');
+          if (!third || !fin) continue;
+          third.title = '3위 결정전';
+          for (const s of ['a', 'b']) if (third[s]?.msi) { delete third[s].msi; third[s].win = true; }
+          if (typeof third.startRow === 'number' && typeof fin.startRow === 'number' && third.startRow < fin.startRow) [third.startRow, fin.startRow] = [fin.startRow, third.startRow];
+          fixed++;
+        }
+        return;
+      }
+      for (const k in o) walk(o[k]);
+    };
+    walk(past.standings);
+    if (fixed) { fs.writeFileSync(pastFile, JSON.stringify(past, null, 2) + '\n'); console.log(`3위 결정전 표기 수정: ${fixed}개`); }
+  } catch (e) { console.warn(`3위 결정전 수정 실패(무시): ${e.message}`); }
 }
