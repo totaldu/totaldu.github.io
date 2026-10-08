@@ -86,8 +86,14 @@ const LEAGUE_IDS = [
   '98767991302996019',  // LEC
   '98767991299243165',  // LCS
   '98767991325878492',  // MSI
-  '107898214974993351', // LCP
+  '113476371197627891', // LCP
   '98767991332355509',  // CBLOL
+  // 국제·이벤트 대회 — 시즌 후반 마지막 경기가 이쪽에 있는 팀(예: LCP 팀의 DCGI)도 최신 라인업으로 판별
+  '98767975604431411',  // Worlds
+  '113464388705111224', // First Stand
+  '116838530616006090', // EWC
+  '116929044967296666', // KeSPA Cup
+  '117126995932274206', // DCGI
 ];
 
 const api = (path) =>
@@ -232,12 +238,14 @@ async function main() {
 
       const players = rosterPlayers
         .map(p => ({
+          id: p.id, // esports 선수 ID — 시즌 기록(lolPlayerStats.json) 연결용
           name: p.summonerName,
           firstName: p.firstName || '',
           lastName: p.lastName || '',
           role: p.role,
           image: (p.image || '').replace(/^http:\/\//, 'https://'), // http 이미지 → https(혼합 콘텐츠 경고 방지)
           starter: starters ? starters.has(p.summonerName) : false,
+          _role: p.role,
         }))
         // 역할 순서 → 같은 역할 내에서는 주전 먼저
         .sort((a, b) => {
@@ -245,8 +253,16 @@ async function main() {
           if (r !== 0) return r;
           return (b.starter ? 1 : 0) - (a.starter ? 1 : 0);
         });
+      // 최근 라인업으로 주전을 못 정한 경우(경기 기록 없음 등): 역할별 첫 번째 선수를 주전으로 표시
+      if (!starters) for (const role of ROLE_ORDER) { const p = players.find((x) => x.role === role); if (p) p.starter = true; }
+      for (const p of players) delete p._role;
 
-      rosters[short] = { id, players };
+      // getTeams 팀 정보(공식 로고·배경·소속 리그·활동 상태) — 팀 페이지 로고 대체·리그 표기용
+      const https = (u) => (u || '').replace(/^http:\/\//, 'https://');
+      rosters[short] = {
+        id, players,
+        team: { name: team.name, code: team.code, slug: team.slug, status: team.status, homeLeague: team.homeLeague || null, image: https(team.image), alternativeImage: https(team.alternativeImage), backgroundImage: https(team.backgroundImage) },
+      };
       console.log(` ${players.length} players${starters ? ` (주전 ${players.filter(p => p.starter).length})` : ''}`);
     } catch (e) {
       console.log(` ERROR: ${e.message}`);
@@ -258,6 +274,31 @@ async function main() {
     updatedAt: new Date().toISOString().slice(0, 10),
     rosters,
   };
+  // getTeams(전체, id 없이) — 활동·해체 팀 전부의 공식 로고·팀명(lolTeamsAll.json).
+  //   과거 대회의 옛 팀(로고 미보유)을 표시할 때 대체 로고로 사용. 같은 약칭이 여럿이면 활동 중인 팀 우선.
+  try {
+    const all = (await api('getTeams?hl=ko-KR'))?.data?.teams || [];
+    const https2 = (u) => (u || '').replace(/^http:\/\//, 'https://');
+    const byCode = {}, byName = {};
+    for (const t of all.filter((x) => x.image)) {
+      const img = https2(t.image);
+      if (!byName[t.name]) byName[t.name] = img;
+      const prev = byCode[t.code];
+      if (!prev || (prev.status !== 'active' && t.status === 'active')) byCode[t.code] = { name: t.name, image: img, status: t.status };
+    }
+    const slim = Object.fromEntries(Object.entries(byCode).map(([c, v]) => [c, [v.name, v.image]]));
+    writeFileSync(resolve(__dirname, '../client/src/data/lolTeamsAll.json'), JSON.stringify({ updatedAt: new Date().toISOString().slice(0, 10), byCode: slim, byName }) + '\n');
+    console.log(`전체 팀 정보 저장: ${all.length}팀 (약칭 ${Object.keys(slim).length})`);
+  } catch (e) { console.log(`전체 팀 정보 실패(무시): ${e.message}`); }
+
+  // getLeagues — 리그 공식 로고·지역·표시 순서(lolLeagues.json)
+  try {
+    const lj = await api('getLeagues?hl=ko-KR');
+    const leagues = (lj?.data?.leagues || []).map((l) => ({ id: l.id, slug: l.slug, name: l.name, region: l.region, image: (l.image || '').replace(/^http:\/\//, 'https://'), priority: l.displayPriority?.position ?? null, status: l.displayPriority?.status ?? null }));
+    writeFileSync(resolve(__dirname, '../client/src/data/lolLeagues.json'), JSON.stringify({ updatedAt: new Date().toISOString().slice(0, 10), leagues }, null, 2) + '\n');
+    console.log(`리그 정보 저장: ${leagues.length}개`);
+  } catch (e) { console.log(`리그 정보 실패(무시): ${e.message}`); }
+
   const outPath = resolve(__dirname, '../client/src/data/lolRosters.json');
   writeFileSync(outPath, JSON.stringify(out, null, 2));
   console.log(`\nSaved to ${outPath}`);
