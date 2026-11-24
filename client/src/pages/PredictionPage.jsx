@@ -175,6 +175,8 @@ import agalEwcLogo from '../assets/agal-ewc.webp';
 import mibrLosEwcLogo from '../assets/mibr-los-ewc.webp';
 import frkLogo from '../assets/frk.webp';
 import StoveLeagueView from '../components/StoveLeagueView';
+import TprTable from '../components/TprTable';
+import { eraLogoByName, splitOf } from '../utils/teamEra';
 // 2026 LCS 승강전 2부 팀(API에서 사라질 수 있어 로컬 저장)
 import lcspMuLogo from '../assets/lcsp-mu.png';
 import lcspZ5Logo from '../assets/lcsp-z5.png';
@@ -847,7 +849,7 @@ const MsiBracket = ({ rounds: roundsIn, totalRows, connectors: connData, cardPre
       const fx = fRect.right - wRect.left;
       const tx = tRect.left - wRect.left;
       const fy = slotCenterY(fromEl, fS);
-      const ty = slotCenterY(toEl, tS);
+      const ty = slotCenterY(toEl); // 진출선은 다음 대진 카드의 세로 가운데로 모음 — 슬롯별로 꽂으면 선이 교차함
       const flat = Math.abs(fy - ty) <= 2;
       if (flat) return `M ${fx} ${fy} L ${tx} ${ty}`;
 
@@ -3151,16 +3153,16 @@ const CURRENT_YEAR = 2026;
 // AG는 에디션별 명칭/로고가 달라 단일 연도만 두어 드롭다운을 숨긴다.
 const COMP_EDITIONS = {
   lck: [2027, 2026, 2025], // 2027 = 스토브리그(예상 로스터)
-  lpl: [2026, 2025],
-  lec: [2026, 2025],
-  lcs: [2026, 2025],
-  lcp: [2026, 2025, 2024, 2023, 2022, 2021],
-  cblol: [2026, 2025],
-  fst: [2026, 2025],
-  msi: [2026, 2025],
-  demacia: [2026, 2025, 2024, 2023, 2022],
-  worlds: [2026, 2025],
-  ewc: [2026, 2025, 2024],
+  lpl: [2027, 2026, 2025],
+  lec: [2027, 2026, 2025],
+  lcs: [2027, 2026, 2025],
+  lcp: [2027, 2026, 2025, 2024, 2023, 2022, 2021],
+  cblol: [2027, 2026, 2025],
+  fst: [2027, 2026, 2025],
+  msi: [2027, 2026, 2025],
+  demacia: [2027, 2026, 2025, 2024, 2023, 2022],
+  worlds: [2027, 2026, 2025],
+  ewc: [2027, 2026, 2025, 2024],
   asiangames: [2026, 2023], // 2022 항저우 AG는 코로나로 2023년 개최 → 연도 선택은 2023(대회명은 2022 유지)
 };
 // 선택 가능한 연도 = 수기 기준(COMP_EDITIONS: demacia/fst 등 특수 2025) + 생성된 과거 데이터의 모든 연도.
@@ -3199,7 +3201,7 @@ const SUBEVENT_NAMES = { ASI: 'Asia Invitational', 'Demacia Cup': 'Demacia Cup' 
 
 // 연도 선택 드롭다운 — 네이티브 select는 항목이 많으면 브라우저가 위로 펼쳐서, 항상 아래로 펼치는 커스텀 구현.
 // 연도·세부 대회 선택에 공용 사용(ariaLabel로 구분).
-const YearDropdown = ({ years, value, onChange, ariaLabel = '대회 연도 선택' }) => {
+export const YearDropdown = ({ years, value, onChange, ariaLabel = '대회 연도 선택' }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   useEffect(() => {
@@ -3246,8 +3248,14 @@ const YearDropdown = ({ years, value, onChange, ariaLabel = '대회 연도 선�
   );
 };
 
+// 지역 GPR 점수 내림차순 (국내리그 탭·지역 점수 그래프 공용)
+const REGIONS_BY_SCORE = [...gpr.regions].sort((a, b) => b.score - a.score);
+const REGION_RANK = Object.fromEntries(REGIONS_BY_SCORE.map((r, i) => [r.key.toLowerCase(), i]));
+// 국내리그 탭만 지역 점수 순으로, 국제대회 탭은 제자리
+const sortLeagues = (cs) => { const lg = cs.filter((c) => c.key in REGION_RANK).sort((x, y) => REGION_RANK[x.key] - REGION_RANK[y.key]); let i = 0; return cs.map((c) => (c.key in REGION_RANK ? lg[i++] : c)); };
+
 const PredictionPage = () => {
-  const comps = sim.competitions;
+  const comps = useMemo(() => sortLeagues(sim.competitions), []);
   const tabs = [GPR_TAB, ...comps];
   const validKeys = useMemo(() => [GPR_TAB.key, ...comps.map((c) => c.key)], [comps]);
 
@@ -3277,6 +3285,7 @@ const PredictionPage = () => {
   const setActiveKey = (key) => navigate(`/lol/prediction/${key}`);
 
   const isGpr = activeKey === 'gpr';
+  const isTpr = isGpr && searchParams.get('rank') === 'tpr';
   const comp = useMemo(() => comps.find((c) => c.key === activeKey), [comps, activeKey]);
   // 대회 연도(에디션) 선택 — 서브탭/데이터 해석보다 먼저 필요. `?year=` 로 유지(현재 연도는 생략)
   const years = comp ? editionYears(comp.key) : [CURRENT_YEAR];
@@ -3643,6 +3652,12 @@ const PredictionPage = () => {
     ov.INTZ = { ...(ov.INTZ || {}), tag: 'ITZ' };
     // ANCX: 2024 LCP(PCS)에서 약칭 ANC로 표기.
     if (comp?.key === 'lcp' && activeYear === 2024) ov.ANCX = { tag: 'ANC', name: 'Antic Esports', logo: anticEsportsLogo };
+    // 위 수기 규칙에 로고가 없는 팀은 Leaguepedia 로고 이력에서 그 해의 옛 로고를 찾아 적용(현재와 같은 로고면 그대로 둔다)
+    for (const sh of Object.keys(nameByShort)) {
+      if (ov[sh]?.logo) continue;
+      const lg = eraLogoByName(ov[sh]?.name || nameByShort[sh], activeYear, { split: splitOf(activeSub), latest: false });
+      if (lg) ov[sh] = { ...(ov[sh] || {}), logo: lg };
+    }
     return ov;
   })();
 
@@ -3725,6 +3740,7 @@ const PredictionPage = () => {
   const displayTitle = (() => {
     if (isCurrentYear) return title;
     if (pcsPoView) return `${activeYear} PCS ${({ 'Split 1': 'Spring', 'Split 2': 'Summer' })[activeSub] || activeSub} Playoffs`;
+    if (comp?.key === 'fst' && activeYear === 2027) return '2027 First Stand: All In'; // 2027만 대회명이 다름
     if (comp?.key === 'asiangames' && activeYear === 2023) return '19th Asian Games Hangzhou 2022 Esports League of Legends'; // 2023년 개최, 대회명은 2022
     if (activeEvent) return `${activeYear} ${SUBEVENT_NAMES[activeEvent] || activeEvent}${activeSub ? ` ${activeSub}` : ''}`;
     const subMap = SUB_TITLE_NAME[`${comp?.key}|${activeYear}`];
@@ -3739,7 +3755,7 @@ const PredictionPage = () => {
   // LIVE 세트 스코어가 대진표 데이터에 반영되면 다시 그리기 위한 카운터
   const [, setLiveTick] = useState(0);
   // 과거 연도는 이미 종료된 대회이므로 상태 배지를 '종료'로 표기
-  const stDisplay = isStove ? statusMeta.upcoming : !isCurrentYear ? statusMeta.finished : st;
+  const stDisplay = isStove || activeYear > CURRENT_YEAR ? statusMeta.upcoming : !isCurrentYear ? statusMeta.finished : st;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1428] via-[#1e2328] to-[#0a1428] p-4 md:p-6 text-white">
@@ -3748,7 +3764,7 @@ const PredictionPage = () => {
           <div className="w-11 h-11 bg-[#C8963E] rounded-xl flex items-center justify-center shrink-0">
             <Target color="white" size={22} />
           </div>
-          <h1 className="text-3xl md:text-4xl font-black text-white">LoL 승부예측</h1>
+          <h1 className="text-3xl md:text-4xl font-black text-white">LoL 대회 진행</h1>
         </div>
 
         {/* 진행 중 경기(LIVE) — 백엔드 경유 30초 갱신, 없으면 숨김 */}
@@ -3819,11 +3835,20 @@ const PredictionPage = () => {
                   <img src={LOLESPORTS_LOGO} alt="GPR" width={24} height={24} className="object-contain" style={{ filter: 'brightness(0) invert(1)' }} />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-white">GPR 팀 랭킹</h2>
-                  <p className="text-xs text-white/40">Global Power Rankings · {gprTeams.teams.length}팀 · 갱신 {gprTeams.updatedAt}</p>
+                  <h2 className="text-xl font-black text-white">{isTpr ? 'TPR 팀 랭킹' : 'GPR 팀 랭킹'}</h2>
+                  <p className="text-xs text-white/40">{isTpr ? 'TotalDU Power Rating · 2027 확정 로스터 기준' : `Global Power Rankings · ${gprTeams.teams.length}팀 · 갱신 ${gprTeams.updatedAt}`}</p>
+                </div>
+                {/* GPR ↔ TPR 전환 — ?rank=tpr 로 유지 */}
+                <div className="ml-auto flex rounded-lg bg-white/5 border border-white/10 p-0.5 text-xs font-black">
+                  {['gpr', 'tpr'].map((m) => (
+                    <button key={m} onClick={() => setSearchParams((p) => { const q = new URLSearchParams(p); if (m === 'tpr') q.set('rank', 'tpr'); else q.delete('rank'); return q; }, { replace: true })}
+                      className={`px-3 py-1 rounded-md ${(m === 'tpr') === isTpr ? 'bg-[#C8963E] text-[#1e2328]' : 'text-white/60 hover:text-white'}`}>{m.toUpperCase()}</button>
+                  ))}
                 </div>
               </div>
-              <GprTable selectedTeam={selectedTeam} onTeamClick={handleTeamClick} />
+              {isTpr
+                ? <TprTable logoOf={(s) => logoByShort[s]} selectedTeam={selectedTeam} onTeamClick={handleTeamClick} />
+                : <GprTable selectedTeam={selectedTeam} onTeamClick={handleTeamClick} />}
             </>
           ) : (
             <>
@@ -3914,8 +3939,8 @@ const PredictionPage = () => {
                 ) : (
                   <div className="py-16 text-center border-2 border-dashed border-white/10 rounded-3xl">
                     <Hourglass size={28} className="mx-auto text-white/30 mb-3" />
-                    <p className="text-white/50 font-bold mb-1">{activeYear} 결과 준비 중</p>
-                    <p className="text-white/30 text-sm">이전 연도 대회 결과를 곧 게재합니다.</p>
+                    <p className="text-white/50 font-bold mb-1">{activeYear > CURRENT_YEAR ? `${activeYear} 시즌 예정` : `${activeYear} 결과 준비 중`}</p>
+                    <p className="text-white/30 text-sm">{activeYear > CURRENT_YEAR ? '대진·일정이 확정되면 게재합니다.' : '이전 연도 대회 결과를 곧 게재합니다.'}</p>
                   </div>
                 )
               ) : isPastSplit ? (
@@ -3949,17 +3974,15 @@ const PredictionPage = () => {
         <section className="mt-8 p-5 rounded-2xl bg-white/5 border border-white/10">
           <h2 className="text-sm font-black text-[#E8C77E] mb-4 uppercase tracking-wider">참고 · 지역별 GPR 점수</h2>
           <div className="flex flex-col gap-2">
-            {gpr.regions.map((r) => {
-              const max = Math.max(...gpr.regions.map((x) => x.score));
+            {REGIONS_BY_SCORE.map((r) => {
+              const max = REGIONS_BY_SCORE[0].score, min = REGIONS_BY_SCORE[REGIONS_BY_SCORE.length - 1].score; // 최저 지역 = 막대 0%
               return (
                 <div key={r.key} className="flex items-center gap-3">
                   <span className="w-14 text-sm font-black shrink-0" style={{ color: lighten(r.color) }}>{r.name}</span>
                   <div className="flex-1 h-4 bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full rounded-full flex items-center justify-end pr-2 text-[10px] font-black text-white/90"
-                      style={{ width: `${(r.score / max) * 100}%`, backgroundColor: r.color }}>
-                      {r.score}
-                    </div>
+                    <div className="h-full rounded-full" style={{ width: `${((r.score - min) / (max - min || 1)) * 100}%`, backgroundColor: r.color }} />
                   </div>
+                  <span className="w-10 text-right font-mono text-xs font-black tabular-nums" style={{ color: lighten(r.color) }}>{r.score}</span>
                 </div>
               );
             })}
@@ -3977,9 +4000,7 @@ const PredictionPage = () => {
             레이팅 출처: lolesports.com Global Power Rankings <ExternalLink size={11} /> · 갱신 {fmtUpdated(sim.updatedAt)}
           </a>
           <p className="text-white/30 text-[11px] mt-2">
-            TotalDU는 Riot Games의 서비스가 아닌 개인의 비공식 서비스이며 Riot Games 또는 리그 오브 레전드의 공개 데이터를 활용합니다. 리그 오브 레전드 및 Riot Games는 Riot Games, Inc.의 상표 또는 등록 상표입니다.
-            <br />
-            League of Legends © Riot Games, Inc.
+            TotalDU은 라이엇 게임즈의 "지식재산 이용 정책"에 따라 라이엇 게임즈 소유의 자산을 이용하여 제작되었습니다. 라이엇 게임즈는 이 프로젝트를 지지하거나 후원하지 않습니다.
           </p>
         </div>
       </div>

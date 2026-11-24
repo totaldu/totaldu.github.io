@@ -8,9 +8,13 @@ import rosters from '../data/lolRosters.json';
 import gprTeamsData from '../data/gprTeams.json';
 import playerStats from '../data/lolPlayerStats.json';
 import playerCareers from '../data/lolPlayerCareers.json';
+import extraPlayers from '../data/lolExtraPlayers.json';
 import { PLAYER_WORLDS_TEAM } from '../utils/championBg';
 import ChampionBackground from '../components/ChampionBackground';
+import AutoContrastLogo from '../components/AutoContrastLogo';
 import { eraLogo } from '../utils/eraLogos';
+import { eraLogoByName, finalTeamName } from '../utils/teamEra';
+import stove2027 from '../data/lckStove2027.json';
 
 const gprTeamMap = Object.fromEntries(gprTeamsData.teams.map((t) => [t.short, t]));
 // 같은 구단의 옛 이름은 한 팀으로 취급(예: SK Telecom T1 K·SK Telecom T1 → T1). 2군·아카데미는 별개.
@@ -28,10 +32,14 @@ const ORG_ALIASES = [
   [/^(JD Gaming|JDG Intel Esports Club|Beijing JDG( Esports)?)$/i, 'JDG'],
   [/^(Invictus Gaming( Meituan)?)$/i, 'IG'],
   [/^(EDG|EDward Gaming|Edward Gaming)$/i, 'EDG'],
-  [/^(Royal Never Give Up|Royal Club)$/i, 'RNG'],
+  [/^(Royal Never Give Up|(Star Horn )?Royal Club)$/i, 'RNG'],
   [/^(Snake Esports|LNG|LNG Esports|Suzhou LNG Esports)$/i, 'LNG'],
 ];
-const orgOf = (name) => { for (const [re, k] of ORG_ALIASES) if (re.test(name.trim())) return k; return name.trim().toLowerCase(); };
+const orgOf = (name) => {
+  const n = finalTeamName(name) || name.trim();
+  for (const [re, k] of ORG_ALIASES) if (re.test(n) || re.test(name.trim())) return k;
+  return n.toLowerCase();
+};
 // 팀 로고 — 같은 구단(옛 이름 포함)은 현재 팀 로고, 그 외는 이름이 같은 GPR·로스터 팀 로고
 const ORG_SHORT = { T1: 'T1', GEN: 'GEN', HLE: 'HLE', DRX: 'KRX', DK: 'DK', KT: 'KT', DNS: 'DNS', BRO: 'BRO', BFX: 'BFX', NS: 'NS', JDG: 'JDG', IG: 'IG', EDG: 'EDG', LNG: 'LNG' };
 const logoByName = {};
@@ -42,8 +50,11 @@ const logoOfTeam = (name, year) => {
   const era = k && year && eraLogo(k, year);
   if (era) return era;
   const sh = k && ORG_SHORT[k];
+  const current = (sh && (gprTeamMap[sh]?.logo || rosters.rosters?.[sh]?.team?.image)) || logoByName[name.trim().toLowerCase()];
+  // 올해까지 이어진 경력은 사이트의 현재 로고 — Leaguepedia 파일 이력이 옛 그림에 머문 팀이 있음(예: BNK FEARX)
+  if (year >= 2026 && current) return current;
   // 그 당시 팀 이름의 로고(Leaguepedia) 우선, 없으면 현재 구단 로고
-  return playerCareers.logos?.[name.trim()] || (sh && (gprTeamMap[sh]?.logo || rosters.rosters?.[sh]?.team?.image)) || logoByName[name.trim().toLowerCase()] || null;
+  return eraLogoByName(name, year) || (sh && (gprTeamMap[sh]?.logo || rosters.rosters?.[sh]?.team?.image)) || logoByName[name.trim().toLowerCase()] || null;
 };
 // 2·3군 → 1군: 같은 구단 2·3군(Academy·Rookies·Youth·Challengers 등)에서 곧바로 1군으로 올라온 경우만 1군 경력에 포함.
 const ACADEMY_RE = /(\s+|\.)(E\.A\. Rookies|Esports Academy|Global Academy|Youth Team|Academy|Rookies|Youth|Challengers?|Chall\.|Scholars|Young|Junior|Trainee)$/i;
@@ -51,9 +62,9 @@ const ACADEMY_RE = /(\s+|\.)(E\.A\. Rookies|Esports Academy|Global Academy|Youth
 const ACADEMY_OF = {
   'INTZ Blue': 'INTZ', 'UOL Sexy Edition': 'Unicorns of Love', 'GIANTX PRIDE': 'GIANTX', 'Karmine Corp Blue': 'Karmine Corp',
   'SK Gaming Prime': 'SK Gaming', 'G2 Arctic': 'G2 Esports', 'Fnatic TQ': 'Fnatic', 'Movistar KOI Fénix': 'Movistar KOI',
-  'Misfits Premier': 'Misfits Gaming', '100 Next': '100 Thieves', 'C9 Amateur': 'Cloud9', 'EG Prodigies': 'Evil Geniuses',
+  'Misfits Premier': 'Misfits Gaming', '100 Next': '100 Thieves', 'C9 Amateur': 'Cloud9', 'Cloud9 Amateur': 'Cloud9', 'EG Prodigies': 'Evil Geniuses',
   'VG Potential': 'Vici Gaming', 'ahq Fighter': 'ahq eSports Club', 'FunPlus Blaze': 'FunPlus Phoenix',
-  'SuperMassive Blaze': 'Papara SuperMassive', 'Schalke Evolution': 'Schalke 04', 'GC Busan SANDBOX': 'Liiv SANDBOX',
+  'SuperMassive Blaze': 'Papara SuperMassive', 'Schalke Evolution': 'Schalke 04', 'FC Schalke 04 Evolution': 'FC Schalke 04 Esports', 'GC Busan SANDBOX': 'Liiv SANDBOX',
 };
 // 2·3군 이름의 약칭 → 1군 이름(1군 경력과 같은 구단인지 비교용)
 const ACADEMY_BASE = {
@@ -81,7 +92,8 @@ const foldAcademy = (list) => {
     out.push(...side); // 겹친 팀은 구간보다 앞(오래된 쪽)에 둔다
     const main = run.filter((c) => !isAcademy(c.team));
     const name = (main.length ? main : run)[(main.length ? main : run).length - 1].team;
-    out.push({ team: name, from: Math.min(...run.map((c) => c.from)), to: Math.max(...run.map((c) => c.to)) });
+    // nameTo: 그 이름을 마지막으로 쓴 시즌 — 로고를 표시 이름과 같은 시기로 맞춘다
+    out.push({ team: name, from: Math.min(...run.map((c) => c.from)), to: Math.max(...run.map((c) => c.to)), nameTo: Math.max(...run.filter((c) => c.team === name).map((c) => c.to)) });
     run = []; side = [];
   };
   for (const c of list) {
@@ -89,19 +101,24 @@ const foldAcademy = (list) => {
     const runTo = run.length ? Math.max(...run.map((x) => x.to)) : -1;
     if (prev && baseOrg(prev.team) === baseOrg(c.team) && c.from <= runTo + 1) run.push(c);
     // 같은 기간에 겹친 다른 팀(지역·아마추어 팀 등)은 구간을 끊지 않고 따로 둔다
-    else if (prev && c.to <= runTo) side.push(c);
+    //   구간 마지막 시즌까지 이어진 팀은 시즌 중 이적이므로 새 구간으로(예: Diable BFX→NS 2026)
+    else if (prev && c.to < runTo) side.push(c);
     else { if (run.length) flush(); run = [c]; }
   }
   if (run.length) flush();
   return out;
 };
 // 연속된 같은 구단 기간을 하나로 합치고, 표시 이름은 가장 최근 이름으로.
+// 한글 이름 팀(아마추어 대회 팀) 제외 — LCK·LCK CL·KeSPA CUP·KeG 참가 팀이면 아래 목록에 넣어 남긴다.
+//   (현재 경력 데이터의 한글 팀명은 모두 아마추어 대회 팀이라 비어 있음)
+const KOREAN_NAME_KEEP = new Set([]);
+const isAmateurKorean = (name) => /[가-힣]/.test(name) && !KOREAN_NAME_KEEP.has(name);
 const mergeCareer = (list0) => {
-  const list = foldAcademy(list0.map((c) => ({ ...c })));
+  const list = foldAcademy(list0.filter((c) => !isAmateurKorean(c.team)).map((c) => ({ ...c })));
   const out = [];
   for (const c of list) {
     const last = out[out.length - 1];
-    if (last && orgOf(last.team) === orgOf(c.team) && c.from <= last.to + 1) { last.to = Math.max(last.to, c.to); last.team = c.team; continue; }
+    if (last && orgOf(last.team) === orgOf(c.team) && c.from <= last.to + 1) { last.to = Math.max(last.to, c.to); last.team = c.team; last.nameTo = c.nameTo ?? c.to; continue; }
     out.push({ ...c });
   }
   return out;
@@ -110,6 +127,11 @@ const mergeCareer = (list0) => {
 const fmtYears = (c) => (c.from === c.to ? String(c.from) : `${c.from}-${c.to}`);
 const pct = (x) => (x == null ? '-' : `${Math.round(x * 100)}%`);
 
+// 2027 계약 확정(basis '계약') 선수 → 팀 약칭 (스토브리그 데이터, LCK만)
+const CONTRACT_2027 = {};
+for (const tm of stove2027.teams || []) for (const pl of Object.values(tm.players || {})) if (pl?.basis === '계약' && pl.name) CONTRACT_2027[pl.name.toLowerCase()] = tm.short;
+// LoL Hall of Legends 헌액 선수(2024 Faker · 2025 Uzi · 2026 Caps)
+const HALL_OF_LEGENDS = new Set(['faker', 'uzi', 'caps']);
 // 선수 ID → { player, teamShort }
 const findPlayer = (id) => {
   for (const [short, r] of Object.entries(rosters.rosters || {})) {
@@ -135,7 +157,9 @@ const PlayerPage = () => {
 
   const found = findPlayer(playerId);
   const s = playerStats.players?.[playerId];
-  if (!found && !s) {
+  // 로스터 밖 선수(복귀 예정·명예의 전당) — 경력만 표시
+  const extra = !found && !s ? extraPlayers.players?.[playerId] : null;
+  if (!found && !s && !extra) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#0a1428] via-[#1e2328] to-[#0a1428] flex items-center justify-center text-white">
         <div className="text-center">
@@ -145,12 +169,18 @@ const PlayerPage = () => {
       </div>
     );
   }
-  const p = found?.player || { name: s.name, role: s.role };
+  const p = found?.player || extra || { name: s.name, role: s.role };
   const team = found ? gprTeamMap[found.teamShort] : null;
   const teamLogo = team?.logo || found?.roster?.team?.image;
   const realName = [p.lastName, p.firstName].filter(Boolean).join(' ');
   // Worlds 우승 선수 → 우승 당시 팀의 배경(팀 페이지와 같은 이미지)
   const career = mergeCareer(playerCareers.players?.[playerId] || []);
+  // 2027 소속 확정: 같은 팀이면 현재 팀 기간을 2027까지, 다른 팀이면 별도 표시
+  const t27 = CONTRACT_2027[String(p.name || '').toLowerCase()];
+  const stay27 = t27 && found && t27 === found.teamShort;
+  if (stay27 && career.length) career[career.length - 1] = { ...career[career.length - 1], to: 2027 };
+  // 다른 팀과 2027 계약이 확정됐으면 그 팀(2027)을 이적 목록 맨 위에 둔다
+  const next27 = t27 && !stay27 && (found || extra) ? { team: gprTeamMap[t27]?.name || t27, from: 2027, to: 2027 } : null;
   const bgKey = PLAYER_WORLDS_TEAM[String(p.name || '').split(' ').pop().toLowerCase()];
 
   return (
@@ -171,24 +201,26 @@ const PlayerPage = () => {
             <h1 className="text-2xl md:text-3xl font-black text-white truncate">{p.name}</h1>
             {realName && <p className="text-white/50 text-sm mt-0.5">{realName}</p>}
             <div className="flex items-center gap-3 mt-2 text-sm text-white/60 flex-wrap">
-              <span className="inline-flex items-center gap-1"><RoleIcon role={p.role} size={16} />{ROLE_KO[p.role] ?? p.role}</span>
-              {found && (
-                <button onClick={() => navigate(`/lol/prediction/team/${found.teamShort}`)} className="inline-flex items-center gap-1.5 font-bold text-white/80 hover:text-white">
-                  {teamLogo && <img src={teamLogo} alt="" className="w-5 h-5 object-contain" />}
-                  {team?.name || found.teamShort}
-                  {career.length > 0 && <span className="font-normal text-white/45">({fmtYears(career[career.length - 1])})</span>}
+              <span className="inline-flex items-center gap-1"><RoleIcon role={p.role} size={16} /></span>
+              {HALL_OF_LEGENDS.has(String(p.name || '').trim().toLowerCase()) && <span className="text-[11px] font-black text-[#E8C77E] border border-[#E8C77E]/40 rounded px-1.5">명예의 전당</span>}
+              {extra && !next27 && <span className="text-[11px] font-bold text-white/40">{extra.note}</span>}
+              {(found || next27) && (
+                <button onClick={() => navigate(`/lol/prediction/team/${next27 ? t27 : found.teamShort}`)} className="inline-flex items-center gap-1.5 font-bold text-white/80 hover:text-white">
+                  <AutoContrastLogo src={next27 ? gprTeamMap[t27]?.logo : teamLogo} className="w-5 h-5 object-contain" />
+                  {next27 ? next27.team : (team?.name || found.teamShort)}
+                  {next27 ? <span className="font-normal text-white/45">(2027)</span> : career.length > 0 && <span className="font-normal text-white/45">({fmtYears(career[career.length - 1])})</span>}
                 </button>
               )}
               {p.starter === false && <span className="text-[11px] font-bold text-white/40 border border-white/15 rounded px-1">후보</span>}
             </div>
             {/* 역대 팀 — 팀 이름(입단 시즌 - 마지막 활동 시즌), 1시즌이면 팀 이름(시즌). 출처 Leaguepedia */}
-            {career.length > 1 && (
+            {(career.length > 1 || next27 || extra) && (
               <ul className="mt-2 flex flex-col gap-1 text-xs text-white/55">
-                {career.slice(0, -1).reverse().map((c, i) => {
-                  const lg = logoOfTeam(c.team, c.to);
+                {(next27 || extra ? career.slice() : career.slice(0, -1)).reverse().map((c, i) => {
+                  const lg = logoOfTeam(c.team, c.nameTo ?? c.to);
                   return (
                     <li key={i} className="flex items-center gap-1.5">
-                      {lg ? <img src={lg} alt="" className="w-4 h-4 object-contain shrink-0" onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }} /> : <span className="w-4 h-4 shrink-0" />}
+                      {lg ? <AutoContrastLogo src={lg} className="w-4 h-4 object-contain shrink-0" onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }} /> : <span className="w-4 h-4 shrink-0" />}
                       <span>{c.team}({fmtYears(c)})</span>
                     </li>
                   );
